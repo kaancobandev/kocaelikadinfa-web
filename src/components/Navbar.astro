@@ -1,0 +1,130 @@
+---
+const links = [
+  { href: "/pilot-takim", label: "Pilot Takım" },
+  { href: "/mac-gecmisi", label: "Maç Geçmişi" },
+  { href: "/a-takim",     label: "A Takım" },
+  { href: "/akademi",     label: "Akademi" },
+  { href: "/haberler",    label: "Haberler" },
+];
+---
+
+<nav class="navbar" id="navbar">
+  <a class="nav-logo" href="/">
+    <img src="/logo.jpeg" alt="Kocaeli Kadın FA Logo" class="logo-img" />
+    <span class="logo-text">Kocaeli Kadın Futbol Kulübü</span>
+  </a>
+
+  <input type="checkbox" id="nav-toggle" class="nav-toggle" />
+  <label for="nav-toggle" class="nav-burger" aria-label="Menü">
+    <span></span><span></span><span></span>
+  </label>
+
+  <ul class="nav-links">
+    {links.map(l => (
+      <li><a href={l.href}>{l.label}</a></li>
+    ))}
+    <li><a href="#katin" class="btn-join">Aramıza Katıl</a></li>
+  </ul>
+</nav>
+
+<style>
+  .navbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--nav-h);
+    background: rgba(0,0,0,0.93);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5%;
+    z-index: 1000;
+    transition: height .3s;
+  }
+  .navbar.scrolled { height: 58px; }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .logo-img { height: 42px; width: 42px; object-fit: contain; border-radius: 50%; }
+  .logo-text {
+    font-size: 1.4rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    background: linear-gradient(135deg, #fff 0%, var(--green-bright) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .nav-toggle { display: none; }
+
+  .nav-burger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+  }
+  .nav-burger span {
+    display: block;
+    width: 25px; height: 2px;
+    background: var(--text);
+    border-radius: 2px;
+    transition: .3s;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    gap: 2rem;
+  }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: .85rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: color .25s;
+  }
+  .nav-links a:hover { color: var(--green-bright); }
+
+  .btn-join {
+    background: var(--green) !important;
+    color: #fff !important;
+    padding: .5rem 1.2rem;
+    border-radius: 50px;
+    transition: background .25s, transform .2s !important;
+  }
+  .btn-join:hover { background: var(--green-mid) !important; transform: translateY(-1px); }
+
+  @media (max-width: 768px) {
+    .nav-burger { display: flex; }
+    .nav-links {
+      position: fixed;
+      top: var(--nav-h); left: 0; right: 0;
+      background: var(--dark);
+      flex-direction: column;
+      gap: 0;
+      padding: 1rem 0 2rem;
+      transform: translateY(-110%);
+      transition: transform .35s ease;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-links li { width: 100%; text-align: center; }
+    .nav-links a { display: block; padding: .8rem 0; }
+    .nav-toggle:checked ~ .nav-links { transform: translateY(0); }
+  }
+</style>
+
+<script>
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar?.classList.toggle('scrolled', window.scrollY > 60);
+  });
+</script>

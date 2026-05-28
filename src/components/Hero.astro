@@ -1,0 +1,297 @@
+---
+import { supabase, type HeroSettings, type NewsItem } from '../lib/supabase';
+
+const { data: heroData } = await supabase
+  .from('hero_settings')
+  .select('*')
+  .eq('id', 1)
+  .single();
+
+const hero: HeroSettings = heroData ?? {
+  id: 1,
+  badge: 'Son Dakika',
+  title: 'Süper Lig\'e en fazla oyuncu gönderen altyapılardan biri olmanın gururunu yaşıyoruz.',
+  description: 'Tutkuyla, kararlılıkla ve takım ruhuyla her maçta sahaya çıkıyoruz.',
+  image_url: '/hero_section.jpeg',
+};
+
+const { data: newsData } = await supabase
+  .from('news')
+  .select('*')
+  .order('sort_order', { ascending: true })
+  .limit(2);
+
+const sideNews: NewsItem[] = newsData ?? [];
+const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=400&q=80';
+---
+
+<div
+  class="hero-wrap"
+  style={`background-image: url('${hero.image_url ?? '/hero_section.jpeg'}')`}
+>
+
+  <!-- SOL: Ana manşet -->
+  <div class="hero-main">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      {hero.badge && <span class="hero-badge">{hero.badge}</span>}
+      <h1 class="hero-title">{hero.title}</h1>
+      <p class="hero-desc">{hero.description}</p>
+      <a href="#haberler" class="hero-btn">
+        Haberi Oku
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- SAĞ: Diğer manşetler -->
+  <div class="hero-side">
+    <p class="side-label">Diğer Manşetler</p>
+    <div class="side-list">
+      {sideNews.length > 0
+        ? sideNews.map(n => (
+            <a href="#haberler" class="side-item">
+              <img
+                src={n.image_url ?? fallbackImg}
+                alt={n.title}
+                class="side-thumb"
+              />
+              <div class="side-body">
+                <p class="side-title">{n.title}</p>
+              </div>
+            </a>
+          ))
+        : [1, 2].map(() => (
+            <div class="side-item side-empty">
+              <div class="side-thumb-empty"></div>
+              <div class="side-body">
+                <p class="side-title side-title-muted">Haber yakında eklenecek...</p>
+              </div>
+            </div>
+          ))
+      }
+    </div>
+  </div>
+
+</div>
+
+<style>
+  .hero-wrap {
+    margin-top: var(--nav-h);
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    height: calc(100vh - var(--nav-h));
+    min-height: 480px;
+    max-height: 800px;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+  }
+
+  @media (max-width: 900px) {
+    .hero-wrap {
+      grid-template-columns: 1fr;
+      grid-template-rows: 70vw auto;
+      height: auto;
+      max-height: none;
+    }
+  }
+
+  /* ── Sol panel ── */
+  .hero-main {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.80) 0%,
+      rgba(0, 0, 0, 0.55) 50%,
+      rgba(0, 0, 0, 0.15) 100%
+    );
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 3rem 3rem 3.5rem;
+    max-width: 700px;
+  }
+
+  @media (max-width: 600px) {
+    .hero-content { padding: 1.5rem 1.5rem 2rem; }
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background: var(--green);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: .35rem .8rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    width: fit-content;
+  }
+
+  .hero-title {
+    font-size: clamp(1.8rem, 3.8vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -.5px;
+    color: #fff;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    white-space: pre-line;
+  }
+
+  .hero-desc {
+    font-size: .95rem;
+    color: rgba(255, 255, 255, 0.70);
+    line-height: 1.65;
+    max-width: 460px;
+    margin-bottom: 1.8rem;
+  }
+
+  .hero-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background: var(--green);
+    color: #fff;
+    font-size: .85rem;
+    font-weight: 700;
+    letter-spacing: .3px;
+    text-decoration: none;
+    padding: .7rem 1.4rem;
+    border-radius: 5px;
+    width: fit-content;
+    transition: background .2s, gap .2s;
+  }
+  .hero-btn:hover {
+    background: var(--green-mid);
+    gap: .8rem;
+  }
+
+  /* ── Sağ panel — Glassmorphism ── */
+  .hero-side {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1.6rem;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-left: 1px solid rgba(255, 255, 255, 0.10);
+  }
+
+  .hero-side::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      160deg,
+      rgba(13, 77, 30, 0.18) 0%,
+      rgba(0, 0, 0, 0.10) 100%
+    );
+    pointer-events: none;
+  }
+
+  .side-label,
+  .side-list {
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (max-width: 900px) {
+    .hero-side {
+      border-left: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.10);
+    }
+  }
+
+  .side-label {
+    font-size: .65rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--green-bright);
+    margin-bottom: 1.2rem;
+    padding-bottom: .9rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .side-list {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .side-item {
+    display: flex;
+    gap: .9rem;
+    align-items: flex-start;
+    padding: .9rem .6rem;
+    border-radius: 8px;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background .2s;
+    cursor: pointer;
+  }
+  .side-item:last-child { border-bottom: none; }
+  .side-item:hover { background: rgba(255, 255, 255, 0.04); }
+
+  .side-thumb {
+    width: 110px;
+    height: 80px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    object-fit: cover;
+    background-color: #1a1a1a;
+  }
+
+  .side-thumb-empty {
+    width: 110px;
+    height: 80px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    background-color: #1a1a1a;
+  }
+
+  .side-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: .4rem;
+    min-width: 0;
+  }
+
+  .side-title {
+    font-size: .95rem;
+    font-weight: 700;
+    color: #d0d0d0;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .side-item:hover .side-title { color: var(--green-bright); }
+  .side-title-muted { color: #3a3a3a !important; font-style: italic; font-weight: 500 !important; }
+</style>

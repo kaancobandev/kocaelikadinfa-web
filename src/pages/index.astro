@@ -1,0 +1,36 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Hero from '../components/Hero.astro';
+import Scores from '../components/Scores.astro';
+import ContentCards from '../components/ContentCards.astro';
+import TeamSection from '../components/TeamSection.astro';
+import VideoSection from '../components/VideoSection.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout title="Kocaeli Kadın Futbol Kulübü">
+  <Navbar />
+  <main>
+    <Hero />
+    <Scores />
+    <ContentCards />
+    <TeamSection />
+    <VideoSection />
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    }),
+    { threshold: 0.12 }
+  );
+  revealEls.forEach(el => observer.observe(el));
+</script>

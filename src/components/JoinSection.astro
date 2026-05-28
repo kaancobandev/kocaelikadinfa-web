@@ -1,0 +1,72 @@
+---
+---
+
+<section class="join-section" id="katin">
+  <div class="join-inner reveal">
+    <span class="section-tag">Aramıza Katıl</span>
+    <h2>Sen de Takımın Parçası Ol</h2>
+    <p>Futbola tutkunsan ve Kocaeli'nde oynuyorsan, seni aramızda görmek isteriz. Yaşın veya seviyenden bağımsız olarak herkese açık deneme antrenmanlarımız devam ediyor.</p>
+
+    <form class="join-form" id="joinForm">
+      <input type="text"  name="name"  placeholder="Adın Soyadın" required />
+      <input type="email" name="email" placeholder="E-posta Adresi" required />
+      <input type="tel"   name="phone" placeholder="Telefon" />
+      <select name="team">
+        <option value="">Hangi Takım? (seç)</option>
+        <option>Pilot Takım</option>
+        <option>A Takım</option>
+        <option>Akademi (U18)</option>
+        <option>Akademi (U14)</option>
+      </select>
+      <button type="submit" class="btn-primary" id="joinBtn">Başvuru Gönder</button>
+    </form>
+  </div>
+</section>
+
+<style>
+  .join-section {
+    padding: 6rem 5%;
+    background:
+      radial-gradient(ellipse 60% 90% at 30% 50%, rgba(26,122,46,0.15) 0%, transparent 60%),
+      var(--dark);
+    border-top: 1px solid var(--border);
+  }
+  .join-inner { max-width: 580px; }
+  .join-inner h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 900; margin: .8rem 0 1rem; }
+  .join-inner p  { color: var(--text-muted); margin-bottom: 2rem; }
+
+  .join-form {
+    display: flex;
+    flex-direction: column;
+    gap: .9rem;
+  }
+  .join-form input,
+  .join-form select {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .85rem 1.1rem;
+    color: var(--text);
+    font-family: inherit;
+    font-size: .9rem;
+    outline: none;
+    transition: border-color .25s;
+  }
+  .join-form input::placeholder { color: var(--text-muted); }
+  .join-form select option { background: var(--dark); }
+  .join-form input:focus,
+  .join-form select:focus { border-color: var(--green-bright); }
+  .join-form .btn-primary { align-self: flex-start; margin-top: .4rem; }
+</style>
+
+<script>
+  const form = document.getElementById('joinForm') as HTMLFormElement;
+  const btn  = document.getElementById('joinBtn') as HTMLButtonElement;
+
+  form?.addEventListener('submit', e => {
+    e.preventDefault();
+    btn.textContent = 'Başvuru Alındı ✓';
+    btn.style.background = '#1a7a2e';
+    btn.disabled = true;
+  });
+</script>

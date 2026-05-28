@@ -1,0 +1,1236 @@
+---
+import { supabase, createUserClient, uploadFile, type Match, type NewsItem, type VideoItem, type GalleryItem, type HeroSettings } from '../../lib/supabase';
+
+// Auth kontrolü
+const accessToken = Astro.cookies.get('sb-access-token')?.value;
+if (!accessToken) return Astro.redirect('/admin');
+
+const { data: { user } } = await supabase.auth.getUser(accessToken);
+if (!user) {
+  Astro.cookies.delete('sb-access-token',  { path: '/' });
+  Astro.cookies.delete('sb-refresh-token', { path: '/' });
+  return Astro.redirect('/admin');
+}
+
+let successMsg = '';
+let errorMsg   = '';
+
+// ── Yardımcı: formdan dosya ya da URL al ──────────────────────────────
+async function resolveImage(
+  form: FormData,
+  fileField: string,
+  urlField: string,
+  folder: string
+): Promise<string | null> {
+  const file = form.get(fileField) as File | null;
+  if (file && file.size > 0) {
+    const uploaded = await uploadFile(accessToken!, file, folder);
+    if (uploaded) return uploaded;
+  }
+  return form.get(urlField)?.toString() || null;
+}
+
+// ── Form işlemleri ────────────────────────────────────────────────────
+if (Astro.request.method === 'POST') {
+  const form   = await Astro.request.formData();
+  const action = form.get('_action')?.toString();
+  const db     = createUserClient(accessToken!);
+
+  // Hero güncelle
+  if (action === 'hero_save') {
+    const badge       = form.get('badge')?.toString() ?? '';
+    const title       = form.get('title')?.toString() ?? '';
+    const description = form.get('description')?.toString() ?? '';
+    const image_url   = await resolveImage(form, 'image_file', 'image_url', 'hero');
+
+    const { data: existing } = await supabase.from('hero_settings').select('id').eq('id', 1).single();
+    if (existing) {
+      const { error } = await db.from('hero_settings').update({ badge, title, description, ...(image_url && { image_url }) }).eq('id', 1);
+      errorMsg   = error ? 'Kaydedilemedi: ' + error.message : '';
+      successMsg = error ? '' : 'Hero güncellendi!';
+    } else {
+      const { error } = await db.from('hero_settings').insert({ id: 1, badge, title, description, image_url });
+      errorMsg   = error ? 'Kaydedilemedi: ' + error.message : '';
+      successMsg = error ? '' : 'Hero oluşturuldu!';
+    }
+  }
+
+  // Maç güncelle
+  if (action === 'update') {
+    const id         = Number(form.get('id'));
+    const badge      = form.get('badge')?.toString() ?? '';
+    const home_name  = form.get('home_name')?.toString() ?? '';
+    const away_name  = form.get('away_name')?.toString() ?? '';
+    const score_home = Number(form.get('score_home'));
+    const score_away = Number(form.get('score_away'));
+    const match_date = form.get('match_date')?.toString() ?? '';
+    const league     = form.get('league')?.toString() ?? '';
+
+    const home_logo = await resolveImage(form, 'home_logo_file', 'home_logo_url', 'logos');
+    const away_logo = await resolveImage(form, 'away_logo_file', 'away_logo_url', 'logos');
+
+    const { error } = await db
+      .from('matches')
+      .update({ badge, home_name, home_logo, away_name, away_logo, score_home, score_away, match_date, league })
+      .eq('id', id);
+
+    errorMsg   = error ? 'Güncelleme başarısız: ' + error.message : '';
+    successMsg = error ? '' : 'Maç güncellendi!';
+  }
+
+  // Maç sil
+  if (action === 'delete') {
+    const id = Number(form.get('id'));
+    const { error } = await db.from('matches').delete().eq('id', id);
+    errorMsg   = error ? 'Silme başarısız.' : '';
+    successMsg = error ? '' : 'Maç silindi.';
+  }
+
+  // Maç ekle
+  if (action === 'match_add') {
+    const badge      = form.get('badge')?.toString() ?? '';
+    const home_name  = form.get('home_name')?.toString() ?? '';
+    const away_name  = form.get('away_name')?.toString() ?? '';
+    const score_home = Number(form.get('score_home'));
+    const score_away = Number(form.get('score_away'));
+    const match_date = form.get('match_date')?.toString() ?? '';
+    const league     = form.get('league')?.toString() ?? '';
+    const sort_order = Number(form.get('sort_order') ?? 99);
+
+    const home_logo = await resolveImage(form, 'home_logo_file', 'home_logo_url', 'logos');
+    const away_logo = await resolveImage(form, 'away_logo_file', 'away_logo_url', 'logos');
+
+    const { error } = await db
+      .from('matches')
+      .insert({ badge, home_name, home_logo, away_name, away_logo, score_home, score_away, match_date, league, sort_order });
+
+    errorMsg   = error ? 'Maç eklenemedi: ' + error.message : '';
+    successMsg = error ? '' : 'Yeni maç eklendi!';
+  }
+
+  // Haber kaydet (upsert — sort_order 1/2/3 sabit slot)
+  if (action === 'news_save') {
+    const slot        = Number(form.get('slot'));
+    const existingId  = form.get('existing_id')?.toString();
+    const title       = form.get('title')?.toString() ?? '';
+    const description = form.get('description')?.toString() ?? '';
+    const image_url   = await resolveImage(form, 'image_file', 'image_url', 'news');
+
+    if (existingId) {
+      const { error } = await db
+        .from('news')
+        .update({ title, description, image_url })
+        .eq('id', Number(existingId));
+      errorMsg   = error ? 'Kaydedilemedi: ' + error.message : '';
+      successMsg = error ? '' : `Haber ${slot} güncellendi!`;
+    } else {
+      const { error } = await db
+        .from('news')
+        .insert({ title, description, image_url, sort_order: slot });
+      errorMsg   = error ? 'Kaydedilemedi: ' + error.message : '';
+      successMsg = error ? '' : `Haber ${slot} eklendi!`;
+    }
+  }
+
+  // Pilot Takım hero görseli kaydet
+  if (action === 'pilot_hero_save') {
+    const image_url = await resolveImage(form, 'image_file', 'image_url', 'pilot-hero');
+    if (!image_url) {
+      errorMsg = 'Lütfen bir görsel seçin veya URL girin.';
+    } else {
+      const { data: existing } = await supabase.from('hero_settings').select('id').eq('id', 2).single();
+      if (existing) {
+        const { error } = await db.from('hero_settings').update({ image_url }).eq('id', 2);
+        errorMsg   = error ? 'Kaydedilemedi: ' + error.message : '';
+        successMsg = error ? '' : 'Pilot Takım hero görseli güncellendi!';
+      } else {
+        const { error } = await db.from('hero_settings').insert({ id: 2, badge: '', title: '', description: '', image_url });
+        errorMsg   = error ? 'Kaydedilemedi: ' + error.message : '';
+        successMsg = error ? '' : 'Pilot Takım hero görseli eklendi!';
+      }
+    }
+  }
+
+  // A Takım galeri fotoğraf ekle
+  if (action === 'a_takim_gallery_add') {
+    const caption    = form.get('caption')?.toString() ?? '';
+    const sort_order = Number(form.get('sort_order') ?? 99);
+    const image_url  = await resolveImage(form, 'image_file', 'image_url', 'a-takim-gallery');
+
+    if (!image_url) {
+      errorMsg = 'Lütfen bir fotoğraf seçin veya URL girin.';
+    } else {
+      const { error } = await db.from('a_takim_gallery').insert({ image_url, caption, sort_order });
+      errorMsg   = error ? 'Eklenemedi: ' + error.message : '';
+      successMsg = error ? '' : 'Fotoğraf eklendi!';
+    }
+  }
+
+  // A Takım galeri fotoğraf sil
+  if (action === 'a_takim_gallery_delete') {
+    const id = Number(form.get('id'));
+    const { error } = await db.from('a_takim_gallery').delete().eq('id', id);
+    errorMsg   = error ? 'Silinemedi.' : '';
+    successMsg = error ? '' : 'Fotoğraf silindi.';
+  }
+
+  // Pilot Takım galeri fotoğraf ekle
+  if (action === 'pilot_gallery_add') {
+    const caption    = form.get('caption')?.toString() ?? '';
+    const sort_order = Number(form.get('sort_order') ?? 99);
+    const image_url  = await resolveImage(form, 'image_file', 'image_url', 'pilot-gallery');
+
+    if (!image_url) {
+      errorMsg = 'Lütfen bir fotoğraf seçin veya URL girin.';
+    } else {
+      const { error } = await db.from('pilot_gallery').insert({ image_url, caption, sort_order });
+      errorMsg   = error ? 'Eklenemedi: ' + error.message : '';
+      successMsg = error ? '' : 'Fotoğraf eklendi!';
+    }
+  }
+
+  // Pilot Takım galeri fotoğraf sil
+  if (action === 'pilot_gallery_delete') {
+    const id = Number(form.get('id'));
+    const { error } = await db.from('pilot_gallery').delete().eq('id', id);
+    errorMsg   = error ? 'Silinemedi.' : '';
+    successMsg = error ? '' : 'Fotoğraf silindi.';
+  }
+
+  // Galeri fotoğraf ekle
+  if (action === 'gallery_add') {
+    const caption     = form.get('caption')?.toString() ?? '';
+    const sort_order  = Number(form.get('sort_order') ?? 99);
+    const image_url   = await resolveImage(form, 'image_file', 'image_url', 'gallery');
+
+    if (!image_url) {
+      errorMsg = 'Lütfen bir fotoğraf seçin veya URL girin.';
+    } else {
+      const { error } = await db
+        .from('gallery')
+        .insert({ image_url, caption, sort_order });
+      errorMsg   = error ? 'Eklenemedi: ' + error.message : '';
+      successMsg = error ? '' : 'Fotoğraf eklendi!';
+    }
+  }
+
+  // Galeri fotoğraf sil
+  if (action === 'gallery_delete') {
+    const id = Number(form.get('id'));
+    const { error } = await db.from('gallery').delete().eq('id', id);
+    errorMsg   = error ? 'Silinemedi.' : '';
+    successMsg = error ? '' : 'Fotoğraf silindi.';
+  }
+
+  // Haber makale ekle
+  if (action === 'article_add') {
+    const title       = form.get('title')?.toString() ?? '';
+    const description = form.get('description')?.toString() ?? '';
+    const image_url   = await resolveImage(form, 'image_file', 'image_url', 'news');
+
+    const { error } = await db.from('news').insert({ title, description, image_url, sort_order: 0 });
+    errorMsg   = error ? 'Eklenemedi: ' + error.message : '';
+    successMsg = error ? '' : 'Haber eklendi!';
+  }
+
+  // Haber makale güncelle
+  if (action === 'article_update') {
+    const id          = Number(form.get('id'));
+    const title       = form.get('title')?.toString() ?? '';
+    const description = form.get('description')?.toString() ?? '';
+    const image_url   = await resolveImage(form, 'image_file', 'image_url', 'news');
+
+    const { error } = await db
+      .from('news')
+      .update({ title, description, ...(image_url && { image_url }) })
+      .eq('id', id);
+    errorMsg   = error ? 'Kaydedilemedi: ' + error.message : '';
+    successMsg = error ? '' : 'Haber güncellendi!';
+  }
+
+  // Haber makale sil
+  if (action === 'article_delete') {
+    const id = Number(form.get('id'));
+    const { error } = await db.from('news').delete().eq('id', id);
+    errorMsg   = error ? 'Silinemedi.' : '';
+    successMsg = error ? '' : 'Haber silindi.';
+  }
+
+  // Video kaydet (sort_order 1/2/3 sabit slot)
+  if (action === 'video_save') {
+    const slot        = Number(form.get('slot'));
+    const existingId  = form.get('existing_id')?.toString();
+    const title       = form.get('title')?.toString() ?? '';
+    const description = form.get('description')?.toString() ?? '';
+    const youtube_url = form.get('youtube_url')?.toString() ?? '';
+
+    if (existingId) {
+      const { error } = await db
+        .from('videos')
+        .update({ title, description, youtube_url })
+        .eq('id', Number(existingId));
+      errorMsg   = error ? 'Kaydedilemedi: ' + error.message : '';
+      successMsg = error ? '' : `Video ${slot} güncellendi!`;
+    } else {
+      const { error } = await db
+        .from('videos')
+        .insert({ title, description, youtube_url, sort_order: slot });
+      errorMsg   = error ? 'Kaydedilemedi: ' + error.message : '';
+      successMsg = error ? '' : `Video ${slot} eklendi!`;
+    }
+  }
+
+  // Çıkış
+  if (action === 'logout') {
+    Astro.cookies.delete('sb-access-token',  { path: '/' });
+    Astro.cookies.delete('sb-refresh-token', { path: '/' });
+    return Astro.redirect('/admin');
+  }
+}
+
+// Verileri çek
+const { data }      = await supabase.from('matches').select('*').order('id', { ascending: false });
+const matches: Match[] = data ?? [];
+const u15Matches = matches.filter(m => m.badge === 'U15');
+const u13Matches = matches.filter(m => m.badge === 'U13');
+
+const { data: allArticlesData } = await supabase.from('news').select('*').order('id', { ascending: false });
+const allArticles: NewsItem[] = allArticlesData ?? [];
+
+const { data: newsData } = await supabase.from('news').select('*').in('sort_order', [1, 2]);
+const newsSlots: (NewsItem | null)[] = [
+  newsData?.find(n => n.sort_order === 1) ?? null,
+  newsData?.find(n => n.sort_order === 2) ?? null,
+];
+
+
+const { data: heroData } = await supabase.from('hero_settings').select('*').eq('id', 1).single();
+const hero: HeroSettings | null = heroData ?? null;
+
+const { data: galleryData } = await supabase.from('gallery').select('*').order('sort_order');
+const galleryPhotos: GalleryItem[] = galleryData ?? [];
+
+const { data: pilotHeroData } = await supabase.from('hero_settings').select('image_url').eq('id', 2).single();
+const pilotHeroImage: string | null = pilotHeroData?.image_url ?? null;
+
+const { data: pilotGalleryData } = await supabase.from('pilot_gallery').select('*').order('sort_order');
+const pilotPhotos: GalleryItem[] = pilotGalleryData ?? [];
+
+const { data: aTakimGalleryData } = await supabase.from('a_takim_gallery').select('*').order('sort_order');
+const aTakimPhotos: GalleryItem[] = aTakimGalleryData ?? [];
+
+const { data: videoData } = await supabase.from('videos').select('*').order('sort_order').limit(3);
+const videoSlots: (VideoItem | null)[] = [
+  videoData?.find(v => v.sort_order === 1) ?? null,
+  videoData?.find(v => v.sort_order === 2) ?? null,
+  videoData?.find(v => v.sort_order === 3) ?? null,
+];
+
+---
+
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Kocaeli Kadın FA Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <img src="/logo.jpeg" alt="Kocaeli Kadın FA" class="topbar-logo" />
+      <span class="logo">Kocaeli Kadın FA Admin</span>
+    </div>
+    <div class="topbar-right">
+      <span class="user-email">{user.email}</span>
+      <form method="POST" enctype="application/x-www-form-urlencoded" style="display:inline">
+        <input type="hidden" name="_action" value="logout" />
+        <button class="btn-logout">Çıkış</button>
+      </form>
+      <a href="/" class="btn-site">Siteye Git →</a>
+    </div>
+  </header>
+
+  <main class="dashboard">
+
+    {successMsg && <div class="alert success">{successMsg}</div>}
+    {errorMsg   && <div class="alert error">{errorMsg}</div>}
+
+    <!-- ── HERO ── -->
+    <section class="panel">
+      <h2>Ana Sayfa Hero</h2>
+      <form method="POST" enctype="multipart/form-data" class="match-form" style="border-bottom:none;margin-bottom:0;padding-bottom:0">
+        <input type="hidden" name="_action" value="hero_save" />
+
+        <div class="form-row">
+          <label>Rozet (örn: Son Dakika)
+            <input name="badge" value={hero?.badge ?? ''} placeholder="Son Dakika" />
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label style="flex:1">Başlık (satır atlamak için yeni satıra geç)
+            <textarea name="title" rows="3" placeholder="SÜPER LIG'E EN FAZLA...">{hero?.title ?? ''}</textarea>
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label style="flex:1">Açıklama
+            <textarea name="description" rows="2" placeholder="Kısa açıklama...">{hero?.description ?? ''}</textarea>
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label>Arka Plan Görseli — Cihazdan Yükle
+            <div class="file-wrap">
+              {hero?.image_url && <img src={hero.image_url} class="news-preview" alt="hero görseli" />}
+              <input type="file" name="image_file" accept="image/*" class="file-input" />
+            </div>
+          </label>
+          <label>veya Görsel URL
+            <input name="image_url" value={hero?.image_url ?? ''} placeholder="https://..." />
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-save">Kaydet</button>
+        </div>
+      </form>
+
+      <!-- Diğer Manşetler -->
+      <div class="hero-divider">
+        <span class="slot-label">Diğer Manşetler (Hero Sağ Panel)</span>
+        <p class="hero-divider-note">Aşağıdaki 2 haber, hero'nun sağ tarafında görünür.</p>
+      </div>
+      <div class="news-slots" style="margin-top:.6rem">
+        {[newsSlots[0], newsSlots[1]].map((n, i) => {
+          const slot = i + 1;
+          return (
+            <form method="POST" enctype="multipart/form-data" class="news-slot-form">
+              <input type="hidden" name="_action"     value="news_save" />
+              <input type="hidden" name="slot"        value={slot} />
+              <input type="hidden" name="existing_id" value={n?.id ?? ''} />
+
+              <p class="slot-label">Manşet {slot}</p>
+
+              <label>Başlık
+                <input name="title" value={n?.title ?? ''} placeholder="Haber başlığı" />
+              </label>
+
+              <label>Açıklama
+                <textarea name="description" rows="2" placeholder="Kısa açıklama...">{n?.description ?? ''}</textarea>
+              </label>
+
+              <label>Görsel — Cihazdan Yükle
+                <div class="file-wrap">
+                  {n?.image_url && <img src={n.image_url} class="news-preview" alt="önizleme" />}
+                  <input type="file" name="image_file" accept="image/*" class="file-input" />
+                </div>
+              </label>
+
+              <label>veya Görsel URL
+                <input name="image_url" value={n?.image_url ?? ''} placeholder="https://..." />
+              </label>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-save">Kaydet</button>
+              </div>
+            </form>
+          );
+        })}
+      </div>
+    </section>
+
+    <!-- ── MAÇ SONUÇLARI ── -->
+    <section class="panel">
+      <h2>Maç Sonuçları</h2>
+
+      <!-- U15 Alt Bölümü -->
+      <div class="match-subsection">
+        <p class="subsection-label">U15</p>
+
+        {u15Matches.length > 0 && (
+          <div class="article-list">
+            {u15Matches.map(m => (
+              <div class="article-row">
+                <div class="article-meta">
+                  <span class="article-title">{m.home_name} {m.score_home} – {m.score_away} {m.away_name}</span>
+                  <span class="article-desc">{m.match_date} &nbsp;·&nbsp; {m.league}</span>
+                </div>
+                <form method="POST" enctype="application/x-www-form-urlencoded" class="article-delete-form">
+                  <input type="hidden" name="_action" value="delete" />
+                  <input type="hidden" name="id" value={m.id} />
+                  <button type="submit" class="btn-delete btn-delete-small">Sil</button>
+                </form>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <form method="POST" enctype="multipart/form-data" class="match-form new-match">
+          <input type="hidden" name="_action" value="match_add" />
+          <input type="hidden" name="badge"   value="U15" />
+          <input type="hidden" name="sort_order" value="99" />
+          <p class="slot-label">+ Yeni U15 Maçı Ekle</p>
+
+          <div class="form-row">
+            <label>Lig
+              <input name="league" placeholder="1. Lig" required />
+            </label>
+            <label>Tarih
+              <input type="date" name="match_date" required />
+            </label>
+          </div>
+
+          <div class="form-row teams-row">
+            <div class="team-block">
+              <span class="team-label">Ev Sahibi</span>
+              <label>Takım Adı
+                <input name="home_name" placeholder="KKFK U15" required />
+              </label>
+              <label>Logo — Cihazdan Yükle
+                <input type="file" name="home_logo_file" accept="image/*" class="file-input" />
+              </label>
+              <label>veya URL
+                <input name="home_logo_url" placeholder="https://..." />
+              </label>
+            </div>
+
+            <div class="score-block">
+              <label>Skor
+                <div class="score-inputs">
+                  <input type="number" name="score_home" value="0" min="0" required />
+                  <span>–</span>
+                  <input type="number" name="score_away" value="0" min="0" required />
+                </div>
+              </label>
+            </div>
+
+            <div class="team-block">
+              <span class="team-label">Deplasman</span>
+              <label>Takım Adı
+                <input name="away_name" placeholder="Rakip FK" required />
+              </label>
+              <label>Logo — Cihazdan Yükle
+                <input type="file" name="away_logo_file" accept="image/*" class="file-input" />
+              </label>
+              <label>veya URL
+                <input name="away_logo_url" placeholder="https://..." />
+              </label>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-save">Maç Ekle</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- U13 Alt Bölümü -->
+      <div class="match-subsection match-subsection-alt">
+        <p class="subsection-label">U13</p>
+
+        {u13Matches.length > 0 && (
+          <div class="article-list">
+            {u13Matches.map(m => (
+              <div class="article-row">
+                <div class="article-meta">
+                  <span class="article-title">{m.home_name} {m.score_home} – {m.score_away} {m.away_name}</span>
+                  <span class="article-desc">{m.match_date} &nbsp;·&nbsp; {m.league}</span>
+                </div>
+                <form method="POST" enctype="application/x-www-form-urlencoded" class="article-delete-form">
+                  <input type="hidden" name="_action" value="delete" />
+                  <input type="hidden" name="id" value={m.id} />
+                  <button type="submit" class="btn-delete btn-delete-small">Sil</button>
+                </form>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <form method="POST" enctype="multipart/form-data" class="match-form new-match">
+          <input type="hidden" name="_action" value="match_add" />
+          <input type="hidden" name="badge"   value="U13" />
+          <input type="hidden" name="sort_order" value="99" />
+          <p class="slot-label">+ Yeni U13 Maçı Ekle</p>
+
+          <div class="form-row">
+            <label>Lig
+              <input name="league" placeholder="1. Lig" required />
+            </label>
+            <label>Tarih
+              <input type="date" name="match_date" required />
+            </label>
+          </div>
+
+          <div class="form-row teams-row">
+            <div class="team-block">
+              <span class="team-label">Ev Sahibi</span>
+              <label>Takım Adı
+                <input name="home_name" placeholder="KKFK U13" required />
+              </label>
+              <label>Logo — Cihazdan Yükle
+                <input type="file" name="home_logo_file" accept="image/*" class="file-input" />
+              </label>
+              <label>veya URL
+                <input name="home_logo_url" placeholder="https://..." />
+              </label>
+            </div>
+
+            <div class="score-block">
+              <label>Skor
+                <div class="score-inputs">
+                  <input type="number" name="score_home" value="0" min="0" required />
+                  <span>–</span>
+                  <input type="number" name="score_away" value="0" min="0" required />
+                </div>
+              </label>
+            </div>
+
+            <div class="team-block">
+              <span class="team-label">Deplasman</span>
+              <label>Takım Adı
+                <input name="away_name" placeholder="Rakip FK" required />
+              </label>
+              <label>Logo — Cihazdan Yükle
+                <input type="file" name="away_logo_file" accept="image/*" class="file-input" />
+              </label>
+              <label>veya URL
+                <input name="away_logo_url" placeholder="https://..." />
+              </label>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-save">Maç Ekle</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ── HABERLER ── -->
+    <section class="panel">
+      <h2>Haberler</h2>
+
+      {allArticles.length > 0 && (
+        <div class="article-list">
+          {allArticles.map(n => (
+            <div class="article-row">
+              {n.image_url && <img src={n.image_url} alt={n.title} class="article-thumb" />}
+              <div class="article-meta">
+                <span class="article-title">{n.title}</span>
+                {n.description && <span class="article-desc">{n.description}</span>}
+              </div>
+              <form method="POST" enctype="application/x-www-form-urlencoded" class="article-delete-form">
+                <input type="hidden" name="_action" value="article_delete" />
+                <input type="hidden" name="id" value={n.id} />
+                <button type="submit" class="btn-delete btn-delete-small">Sil</button>
+              </form>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <form method="POST" enctype="multipart/form-data" class="match-form new-match" style="margin-top:1.4rem">
+        <input type="hidden" name="_action" value="article_add" />
+        <p class="slot-label">+ Yeni Haber Ekle</p>
+
+        <div class="form-row">
+          <label style="flex:2">Başlık
+            <input name="title" placeholder="Haber başlığı" required />
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label style="flex:1">Açıklama
+            <textarea name="description" rows="3" placeholder="Haber içeriği..."></textarea>
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label>Görsel — Cihazdan Yükle
+            <div class="file-wrap">
+              <input type="file" name="image_file" accept="image/*" class="file-input" />
+            </div>
+          </label>
+          <label>veya Görsel URL
+            <input name="image_url" placeholder="https://..." />
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-save">Haber Ekle</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ── VİDEOLAR ── -->
+    <section class="panel">
+      <h2>Videolar</h2>
+      <div class="news-slots">
+        {videoSlots.map((v, i) => {
+          const slot = i + 1;
+          return (
+            <form method="POST" enctype="application/x-www-form-urlencoded" class="news-slot-form">
+              <input type="hidden" name="_action"     value="video_save" />
+              <input type="hidden" name="slot"        value={slot} />
+              <input type="hidden" name="existing_id" value={v?.id ?? ''} />
+
+              <p class="slot-label">Video {slot}</p>
+
+              <label>Başlık
+                <input name="title" value={v?.title ?? ''} placeholder="Video başlığı" />
+              </label>
+
+              <label>Açıklama
+                <textarea name="description" rows="2" placeholder="Kısa açıklama...">{v?.description ?? ''}</textarea>
+              </label>
+
+              <label>YouTube Linki
+                <input name="youtube_url" value={v?.youtube_url ?? ''} placeholder="https://www.youtube.com/watch?v=..." />
+              </label>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-save">Kaydet</button>
+              </div>
+            </form>
+          );
+        })}
+      </div>
+    </section>
+
+    <!-- ── A TAKIM GALERİSİ ── -->
+    <section class="panel">
+      <h2>A Takım Galerisi</h2>
+
+      {aTakimPhotos.length > 0 && (
+        <div class="gallery-admin-grid">
+          {aTakimPhotos.map(p => (
+            <div class="gallery-admin-item">
+              <img src={p.image_url} alt={p.caption ?? ''} class="gallery-thumb" />
+              {p.caption && <p class="gallery-admin-caption">{p.caption}</p>}
+              <form method="POST" enctype="application/x-www-form-urlencoded" class="gallery-delete-form">
+                <input type="hidden" name="_action" value="a_takim_gallery_delete" />
+                <input type="hidden" name="id" value={p.id} />
+                <button type="submit" class="btn-delete btn-delete-small">Sil</button>
+              </form>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <form method="POST" enctype="multipart/form-data" class="match-form new-match" style="margin-top: 1.4rem;">
+        <input type="hidden" name="_action" value="a_takim_gallery_add" />
+        <p class="slot-label">+ Yeni Fotoğraf Ekle</p>
+
+        <div class="form-row">
+          <label>Açıklama (isteğe bağlı)
+            <input name="caption" placeholder="Fotoğraf açıklaması..." />
+          </label>
+          <label>Sıra
+            <input type="number" name="sort_order" value="99" min="0" />
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label>Fotoğraf — Cihazdan Yükle
+            <div class="file-wrap">
+              <input type="file" name="image_file" accept="image/*" class="file-input" />
+            </div>
+          </label>
+          <label>veya Görsel URL
+            <input name="image_url" placeholder="https://..." />
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-save">Fotoğraf Ekle</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ── PİLOT TAKIM HERO ── -->
+    <section class="panel">
+      <h2>Pilot Takım — Hero Görseli</h2>
+      <form method="POST" enctype="multipart/form-data" class="match-form" style="border-bottom:none;margin-bottom:0;padding-bottom:0">
+        <input type="hidden" name="_action" value="pilot_hero_save" />
+
+        <div class="form-row">
+          <label>Görsel — Cihazdan Yükle
+            <div class="file-wrap">
+              {pilotHeroImage && <img src={pilotHeroImage} class="news-preview" alt="pilot hero" />}
+              <input type="file" name="image_file" accept="image/*" class="file-input" />
+            </div>
+          </label>
+          <label>veya Görsel URL
+            <input name="image_url" value={pilotHeroImage ?? ''} placeholder="https://..." />
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-save">Kaydet</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ── PİLOT TAKIM GALERİSİ ── -->
+    <section class="panel">
+      <h2>Pilot Takım Galerisi</h2>
+
+      {pilotPhotos.length > 0 && (
+        <div class="gallery-admin-grid">
+          {pilotPhotos.map(p => (
+            <div class="gallery-admin-item">
+              <img src={p.image_url} alt={p.caption ?? ''} class="gallery-thumb" />
+              {p.caption && <p class="gallery-admin-caption">{p.caption}</p>}
+              <form method="POST" enctype="application/x-www-form-urlencoded" class="gallery-delete-form">
+                <input type="hidden" name="_action" value="pilot_gallery_delete" />
+                <input type="hidden" name="id" value={p.id} />
+                <button type="submit" class="btn-delete btn-delete-small">Sil</button>
+              </form>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <form method="POST" enctype="multipart/form-data" class="match-form new-match" style="margin-top: 1.4rem;">
+        <input type="hidden" name="_action" value="pilot_gallery_add" />
+        <p class="slot-label">+ Yeni Fotoğraf Ekle</p>
+
+        <div class="form-row">
+          <label>Açıklama (isteğe bağlı)
+            <input name="caption" placeholder="Fotoğraf açıklaması..." />
+          </label>
+          <label>Sıra
+            <input type="number" name="sort_order" value="99" min="0" />
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label>Fotoğraf — Cihazdan Yükle
+            <div class="file-wrap">
+              <input type="file" name="image_file" accept="image/*" class="file-input" />
+            </div>
+          </label>
+          <label>veya Görsel URL
+            <input name="image_url" placeholder="https://..." />
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-save">Fotoğraf Ekle</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ── AKADEMİ GALERİSİ ── -->
+    <section class="panel">
+      <h2>Akademi Galerisi</h2>
+
+      <!-- Mevcut fotoğraflar -->
+      {galleryPhotos.length > 0 && (
+        <div class="gallery-admin-grid">
+          {galleryPhotos.map(p => (
+            <div class="gallery-admin-item">
+              <img src={p.image_url} alt={p.caption ?? ''} class="gallery-thumb" />
+              {p.caption && <p class="gallery-admin-caption">{p.caption}</p>}
+              <form method="POST" enctype="application/x-www-form-urlencoded" class="gallery-delete-form">
+                <input type="hidden" name="_action" value="gallery_delete" />
+                <input type="hidden" name="id" value={p.id} />
+                <button type="submit" class="btn-delete btn-delete-small">Sil</button>
+              </form>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <!-- Yeni fotoğraf ekle -->
+      <form method="POST" enctype="multipart/form-data" class="match-form new-match" style="margin-top: 1.4rem;">
+        <input type="hidden" name="_action" value="gallery_add" />
+        <p class="slot-label">+ Yeni Fotoğraf Ekle</p>
+
+        <div class="form-row">
+          <label>Açıklama (isteğe bağlı)
+            <input name="caption" placeholder="Fotoğraf açıklaması..." />
+          </label>
+          <label>Sıra
+            <input type="number" name="sort_order" value="99" min="0" />
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label>Fotoğraf — Cihazdan Yükle
+            <div class="file-wrap">
+              <input type="file" name="image_file" accept="image/*" class="file-input" />
+            </div>
+          </label>
+          <label>veya Görsel URL
+            <input name="image_url" placeholder="https://..." />
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-save">Fotoğraf Ekle</button>
+        </div>
+      </form>
+    </section>
+
+  </main>
+</body>
+</html>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: #0a0a0a;
+    color: #e8e8e8;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    position: sticky; top: 0;
+    background: #111;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 0 2rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+  }
+  .topbar-left { display: flex; align-items: center; gap: .6rem; }
+  .topbar-logo { height: 34px; width: 34px; min-width: 34px; max-width: 34px; object-fit: contain; border-radius: 50%; display: block; flex-shrink: 0; }
+  .logo { font-weight: 900; font-size: 1rem; letter-spacing: 2px; }
+  .topbar-right { display: flex; align-items: center; gap: .8rem; }
+  .user-email { font-size: .78rem; color: #8a8a8a; }
+
+  .btn-logout {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #8a8a8a;
+    padding: .35rem .9rem;
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: .78rem;
+    cursor: pointer;
+    transition: border-color .2s, color .2s;
+  }
+  .btn-logout:hover { border-color: #e05555; color: #e05555; }
+
+  .btn-site {
+    background: #1a7a2e;
+    color: #fff;
+    padding: .35rem .9rem;
+    border-radius: 50px;
+    font-size: .78rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background .2s;
+  }
+  .btn-site:hover { background: #22963a; }
+
+  .dashboard { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  .alert {
+    border-radius: 8px;
+    padding: .8rem 1.2rem;
+    font-size: .85rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+  }
+  .alert.success { background: rgba(34,150,58,.15); border: 1px solid rgba(34,150,58,.3); color: #2cb84a; }
+  .alert.error   { background: rgba(200,40,40,.15);  border: 1px solid rgba(200,40,40,.3);  color: #e05555; }
+
+  .panel {
+    background: #161616;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 1.8rem;
+    margin-bottom: 2rem;
+  }
+  .panel h2 {
+    font-size: 1rem; font-weight: 700;
+    letter-spacing: 1px; margin-bottom: 1.5rem;
+    color: #2cb84a; text-transform: uppercase;
+  }
+
+  .match-form {
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: 1.8rem;
+    margin-bottom: 1.8rem;
+  }
+  .match-form:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+  .new-match {
+    margin-top: 1rem;
+    background: rgba(44,184,74,0.04);
+    border: 1px dashed rgba(44,184,74,0.25);
+    border-radius: 10px;
+    padding: 1.4rem;
+  }
+
+  .form-row { display: flex; flex-wrap: wrap; gap: .9rem; margin-bottom: .9rem; }
+  .teams-row { align-items: flex-start; }
+
+  .team-block {
+    flex: 1; min-width: 180px;
+    display: flex; flex-direction: column; gap: .6rem;
+  }
+  .team-label {
+    font-size: .7rem; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: #2cb84a;
+  }
+
+  .score-block { flex: 0 0 auto; display: flex; align-items: center; padding-top: 1.2rem; }
+  .score-inputs { display: flex; align-items: center; gap: .5rem; }
+  .score-inputs input { width: 56px; text-align: center; font-size: 1.2rem; font-weight: 900; }
+  .score-inputs span { font-size: 1.2rem; color: #8a8a8a; }
+
+  label {
+    font-size: .76rem; font-weight: 600;
+    color: #8a8a8a;
+    display: flex; flex-direction: column; gap: .35rem;
+    flex: 1; min-width: 140px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input:not([type]) {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: .65rem .9rem;
+    color: #e8e8e8;
+    font-family: inherit;
+    font-size: .88rem;
+    outline: none;
+    transition: border-color .2s;
+    width: 100%;
+  }
+  input:focus { border-color: #2cb84a; }
+
+  /* Dosya yükleme */
+  .file-wrap { display: flex; flex-direction: column; gap: .5rem; }
+
+  .file-input {
+    background: rgba(255,255,255,0.03) !important;
+    border: 1px dashed rgba(44,184,74,0.4) !important;
+    border-radius: 8px !important;
+    padding: .6rem .9rem !important;
+    color: #8a8a8a !important;
+    font-size: .82rem !important;
+    cursor: pointer;
+    width: 100% !important;
+  }
+  .file-input:hover { border-color: #2cb84a !important; color: #e8e8e8 !important; }
+
+  .logo-preview {
+    width: 48px; height: 48px;
+    object-fit: contain;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    padding: 4px;
+  }
+
+  .news-preview {
+    width: 100%; max-height: 140px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  textarea {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: .65rem .9rem;
+    color: #e8e8e8;
+    font-family: inherit;
+    font-size: .88rem;
+    outline: none; resize: vertical;
+    transition: border-color .2s;
+    width: 100%;
+  }
+  textarea:focus { border-color: #2cb84a; }
+
+  .form-actions { display: flex; gap: .7rem; margin-top: .8rem; }
+
+  .btn-save {
+    background: #1a7a2e; color: #fff;
+    border: none; border-radius: 50px;
+    padding: .6rem 1.4rem;
+    font-family: inherit; font-size: .85rem; font-weight: 700;
+    cursor: pointer;
+    transition: background .2s, transform .2s;
+  }
+  .btn-save:hover { background: #22963a; transform: translateY(-1px); }
+
+  .btn-delete {
+    background: transparent; color: #e05555;
+    border: 1px solid rgba(200,40,40,.3);
+    border-radius: 50px; padding: .6rem 1.4rem;
+    font-family: inherit; font-size: .85rem; font-weight: 700;
+    cursor: pointer;
+    transition: background .2s, border-color .2s;
+  }
+  .btn-delete:hover { background: rgba(200,40,40,.1); border-color: #e05555; }
+
+  .news-slots {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+  }
+  @media (max-width: 800px) { .news-slots { grid-template-columns: 1fr; } }
+
+  .news-slot-form {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: .8rem;
+  }
+
+  .slot-label {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #2cb84a;
+    margin-bottom: .2rem;
+  }
+
+  .hero-divider {
+    margin-top: 1.8rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    margin-bottom: .2rem;
+  }
+  .hero-divider-note {
+    font-size: .72rem;
+    color: #555;
+    margin-top: .3rem;
+  }
+
+  .gallery-admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: .5rem;
+  }
+
+  .gallery-admin-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+  }
+
+  .gallery-thumb {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    display: block;
+  }
+
+  .gallery-admin-caption {
+    font-size: .72rem;
+    color: #8a8a8a;
+    padding: .4rem .6rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .gallery-delete-form { padding: .4rem .6rem .6rem; }
+
+  .btn-delete-small {
+    font-size: .72rem;
+    padding: .3rem .8rem;
+  }
+
+  .article-list {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+    margin-bottom: .5rem;
+  }
+
+  .article-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+    padding: .7rem 1rem;
+  }
+
+  .article-thumb {
+    width: 64px;
+    height: 46px;
+    object-fit: cover;
+    border-radius: 6px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .article-meta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    min-width: 0;
+  }
+
+  .article-title {
+    font-size: .85rem;
+    font-weight: 700;
+    color: #e8e8e8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .article-desc {
+    font-size: .72rem;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .article-delete-form { flex-shrink: 0; }
+
+  .match-subsection {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .match-subsection:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+  .match-subsection-alt { background: transparent; }
+
+  .subsection-label {
+    font-size: .68rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #fff;
+    background: #1a7a2e;
+    display: inline-block;
+    padding: .3rem .9rem;
+    border-radius: 50px;
+    margin-bottom: 1.4rem;
+  }
+</style>

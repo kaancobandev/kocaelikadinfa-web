@@ -1,0 +1,165 @@
+---
+import { supabase, type VideoItem } from '../lib/supabase';
+
+const { data } = await supabase
+  .from('videos')
+  .select('*')
+  .order('sort_order', { ascending: true })
+  .limit(3);
+
+const slots: (VideoItem | null)[] = [
+  data?.[0] ?? null,
+  data?.[1] ?? null,
+  data?.[2] ?? null,
+];
+
+function embedUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    let id = '';
+    if (u.hostname.includes('youtu.be')) {
+      id = u.pathname.slice(1).split('?')[0];
+    } else if (u.pathname.startsWith('/shorts/')) {
+      id = u.pathname.replace('/shorts/', '').split('?')[0];
+    } else {
+      id = u.searchParams.get('v') ?? '';
+    }
+    return id ? `https://www.youtube.com/embed/${id}` : '';
+  } catch {
+    return '';
+  }
+}
+---
+
+<section class="video-section" id="videolar">
+  <div class="video-section-inner reveal">
+    <span class="section-tag">Videolar</span>
+    <h2>Maçlardan Kareler</h2>
+  </div>
+
+  <div class="video-grid">
+    {slots.map(v => (
+      <div class="video-card reveal">
+        {v?.youtube_url && embedUrl(v.youtube_url) ? (
+          <div class="video-frame-wrap">
+            <iframe
+              src={embedUrl(v.youtube_url)}
+              title={v.title}
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+        ) : (
+          <div class="video-placeholder">
+            <span class="play-icon">▶</span>
+            <p class="placeholder-text">Video Yakında</p>
+          </div>
+        )}
+        <div class="video-info">
+          <h3>{v?.title ?? 'Başlık Bekleniyor'}</h3>
+          {v?.description && <p>{v.description}</p>}
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .video-section {
+    padding: 5rem 5%;
+    background: #ffffff;
+    border-top: 1px solid #e8e8e8;
+    border-bottom: 3px solid var(--green);
+  }
+
+  .video-section-inner {
+    max-width: 600px;
+    margin-bottom: 3rem;
+  }
+  .video-section-inner .section-tag {
+    color: var(--green);
+  }
+  .video-section-inner h2 {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 900;
+    margin-top: .6rem;
+    color: #111;
+  }
+
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 960px) {
+    .video-grid { grid-template-columns: 1fr; }
+  }
+
+  .video-card {
+    background: #fff;
+    border: 1.5px solid #e0e0e0;
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color .25s, box-shadow .25s, transform .2s;
+  }
+  .video-card:hover {
+    border-color: var(--green);
+    box-shadow: 0 6px 28px rgba(13,77,30,0.12);
+    transform: translateY(-2px);
+  }
+
+  .video-frame-wrap {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+  }
+  .video-frame-wrap iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: none;
+  }
+
+  .video-placeholder {
+    aspect-ratio: 16 / 9;
+    background: #f5f5f5;
+    border-bottom: 1px solid #e8e8e8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+  }
+  .play-icon {
+    font-size: 2rem;
+    color: var(--green);
+    opacity: .4;
+  }
+  .placeholder-text {
+    font-size: .75rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #aaa;
+  }
+
+  .video-info {
+    padding: 1.2rem 1.4rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+  }
+  .video-info h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #111;
+  }
+  .video-info p {
+    font-size: .85rem;
+    color: #666;
+    line-height: 1.5;
+  }
+</style>

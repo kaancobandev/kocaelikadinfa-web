@@ -1,0 +1,85 @@
+---
+interface Props {
+  title?: string;
+}
+const { title = "Kocaeli Kadın Futbol Kulübü" } = Astro.props;
+---
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black:        #000000;
+    --dark:         #060806;
+    --card-bg:      #0c100c;
+    --green:        #0d4d1e;
+    --green-mid:    #116025;
+    --green-bright: #2cb84a;
+    --green-glow:   rgba(13,77,30,0.35);
+    --text:         #ffffff;
+    --text-muted:   #7a7a7a;
+    --border:       rgba(255,255,255,0.07);
+    --radius:       12px;
+    --nav-h:        70px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--black);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--dark); }
+  ::-webkit-scrollbar-thumb { background: var(--green); border-radius: 3px; }
+
+  .btn-primary {
+    display: inline-block;
+    background: var(--green);
+    color: #fff;
+    padding: .8rem 2rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: .9rem;
+    letter-spacing: 1px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background .25s, transform .2s, box-shadow .2s;
+  }
+  .btn-primary:hover {
+    background: var(--green-mid);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px var(--green-glow);
+  }
+
+  .section-tag {
+    display: inline-block;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--green-bright);
+    margin-bottom: 1rem;
+  }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+</style>

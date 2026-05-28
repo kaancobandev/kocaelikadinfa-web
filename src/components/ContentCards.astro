@@ -1,0 +1,92 @@
+---
+import { supabase, type NewsItem } from '../lib/supabase';
+
+const { data } = await supabase
+  .from('news')
+  .select('*')
+  .order('id', { ascending: false })
+  .limit(3);
+
+const slots: (NewsItem | null)[] = [
+  data?.[0] ?? null,
+  data?.[1] ?? null,
+  data?.[2] ?? null,
+];
+
+const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=800&q=80';
+---
+
+<section class="content-cards" id="haberler">
+  {slots.map(n => (
+    <article class="card reveal">
+      <div
+        class="card-img"
+        style={`background-image: linear-gradient(to bottom, rgba(0,0,0,0) 40%, #000000 100%), url('${n?.image_url ?? fallbackImg}')`}
+      ></div>
+      <div class="card-body">
+        <span class="card-tag">Haberler</span>
+        <h3>{n?.title ?? 'Yakında...'}</h3>
+        <p>{n?.description ?? 'İçerik henüz eklenmedi.'}</p>
+        <a href="/haberler" class="card-link">Devamını Oku →</a>
+      </div>
+    </article>
+  ))}
+</section>
+
+<style>
+  .content-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: var(--black);
+  }
+
+  @media (max-width: 900px) {
+    .content-cards { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    transition: background .25s;
+  }
+  .card:last-child { border-right: none; }
+  .card:hover { background: var(--card-bg); }
+
+  .card-img {
+    height: 220px;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .card-body {
+    padding: 1.8rem 2rem 2rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: .8rem;
+  }
+
+  .card-tag {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--green-bright);
+  }
+
+  .card-body h3 { font-size: 1.2rem; font-weight: 700; line-height: 1.3; }
+  .card-body p  { font-size: .9rem; color: var(--text-muted); flex: 1; }
+
+  .card-link {
+    display: inline-block;
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--green-bright);
+    text-decoration: none;
+    letter-spacing: .5px;
+    transition: color .2s;
+  }
+  .card-link:hover { color: #fff; }
+</style>

@@ -1,0 +1,201 @@
+---
+import { supabase, type Match } from '../lib/supabase';
+
+const [{ data: u15Data }, { data: u13Data }] = await Promise.all([
+  supabase.from('matches').select('*').eq('badge', 'U15').order('id', { ascending: false }).limit(1),
+  supabase.from('matches').select('*').eq('badge', 'U13').order('id', { ascending: false }).limit(1),
+]);
+
+const latestMatches: Match[] = [
+  ...(u15Data ?? []),
+  ...(u13Data ?? []),
+];
+
+function initials(name: string) {
+  return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+}
+
+const TR_MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+function formatDate(d: string) {
+  const m = d.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return d;
+  return `${parseInt(m[3])} ${TR_MONTHS[parseInt(m[2]) - 1]} ${m[1]}`;
+}
+---
+
+<section class="scores-section">
+  <h2 class="section-label">Son Maç Sonuçları</h2>
+
+  <div class="scores-grid">
+    {latestMatches.map(m => (
+      <div class="score-card reveal">
+        <div class="score-badge">{m.badge}</div>
+        <div class="match-row">
+
+          <div class="team home">
+            <div class="team-logo-wrap">
+              {m.home_logo
+                ? <img src={m.home_logo} alt={m.home_name} class="team-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                : null
+              }
+              <span class="team-logo-fallback" style={m.home_logo ? "display:none" : "display:flex"}>
+                {initials(m.home_name)}
+              </span>
+            </div>
+            <span class="team-name">{m.home_name}</span>
+          </div>
+
+          <div class="score-box">
+            <span class="score-num">{m.score_home}</span>
+            <span class="score-sep">–</span>
+            <span class="score-num">{m.score_away}</span>
+          </div>
+
+          <div class="team away">
+            <div class="team-logo-wrap">
+              {m.away_logo
+                ? <img src={m.away_logo} alt={m.away_name} class="team-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                : null
+              }
+              <span class="team-logo-fallback" style={m.away_logo ? "display:none" : "display:flex"}>
+                {initials(m.away_name)}
+              </span>
+            </div>
+            <span class="team-name">{m.away_name}</span>
+          </div>
+
+        </div>
+        <div class="match-meta">{formatDate(m.match_date)} &nbsp;|&nbsp; {m.league}</div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .scores-section {
+    background: #ffffff;
+    padding: 4rem 5%;
+    border-top: 3px solid var(--green);
+    border-bottom: 1px solid #e8e8e8;
+  }
+
+  .section-label {
+    text-align: center;
+    font-size: .75rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 2.5rem;
+    font-weight: 700;
+  }
+
+  .db-error {
+    text-align: center;
+    color: #e05555;
+    font-size: .85rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .scores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .score-card {
+    background: #fff;
+    border: 1.5px solid #e0e0e0;
+    border-radius: var(--radius);
+    padding: 1.8rem 2rem;
+    text-align: center;
+    transition: border-color .25s, box-shadow .25s, transform .2s;
+  }
+  .score-card:hover {
+    border-color: var(--green);
+    box-shadow: 0 6px 28px rgba(13,77,30,0.12);
+    transform: translateY(-2px);
+  }
+
+  .score-badge {
+    display: inline-block;
+    background: var(--green);
+    color: #fff;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: .3rem .9rem;
+    border-radius: 50px;
+    margin-bottom: 1.4rem;
+  }
+
+  .match-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .team {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  .team-logo-wrap {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1.5px solid #e0e0e0;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: border-color .25s;
+  }
+  .score-card:hover .team-logo-wrap { border-color: var(--green); }
+
+  .team-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 6px;
+  }
+
+  .team-logo-fallback {
+    font-size: .75rem;
+    font-weight: 900;
+    color: var(--green);
+    letter-spacing: 1px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .team-name {
+    font-weight: 700;
+    font-size: .85rem;
+    text-align: center;
+    color: #111;
+  }
+
+  .score-box {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    flex-shrink: 0;
+  }
+  .score-num {
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: var(--green);
+    line-height: 1;
+  }
+  .score-sep { font-size: 1.6rem; color: #bbb; font-weight: 300; }
+
+  .match-meta { font-size: .75rem; color: #888; margin-top: 1rem; }
+</style>

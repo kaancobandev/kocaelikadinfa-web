@@ -1,0 +1,139 @@
+---
+import { supabase } from '../../lib/supabase';
+
+// Zaten giriş yaptıysa dashboard'a yönlendir
+const accessToken = Astro.cookies.get('sb-access-token')?.value;
+if (accessToken) {
+  const { data: { user } } = await supabase.auth.getUser(accessToken);
+  if (user) return Astro.redirect('/admin/dashboard');
+}
+
+let error = '';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const email    = form.get('email')?.toString() ?? '';
+  const password = form.get('password')?.toString() ?? '';
+
+  const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (authError || !data.session) {
+    error = 'E-posta veya şifre hatalı.';
+  } else {
+    Astro.cookies.set('sb-access-token',  data.session.access_token,  { path: '/', httpOnly: true, maxAge: 60 * 60 * 8 });
+    Astro.cookies.set('sb-refresh-token', data.session.refresh_token, { path: '/', httpOnly: true, maxAge: 60 * 60 * 24 * 7 });
+    return Astro.redirect('/admin/dashboard');
+  }
+}
+---
+
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Girişi — Kocaeli Kadın FA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">⚽</div>
+      <h1>Kocaeli Kadın FA Admin</h1>
+      <p class="login-sub">Yönetim paneline giriş yap</p>
+
+      {error && <div class="error-box">{error}</div>}
+
+      <form method="POST" enctype="application/x-www-form-urlencoded">
+        <label>E-posta
+          <input type="email" name="email" required autofocus />
+        </label>
+        <label>Şifre
+          <input type="password" name="password" required />
+        </label>
+        <button type="submit">Giriş Yap</button>
+      </form>
+
+      <a href="/" class="back-link">← Anasayfaya dön</a>
+    </div>
+  </div>
+</body>
+</html>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: #0a0a0a;
+    color: #e8e8e8;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .login-wrap { width: 100%; padding: 1rem; }
+
+  .login-card {
+    background: #161616;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .login-logo { font-size: 2.5rem; margin-bottom: .8rem; }
+
+  h1 { font-size: 1.5rem; font-weight: 900; letter-spacing: 2px; }
+
+  .login-sub { font-size: .82rem; color: #8a8a8a; margin: .4rem 0 1.8rem; }
+
+  .error-box {
+    background: rgba(200,40,40,.15);
+    border: 1px solid rgba(200,40,40,.3);
+    color: #e05555;
+    border-radius: 8px;
+    padding: .7rem 1rem;
+    font-size: .85rem;
+    margin-bottom: 1.2rem;
+  }
+
+  form { display: flex; flex-direction: column; gap: .9rem; text-align: left; }
+
+  label { font-size: .78rem; font-weight: 600; letter-spacing: .5px; color: #8a8a8a; display: flex; flex-direction: column; gap: .4rem; }
+
+  input {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: .8rem 1rem;
+    color: #e8e8e8;
+    font-family: inherit;
+    font-size: .9rem;
+    outline: none;
+    transition: border-color .2s;
+  }
+  input:focus { border-color: #2cb84a; }
+
+  button {
+    margin-top: .4rem;
+    background: #1a7a2e;
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: .85rem;
+    font-family: inherit;
+    font-size: .9rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: background .2s, transform .2s;
+  }
+  button:hover { background: #22963a; transform: translateY(-1px); }
+
+  .back-link { display: block; margin-top: 1.5rem; font-size: .8rem; color: #8a8a8a; text-decoration: none; }
+  .back-link:hover { color: #2cb84a; }
+</style>
