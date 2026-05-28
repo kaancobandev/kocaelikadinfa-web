@@ -297,10 +297,12 @@ const u13Matches = matches.filter(m => m.badge === 'U13');
 const { data: allArticlesData } = await supabase.from('news').select('*').order('id', { ascending: false });
 const allArticles: NewsItem[] = allArticlesData ?? [];
 
-const { data: newsData } = await supabase.from('news').select('*').in('sort_order', [1, 2]);
+const { data: newsData } = await supabase.from('news').select('*').in('sort_order', [1, 2, 3, 4]);
 const newsSlots: (NewsItem | null)[] = [
   newsData?.find(n => n.sort_order === 1) ?? null,
   newsData?.find(n => n.sort_order === 2) ?? null,
+  newsData?.find(n => n.sort_order === 3) ?? null,
+  newsData?.find(n => n.sort_order === 4) ?? null,
 ];
 
 
@@ -404,8 +406,8 @@ const videoSlots: (VideoItem | null)[] = [
         <span class="slot-label">Diğer Manşetler (Hero Sağ Panel)</span>
         <p class="hero-divider-note">Aşağıdaki 2 haber, hero'nun sağ tarafında görünür.</p>
       </div>
-      <div class="news-slots" style="margin-top:.6rem">
-        {[newsSlots[0], newsSlots[1]].map((n, i) => {
+      <div class="news-slots" style="margin-top:.6rem;grid-template-columns:repeat(2,1fr)">
+        {[newsSlots[0], newsSlots[1], newsSlots[2], newsSlots[3]].map((n, i) => {
           const slot = i + 1;
           return (
             <form method="POST" enctype="multipart/form-data" class="news-slot-form">
@@ -457,7 +459,7 @@ const videoSlots: (VideoItem | null)[] = [
               <div class="article-row">
                 <div class="article-meta">
                   <span class="article-title">{m.home_name} {m.score_home} – {m.score_away} {m.away_name}</span>
-                  <span class="article-desc">{m.match_date} &nbsp;·&nbsp; {m.league}</span>
+                  <span class="article-desc">{m.match_date}</span>
                 </div>
                 <form method="POST" enctype="application/x-www-form-urlencoded" class="article-delete-form">
                   <input type="hidden" name="_action" value="delete" />
@@ -476,9 +478,6 @@ const videoSlots: (VideoItem | null)[] = [
           <p class="slot-label">+ Yeni U15 Maçı Ekle</p>
 
           <div class="form-row">
-            <label>Lig
-              <input name="league" placeholder="1. Lig" required />
-            </label>
             <label>Tarih
               <input type="date" name="match_date" required />
             </label>
@@ -538,7 +537,7 @@ const videoSlots: (VideoItem | null)[] = [
               <div class="article-row">
                 <div class="article-meta">
                   <span class="article-title">{m.home_name} {m.score_home} – {m.score_away} {m.away_name}</span>
-                  <span class="article-desc">{m.match_date} &nbsp;·&nbsp; {m.league}</span>
+                  <span class="article-desc">{m.match_date}</span>
                 </div>
                 <form method="POST" enctype="application/x-www-form-urlencoded" class="article-delete-form">
                   <input type="hidden" name="_action" value="delete" />
@@ -557,9 +556,6 @@ const videoSlots: (VideoItem | null)[] = [
           <p class="slot-label">+ Yeni U13 Maçı Ekle</p>
 
           <div class="form-row">
-            <label>Lig
-              <input name="league" placeholder="1. Lig" required />
-            </label>
             <label>Tarih
               <input type="date" name="match_date" required />
             </label>

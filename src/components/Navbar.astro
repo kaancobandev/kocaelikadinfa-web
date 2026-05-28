@@ -23,7 +23,7 @@ const links = [
     {links.map(l => (
       <li><a href={l.href}>{l.label}</a></li>
     ))}
-    <li><a href="#katin" class="btn-join">Aramıza Katıl</a></li>
+    <li><a href="https://kocaelikadinfk.sporakademik.com/OnKayit" target="_blank" rel="noopener noreferrer" class="btn-join">Aramıza Katıl</a></li>
   </ul>
 </nav>
 
@@ -104,27 +104,66 @@ const links = [
   .btn-join:hover { background: var(--green-mid) !important; transform: translateY(-1px); }
 
   @media (max-width: 768px) {
+    .logo-text { display: none; }
+
     .nav-burger { display: flex; }
+
     .nav-links {
       position: fixed;
       top: var(--nav-h); left: 0; right: 0;
-      background: var(--dark);
+      background: rgba(6,8,6,0.98);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       flex-direction: column;
       gap: 0;
-      padding: 1rem 0 2rem;
+      padding: 0.5rem 0 2rem;
       transform: translateY(-110%);
-      transition: transform .35s ease;
+      opacity: 0;
+      transition: transform .35s ease, opacity .3s ease;
       border-bottom: 1px solid var(--border);
+      z-index: 999;
     }
     .nav-links li { width: 100%; text-align: center; }
-    .nav-links a { display: block; padding: .8rem 0; }
-    .nav-toggle:checked ~ .nav-links { transform: translateY(0); }
+    .nav-links a {
+      display: block;
+      padding: 1rem 0;
+      font-size: .9rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .nav-links li:last-child a { border-bottom: none; }
+
+    .nav-toggle:checked ~ .nav-links {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Burger → X animasyonu */
+    .nav-toggle:checked ~ .nav-burger span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+    .nav-toggle:checked ~ .nav-burger span:nth-child(2) {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+    .nav-toggle:checked ~ .nav-burger span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
   }
 </style>
 
 <script>
-  const navbar = document.getElementById('navbar');
+  const navbar  = document.getElementById('navbar');
+  const toggle  = document.getElementById('nav-toggle') as HTMLInputElement | null;
+
+  // Scroll → küçült
   window.addEventListener('scroll', () => {
     navbar?.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // Mobil: linke tıklayınca menüyü kapat
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (toggle) toggle.checked = false;
+    });
   });
 </script>

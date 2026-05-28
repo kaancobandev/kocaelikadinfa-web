@@ -57,6 +57,20 @@
       </ul>
     </div>
 
+    <!-- Reklam & İş Birliği -->
+    <div class="footer-col">
+      <h4>Reklam & İş Birliği</h4>
+      <p class="collab-desc">Sponsorluk, reklam ve iş birliği teklifleri için bizimle iletişime geçin.</p>
+      <a href="tel:+905308648841" class="collab-phone">
+        <span class="contact-icon">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.6 19.79 19.79 0 0 1 1.6 5a2 2 0 0 1 1.95-2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 10.9a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 18.18v-1.26z"/>
+          </svg>
+        </span>
+        +90 530 864 88 41
+      </a>
+    </div>
+
     <!-- Sağ: İletişim -->
     <div class="footer-col">
       <h4>İletişim</h4>
@@ -128,15 +142,15 @@
 
   /* İçerik grid */
   .footer-inner {
-    max-width: 1160px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 4.5rem 5% 3.5rem;
     display: grid;
-    grid-template-columns: 1.8fr 1fr 1.1fr;
-    gap: 3rem;
+    grid-template-columns: 1.6fr 1fr 1fr 1.1fr;
+    gap: 2.5rem;
   }
 
-  @media (max-width: 860px) {
+  @media (max-width: 1000px) {
     .footer-inner {
       grid-template-columns: 1fr 1fr;
     }
@@ -285,6 +299,26 @@
     flex-shrink: 0;
     transition: background .2s, box-shadow .2s;
   }
+
+  /* ── Reklam & İş Birliği ── */
+  .collab-desc {
+    font-size: .82rem;
+    color: #505050;
+    line-height: 1.65;
+    margin-bottom: 1.2rem;
+  }
+
+  .collab-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    font-size: .88rem;
+    font-weight: 700;
+    color: var(--green-bright);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .collab-phone:hover { color: #fff; }
 
   /* ── İletişim ── */
   .contact-list {

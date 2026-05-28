@@ -18,8 +18,8 @@ const hero: HeroSettings = heroData ?? {
 const { data: newsData } = await supabase
   .from('news')
   .select('*')
-  .order('sort_order', { ascending: true })
-  .limit(2);
+  .order('id', { ascending: false })
+  .limit(4);
 
 const sideNews: NewsItem[] = newsData ?? [];
 const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=400&q=80';
@@ -64,7 +64,7 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
               </div>
             </a>
           ))
-        : [1, 2].map(() => (
+        : [1, 2, 3, 4].map(() => (
             <div class="side-item side-empty">
               <div class="side-thumb-empty"></div>
               <div class="side-body">
@@ -80,12 +80,11 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
 
 <style>
   .hero-wrap {
-    margin-top: var(--nav-h);
     display: grid;
     grid-template-columns: 1fr 360px;
     height: calc(100vh - var(--nav-h));
-    min-height: 480px;
-    max-height: 800px;
+    min-height: 560px;
+    max-height: 920px;
     overflow: hidden;
     background-size: cover;
     background-position: center;
