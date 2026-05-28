@@ -52,6 +52,11 @@ const links = [
     text-decoration: none;
   }
   .logo-img { height: 42px; width: 42px; object-fit: contain; border-radius: 50%; }
+
+  @media (max-width: 768px) {
+    .nav-logo { padding: 8px 0; }
+    .logo-img { height: 38px; width: 38px; }
+  }
   .logo-text {
     font-size: 1.4rem;
     font-weight: 900;
@@ -155,6 +160,9 @@ const links = [
   const navbar  = document.getElementById('navbar');
   const toggle  = document.getElementById('nav-toggle') as HTMLInputElement | null;
 
+  // iOS Safari sticky fix: boş touchstart ile dokunma olayları etkinleşir
+  navbar?.addEventListener('touchstart', () => {}, { passive: true });
+
   // Scroll → küçült
   window.addEventListener('scroll', () => {
     navbar?.classList.toggle('scrolled', window.scrollY > 60);
@@ -165,5 +173,12 @@ const links = [
     link.addEventListener('click', () => {
       if (toggle) toggle.checked = false;
     });
+  });
+
+  // Logo tıklamasında menüyü kapat ve anasayfaya git
+  const logo = document.querySelector('.nav-logo') as HTMLAnchorElement | null;
+  logo?.addEventListener('click', (e) => {
+    if (toggle) toggle.checked = false;
+    // href="/" zaten var, navigate etmesine izin ver
   });
 </script>
