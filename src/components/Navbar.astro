@@ -23,7 +23,7 @@ const links = [
     {links.map(l => (
       <li><a href={l.href}>{l.label}</a></li>
     ))}
-    <li><a href="https://kocaelikadinfk.sporakademik.com/OnKayit" target="_blank" rel="noopener noreferrer" class="btn-join">Aramıza Katıl</a></li>
+    <li><a href="/aramiza-katil" class="btn-join">Aramıza Katıl</a></li>
   </ul>
 </nav>
 
@@ -109,7 +109,7 @@ const links = [
   .btn-join:hover { background: var(--green-mid) !important; transform: translateY(-1px); }
 
   @media (max-width: 768px) {
-    .logo-text { display: none; }
+    .logo-text { font-size: .75rem; letter-spacing: 1.5px; }
 
     .nav-burger { display: flex; }
 
