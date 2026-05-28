@@ -46,6 +46,9 @@ const photos: GalleryItem[] = galleryData ?? [];
     <!-- Fotoğraflar -->
     {photos.length > 0 && (
       <section class="photos-section">
+        <div class="partner-logo-wrap">
+          <img src="/idmanocağı_futbol_kulübü.jpeg" alt="Kocaeli Gölcük İdmanocağı FK" class="partner-logo" />
+        </div>
         <h2 class="photos-title">Sahadan Kareler</h2>
         <div class="photos-grid">
           {photos.map(p => (
@@ -161,6 +164,22 @@ const photos: GalleryItem[] = galleryData ?? [];
     font-size: 1rem;
     color: var(--text-muted);
     line-height: 1.85;
+  }
+
+  /* ── Partner logo ── */
+  .partner-logo-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+  }
+  .partner-logo {
+    height: 200px;
+    width: 200px;
+    object-fit: contain;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: rgba(255,255,255,0.04);
+    padding: 6px;
   }
 
   /* ── Fotoğraflar ── */
