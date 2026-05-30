@@ -1,5 +1,5 @@
 ---
-import { supabase, createUserClient, uploadFile, type Match, type NewsItem, type VideoItem, type GalleryItem, type HeroSettings } from '../../lib/supabase';
+import { supabase, createUserClient, uploadFile, type Match, type NewsItem, type VideoItem, type GalleryItem, type HeroSettings, type AntrenmanGaleriItem } from '../../lib/supabase';
 
 // Auth kontrolü
 const accessToken = Astro.cookies.get('sb-access-token')?.value;
@@ -280,6 +280,36 @@ if (Astro.request.method === 'POST') {
     }
   }
 
+  // Antrenman Galerisi — fotoğraf/video ekle
+  if (action === 'antrenman_add') {
+    const caption    = form.get('caption')?.toString() ?? '';
+    const sort_order = Number(form.get('sort_order') ?? 99);
+
+    // Önce dosya yüklemeyi dene, yoksa URL veya YouTube linki al
+    const file = form.get('image_file') as File | null;
+    let media_url: string | null = null;
+    if (file && file.size > 0) {
+      media_url = await uploadFile(accessToken!, file, 'antrenman-galeri');
+    }
+    if (!media_url) media_url = form.get('media_url')?.toString() || null;
+
+    if (!media_url) {
+      errorMsg = 'Lütfen bir fotoğraf seçin, URL veya YouTube linki girin.';
+    } else {
+      const { error } = await db.from('antrenman_galeri').insert({ media_url, caption, sort_order });
+      errorMsg   = error ? 'Eklenemedi: ' + error.message : '';
+      successMsg = error ? '' : 'İçerik eklendi!';
+    }
+  }
+
+  // Antrenman Galerisi — sil
+  if (action === 'antrenman_delete') {
+    const id = Number(form.get('id'));
+    const { error } = await db.from('antrenman_galeri').delete().eq('id', id);
+    errorMsg   = error ? 'Silinemedi.' : '';
+    successMsg = error ? '' : 'İçerik silindi.';
+  }
+
   // Çıkış
   if (action === 'logout') {
     Astro.cookies.delete('sb-access-token',  { path: '/' });
@@ -321,12 +351,16 @@ const pilotPhotos: GalleryItem[] = pilotGalleryData ?? [];
 const { data: aTakimGalleryData } = await supabase.from('a_takim_gallery').select('*').order('sort_order');
 const aTakimPhotos: GalleryItem[] = aTakimGalleryData ?? [];
 
+const { data: antrenmanData } = await supabase.from('antrenman_galeri').select('*').order('sort_order');
+const antrenmanItems: AntrenmanGaleriItem[] = antrenmanData ?? [];
+
 const { data: videoData } = await supabase.from('videos').select('*').order('sort_order').limit(3);
 const videoSlots: (VideoItem | null)[] = [
   videoData?.find(v => v.sort_order === 1) ?? null,
   videoData?.find(v => v.sort_order === 2) ?? null,
   videoData?.find(v => v.sort_order === 3) ?? null,
 ];
+
 
 ---
 
@@ -662,39 +696,67 @@ const videoSlots: (VideoItem | null)[] = [
       </form>
     </section>
 
-    <!-- ── VİDEOLAR ── -->
+    <!-- ── ANTRENMANLARDAN KARELER ── -->
     <section class="panel">
-      <h2>Videolar</h2>
-      <div class="news-slots">
-        {videoSlots.map((v, i) => {
-          const slot = i + 1;
-          return (
-            <form method="POST" enctype="application/x-www-form-urlencoded" class="news-slot-form">
-              <input type="hidden" name="_action"     value="video_save" />
-              <input type="hidden" name="slot"        value={slot} />
-              <input type="hidden" name="existing_id" value={v?.id ?? ''} />
+      <h2>Antrenmanlardan Kareler</h2>
 
-              <p class="slot-label">Video {slot}</p>
-
-              <label>Başlık
-                <input name="title" value={v?.title ?? ''} placeholder="Video başlığı" />
-              </label>
-
-              <label>Açıklama
-                <textarea name="description" rows="2" placeholder="Kısa açıklama...">{v?.description ?? ''}</textarea>
-              </label>
-
-              <label>YouTube Linki
-                <input name="youtube_url" value={v?.youtube_url ?? ''} placeholder="https://www.youtube.com/watch?v=..." />
-              </label>
-
-              <div class="form-actions">
-                <button type="submit" class="btn-save">Kaydet</button>
+      {antrenmanItems.length > 0 && (
+        <div class="gallery-admin-grid">
+          {antrenmanItems.map(item => {
+            const isYt = /youtu(\.be|be\.com)/i.test(item.media_url);
+            const ytId = item.media_url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/)?.[1];
+            return (
+              <div class="gallery-admin-item">
+                {isYt && ytId ? (
+                  <img
+                    src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`}
+                    alt={item.caption ?? ''}
+                    class="gallery-thumb"
+                  />
+                ) : (
+                  <img src={item.media_url} alt={item.caption ?? ''} class="gallery-thumb" />
+                )}
+                {isYt && <div class="yt-badge">▶ YT</div>}
+                {item.caption && <p class="gallery-admin-caption">{item.caption}</p>}
+                <form method="POST" enctype="application/x-www-form-urlencoded" class="gallery-delete-form">
+                  <input type="hidden" name="_action" value="antrenman_delete" />
+                  <input type="hidden" name="id" value={item.id} />
+                  <button type="submit" class="btn-delete btn-delete-small">Sil</button>
+                </form>
               </div>
-            </form>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
+
+      <form method="POST" enctype="multipart/form-data" class="match-form new-match" style="margin-top:1.4rem">
+        <input type="hidden" name="_action" value="antrenman_add" />
+        <p class="slot-label">+ Fotoğraf veya Video Ekle</p>
+
+        <div class="form-row">
+          <label>Açıklama (isteğe bağlı)
+            <input name="caption" placeholder="Fotoğraf/video açıklaması..." />
+          </label>
+          <label>Sıra
+            <input type="number" name="sort_order" value="99" min="0" />
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label>Fotoğraf — Cihazdan Yükle
+            <div class="file-wrap">
+              <input type="file" name="image_file" accept="image/*,video/*" class="file-input" />
+            </div>
+          </label>
+          <label>veya Görsel URL / YouTube Linki
+            <input name="media_url" placeholder="https://... veya https://youtube.com/watch?v=..." />
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-save">Ekle</button>
+        </div>
+      </form>
     </section>
 
     <!-- ── A TAKIM GALERİSİ ── -->
@@ -1149,6 +1211,18 @@ const videoSlots: (VideoItem | null)[] = [
   }
 
   .gallery-delete-form { padding: .4rem .6rem .6rem; }
+
+  .yt-badge {
+    position: absolute;
+    top: .4rem; right: .4rem;
+    font-size: .65rem;
+    font-weight: 700;
+    background: rgba(200,0,0,.85);
+    color: #fff;
+    padding: .15rem .45rem;
+    border-radius: 4px;
+    letter-spacing: .5px;
+  }
 
   .btn-delete-small {
     font-size: .72rem;

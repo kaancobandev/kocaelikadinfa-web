@@ -14,6 +14,13 @@ const slots: (NewsItem | null)[] = [
 ];
 
 const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=800&q=80';
+
+function linkify(text: string): string {
+  return text.replace(
+    /(https?:\/\/[^\s<>"']+)/g,
+    '<a href="$1" target="_blank" rel="noopener noreferrer" class="news-link">$1</a>'
+  );
+}
 ---
 
 <section class="content-cards" id="haberler">
@@ -26,7 +33,7 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
       <div class="card-body">
         <span class="card-tag">Haberler</span>
         <h3>{n?.title ?? 'Yakında...'}</h3>
-        <p>{n?.description ?? 'İçerik henüz eklenmedi.'}</p>
+        <p set:html={linkify(n?.description ?? 'İçerik henüz eklenmedi.')}></p>
         <a href="/haberler" class="card-link">Devamını Oku →</a>
       </div>
     </article>
@@ -78,6 +85,15 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
 
   .card-body h3 { font-size: 1.2rem; font-weight: 700; line-height: 1.3; }
   .card-body p  { font-size: .9rem; color: var(--text-muted); flex: 1; }
+
+  .card-body p :global(.news-link) {
+    color: #4da6ff;
+    text-decoration: underline;
+    word-break: break-all;
+  }
+  .card-body p :global(.news-link:hover) {
+    color: #80c1ff;
+  }
 
   .card-link {
     display: inline-block;

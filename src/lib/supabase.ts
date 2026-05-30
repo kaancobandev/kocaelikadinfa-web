@@ -64,6 +64,13 @@ export interface VideoItem {
   sort_order: number;
 }
 
+export interface AntrenmanGaleriItem {
+  id: number;
+  media_url: string;
+  caption: string | null;
+  sort_order: number;
+}
+
 export interface Match {
   id: number;
   badge: string;

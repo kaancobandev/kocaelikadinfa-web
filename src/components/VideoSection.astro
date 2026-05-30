@@ -1,69 +1,73 @@
 ---
-import { supabase, type VideoItem } from '../lib/supabase';
+import { supabase, type AntrenmanGaleriItem } from '../lib/supabase';
 
 const { data } = await supabase
-  .from('videos')
+  .from('antrenman_galeri')
   .select('*')
-  .order('sort_order', { ascending: true })
+  .order('id', { ascending: false })
   .limit(3);
 
-const slots: (VideoItem | null)[] = [
-  data?.[0] ?? null,
-  data?.[1] ?? null,
-  data?.[2] ?? null,
-];
+const items: AntrenmanGaleriItem[] = data ?? [];
 
-function embedUrl(url: string): string {
-  try {
-    const u = new URL(url);
-    let id = '';
-    if (u.hostname.includes('youtu.be')) {
-      id = u.pathname.slice(1).split('?')[0];
-    } else if (u.pathname.startsWith('/shorts/')) {
-      id = u.pathname.replace('/shorts/', '').split('?')[0];
-    } else {
-      id = u.searchParams.get('v') ?? '';
-    }
-    return id ? `https://www.youtube.com/embed/${id}` : '';
-  } catch {
-    return '';
-  }
+function youtubeId(url: string): string | null {
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+function isYoutube(url: string): boolean {
+  return /youtu(\.be|be\.com)/i.test(url);
 }
 ---
 
-<section class="video-section" id="videolar">
-  <div class="video-section-inner reveal">
-    <span class="section-tag">Videolar</span>
-    <h2>Antrenmanlardan Kareler</h2>
-  </div>
+{items.length > 0 && (
+  <section class="video-section" id="videolar">
+    <div class="video-section-inner reveal">
+      <span class="section-tag">Videolar & Fotoğraflar</span>
+      <h2>Antrenmanlardan Kareler</h2>
+      <a href="/antrenmanlardan-kareler" class="btn-all">Tümünü Gör →</a>
+    </div>
 
-  <div class="video-grid">
-    {slots.map(v => (
-      <div class="video-card reveal">
-        {v?.youtube_url && embedUrl(v.youtube_url) ? (
-          <div class="video-frame-wrap">
-            <iframe
-              src={embedUrl(v.youtube_url)}
-              title={v.title}
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-            ></iframe>
-          </div>
-        ) : (
-          <div class="video-placeholder">
-            <span class="play-icon">▶</span>
-            <p class="placeholder-text">Video Yakında</p>
-          </div>
-        )}
-        <div class="video-info">
-          <h3>{v?.title ?? 'Başlık Bekleniyor'}</h3>
-          {v?.description && <p>{v.description}</p>}
+    <div class="video-grid">
+      {items.map(item => (
+        <div class="video-card reveal">
+          {isYoutube(item.media_url) ? (
+            <>
+              <div class="video-frame-wrap">
+                <iframe
+                  src={`https://www.youtube.com/embed/${youtubeId(item.media_url)}`}
+                  title={item.caption ?? ''}
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                ></iframe>
+              </div>
+              {item.caption && (
+                <div class="video-info">
+                  <p>{item.caption}</p>
+                </div>
+              )}
+            </>
+          ) : (
+            <button class="img-btn" data-src={item.media_url} data-caption={item.caption ?? ''} aria-label={item.caption ?? 'Fotoğraf'}>
+              <img src={item.media_url} alt={item.caption ?? ''} loading="lazy" />
+              {item.caption && <span class="img-caption">{item.caption}</span>}
+              <span class="img-overlay">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+              </span>
+            </button>
+          )}
         </div>
-      </div>
-    ))}
-  </div>
-</section>
+      ))}
+    </div>
+  </section>
+)}
+
+<!-- Lightbox -->
+<div id="ag-lightbox" class="ag-lightbox" role="dialog" aria-modal="true">
+  <button id="ag-lb-close" class="ag-lb-close" aria-label="Kapat">✕</button>
+  <img id="ag-lb-img" src="" alt="" />
+  <p id="ag-lb-caption" class="ag-lb-caption"></p>
+</div>
 
 <style>
   .video-section {
@@ -77,9 +81,7 @@ function embedUrl(url: string): string {
     max-width: 600px;
     margin-bottom: 3rem;
   }
-  .video-section-inner .section-tag {
-    color: var(--green);
-  }
+  .video-section-inner .section-tag { color: var(--green); }
   .video-section-inner h2 {
     font-size: clamp(1.8rem, 4vw, 2.6rem);
     font-weight: 900;
@@ -87,15 +89,24 @@ function embedUrl(url: string): string {
     color: #111;
   }
 
+  .btn-all {
+    display: inline-block;
+    margin-top: 1rem;
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--green);
+    text-decoration: none;
+    letter-spacing: .5px;
+    transition: color .2s;
+  }
+  .btn-all:hover { color: #111; }
+
   .video-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
   }
-
-  @media (max-width: 960px) {
-    .video-grid { grid-template-columns: 1fr; }
-  }
+  @media (max-width: 960px) { .video-grid { grid-template-columns: 1fr; } }
 
   .video-card {
     background: #fff;
@@ -110,6 +121,7 @@ function embedUrl(url: string): string {
     transform: translateY(-2px);
   }
 
+  /* YouTube embed */
   .video-frame-wrap {
     position: relative;
     padding-bottom: 56.25%;
@@ -122,44 +134,126 @@ function embedUrl(url: string): string {
     width: 100%; height: 100%;
     border: none;
   }
-
-  .video-placeholder {
-    aspect-ratio: 16 / 9;
-    background: #f5f5f5;
-    border-bottom: 1px solid #e8e8e8;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: .6rem;
-  }
-  .play-icon {
-    font-size: 2rem;
-    color: var(--green);
-    opacity: .4;
-  }
-  .placeholder-text {
-    font-size: .75rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: #aaa;
-  }
-
   .video-info {
-    padding: 1.2rem 1.4rem 1.4rem;
-    display: flex;
-    flex-direction: column;
-    gap: .5rem;
-  }
-  .video-info h3 {
-    font-size: 1rem;
-    font-weight: 700;
-    line-height: 1.3;
-    color: #111;
+    padding: 1rem 1.2rem;
   }
   .video-info p {
     font-size: .85rem;
     color: #666;
     line-height: 1.5;
   }
+
+  /* Fotoğraf */
+  .img-btn {
+    position: relative;
+    display: block;
+    width: 100%;
+    border: none;
+    background: none;
+    cursor: pointer;
+    overflow: hidden;
+    padding: 0;
+  }
+  .img-btn img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+    transition: transform .35s;
+  }
+  .img-btn:hover img { transform: scale(1.04); }
+
+  .img-caption {
+    display: block;
+    padding: .6rem .9rem;
+    font-size: .82rem;
+    color: #666;
+    background: #fff;
+    text-align: left;
+  }
+
+  .img-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .25s;
+  }
+  .img-overlay svg {
+    width: 44px; height: 44px;
+    color: #fff;
+    opacity: 0;
+    transition: opacity .25s;
+  }
+  .img-btn:hover .img-overlay { background: rgba(0,0,0,.35); }
+  .img-btn:hover .img-overlay svg { opacity: 1; }
+
+  /* Lightbox */
+  .ag-lightbox {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.92);
+    z-index: 9000;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 2rem;
+  }
+  .ag-lightbox.open { display: flex; }
+  .ag-lightbox img {
+    max-width: 90vw;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 8px 48px rgba(0,0,0,.6);
+  }
+  .ag-lb-caption {
+    color: rgba(255,255,255,.65);
+    font-size: .85rem;
+    text-align: center;
+    max-width: 600px;
+  }
+  .ag-lb-close {
+    position: fixed;
+    top: 1.2rem; right: 1.4rem;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.15);
+    color: #fff;
+    font-size: 1.2rem;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s;
+    z-index: 9100;
+  }
+  .ag-lb-close:hover { background: rgba(255,255,255,.2); }
 </style>
+
+<script>
+  const lightbox  = document.getElementById('ag-lightbox')!;
+  const lbImg     = document.getElementById('ag-lb-img')     as HTMLImageElement;
+  const lbCaption = document.getElementById('ag-lb-caption')!;
+  const lbClose   = document.getElementById('ag-lb-close')!;
+
+  document.querySelectorAll<HTMLButtonElement>('.img-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      lbImg.src             = btn.dataset.src ?? '';
+      lbImg.alt             = btn.dataset.caption ?? '';
+      lbCaption.textContent = btn.dataset.caption ?? '';
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  function close() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  lbClose.addEventListener('click', close);
+  lightbox.addEventListener('click', e => { if (e.target === lightbox) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+</script>
