@@ -1,18 +1,89 @@
 ---
 interface Props {
   title?: string;
+  description?: string;
+  image?: string;
+  noindex?: boolean;
 }
-const { title = "Kocaeli Kadın Futbol Kulübü" } = Astro.props;
+
+const {
+  title = "Kocaeli Kadın Futbol Kulübü",
+  description = "Kocaeli Kadın Futbol Kulübü resmi web sitesi. A Takım, Pilot Takım, akademi, maç sonuçları ve haberler. Kadın futbolunun Kocaeli'deki gücü.",
+  image = "/logo.jpeg",
+  noindex = false,
+} = Astro.props;
+
+const siteUrl = Astro.site?.href ?? "https://kocaelikadinfa.com/";
+const canonicalURL = new URL(Astro.url.pathname, siteUrl);
+const ogImage = new URL(image, siteUrl);
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SportsOrganization",
+  name: "Kocaeli Kadın Futbol Kulübü",
+  alternateName: "Kocaeli Kadın FA",
+  url: siteUrl,
+  logo: new URL("/logo.jpeg", siteUrl).href,
+  image: ogImage.href,
+  description,
+  sport: "Kadın Futbolu",
+  email: "kocaelikadinfa@gmail.com",
+  telephone: "+905326944509",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Kozluk",
+    addressLocality: "İzmit",
+    addressRegion: "Kocaeli",
+    postalCode: "41200",
+    addressCountry: "TR",
+  },
+  sameAs: [
+    "https://www.instagram.com/kocaelikadinfa",
+    "https://www.youtube.com/@kocaelikadinfa",
+    "https://www.tiktok.com/@kocaelikadinfutbol",
+    "https://x.com/kocaelikadnfa",
+  ],
+};
 ---
 <!doctype html>
 <html lang="tr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/logo.jpeg" />
+
     <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    <meta name="theme-color" content="#0d4d1e" />
+    <meta name="author" content="Kocaeli Kadın Futbol Kulübü" />
+    <meta name="geo.region" content="TR-41" />
+    <meta name="geo.placename" content="Kocaeli" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Kocaeli Kadın Futbol Kulübü" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="tr_TR" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </head>
   <body>
     <slot />
