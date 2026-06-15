@@ -4,7 +4,11 @@
       "Bash(Remove-Item index.html, style.css, script.js -ErrorAction SilentlyContinue)",
       "PowerShell(cd \"c:\\\\Users\\\\Kaan\\\\Desktop\\\\Kaan\\\\KocaeliKadinFutbolClub\"; $src = \".\\\\squealing-star\"; Get-ChildItem $src -Force | ForEach-Object { Move-Item $_.FullName \".\" -Force }; Remove-Item $src -Force -ErrorAction SilentlyContinue; Get-ChildItem)",
       "Bash(Remove-Item \"c:\\\\Users\\\\Kaan\\\\Desktop\\\\Kaan\\\\KocaeliKadinFutbolClub\\\\src\\\\components\\\\MatchHistory.astro\")",
-      "Bash(del \"c:\\\\Users\\\\Kaan\\\\Desktop\\\\Kaan\\\\KocaeliKadinFutbolClub\\\\src\\\\pages\\\\fotogaleri.astro\")"
+      "Bash(del \"c:\\\\Users\\\\Kaan\\\\Desktop\\\\Kaan\\\\KocaeliKadinFutbolClub\\\\src\\\\pages\\\\fotogaleri.astro\")",
+      "Bash(npm run *)",
+      "Read(//tmp/**)",
+      "Bash(export NODE_PATH=\"/c/Users/Kaan/AppData/Local/npm-cache/_npx/e41f203b7505f1fb/node_modules\")",
+      "Bash(node /tmp/shot.mjs)"
     ]
   }
 }

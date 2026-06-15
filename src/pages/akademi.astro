@@ -58,7 +58,7 @@ const photos: GalleryItem[] = data ?? [];
         </div>
         <div class="gallery-grid">
           {photos.map(p => (
-            <div class="gallery-item">
+            <div class="gallery-item" style={`--img: url('${p.image_url}')`}>
               <img src={p.image_url} alt={p.caption ?? 'Akademi fotoğrafı'} loading="lazy" />
               {p.caption && <div class="gallery-caption">{p.caption}</div>}
             </div>
@@ -189,13 +189,29 @@ const photos: GalleryItem[] = data ?? [];
     position: relative;
     border-radius: var(--radius);
     overflow: hidden;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 3 / 4;
     border: 1px solid var(--border);
+    background: #0a0a0a;
     cursor: pointer;
   }
+  /* Bulanık dolgu: boş kenarları fotoğrafın kendisiyle doldurur */
+  .gallery-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: var(--img);
+    background-size: cover;
+    background-position: center;
+    filter: blur(22px) brightness(.45);
+    transform: scale(1.2);
+  }
+  /* Asıl fotoğraf: kırpılmadan, ortalanmış şekilde tamamı görünür */
   .gallery-item img {
+    position: relative;
+    z-index: 1;
     width: 100%; height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     transition: transform .4s ease;
     display: block;
   }
@@ -204,6 +220,7 @@ const photos: GalleryItem[] = data ?? [];
   .gallery-caption {
     position: absolute;
     bottom: 0; left: 0; right: 0;
+    z-index: 2;
     background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%);
     color: #fff;
     font-size: .8rem;

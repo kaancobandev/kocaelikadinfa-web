@@ -26,10 +26,18 @@ function linkify(text: string): string {
 <section class="content-cards" id="haberler">
   {slots.map(n => (
     <article class="card reveal">
-      <div
-        class="card-img"
-        style={`background-image: linear-gradient(to bottom, rgba(0,0,0,0) 40%, #000000 100%), url('${n?.image_url ?? fallbackImg}')`}
-      ></div>
+      <div class="card-img">
+        <div
+          class="card-img-bg"
+          style={`background-image: url('${n?.image_url ?? fallbackImg}')`}
+        ></div>
+        <img
+          class="card-img-fg"
+          src={n?.image_url ?? fallbackImg}
+          alt={n?.title ?? 'Haber görseli'}
+          loading="lazy"
+        />
+      </div>
       <div class="card-body">
         <span class="card-tag">Haberler</span>
         <h3>{n?.title ?? 'Yakında...'}</h3>
@@ -62,9 +70,37 @@ function linkify(text: string): string {
   .card:hover { background: var(--card-bg); }
 
   .card-img {
-    height: 220px;
+    position: relative;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background: #080808;
+  }
+  /* Bulanık dolgu: boş kenarları fotoğrafın kendisiyle doldurur */
+  .card-img-bg {
+    position: absolute;
+    inset: 0;
     background-size: cover;
     background-position: center;
+    filter: blur(22px) brightness(.4);
+    transform: scale(1.2);
+  }
+  /* Asıl fotoğraf: kırpılmadan, ortalanmış şekilde tamamı görünür */
+  .card-img-fg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+  }
+  /* Alt kenarda karta yumuşak geçiş */
+  .card-img::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 68%, rgba(0,0,0,.8) 100%);
+    pointer-events: none;
   }
 
   .card-body {

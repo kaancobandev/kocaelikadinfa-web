@@ -90,81 +90,6 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
     background-position: center;
   }
 
-  @media (max-width: 768px) {
-    /* Hero görsel alanı tam ekranı kaplasın */
-    .hero-wrap {
-      grid-template-columns: 1fr;
-      height: auto;
-      min-height: 0;
-      max-height: none;
-      background-image: none;
-    }
-    .hero-main {
-      height: 55vh;
-      min-height: 280px;
-      background-image: inherit;
-      background-size: cover;
-      background-position: center center;
-    }
-    .hero-overlay {
-      background: linear-gradient(
-        to bottom,
-        rgba(0,0,0,0.1) 0%,
-        rgba(0,0,0,0.5) 55%,
-        rgba(0,0,0,0.88) 100%
-      );
-    }
-    .hero-content {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: auto;
-      max-width: none;
-      padding: 1.5rem 1.5rem 2.5rem;
-    }
-
-    /* Manşetler: hero altında yatay kaydırılabilir şerit */
-    .hero-side {
-      border-left: none;
-      border-top: 1px solid rgba(255,255,255,0.07);
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      background: #0a0a0a;
-      padding: 1rem 1rem 1.2rem;
-      overflow: visible;
-    }
-    .side-list {
-      flex-direction: row;
-      overflow-x: auto;
-      overflow-y: hidden;
-      gap: .8rem;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-      padding-bottom: .2rem;
-    }
-    .side-list::-webkit-scrollbar { display: none; }
-    .side-item {
-      flex-direction: column;
-      min-width: 150px;
-      max-width: 150px;
-      flex-shrink: 0;
-      border-bottom: none;
-      padding: 0;
-      gap: .4rem;
-    }
-    .side-thumb {
-      width: 100%;
-      height: 90px;
-    }
-    .side-thumb-empty {
-      width: 100%;
-      height: 90px;
-    }
-    .side-title {
-      font-size: .78rem;
-      -webkit-line-clamp: 2;
-    }
-  }
-
   /* ── Sol panel ── */
   .hero-main {
     position: relative;
@@ -191,10 +116,6 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
     justify-content: flex-end;
     padding: 3rem 3rem 3.5rem;
     max-width: 700px;
-  }
-
-  @media (max-width: 600px) {
-    .hero-content { padding: 1.5rem 1.5rem 2rem; }
   }
 
   .hero-badge {
@@ -352,4 +273,95 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
   }
   .side-item:hover .side-title { color: var(--green-bright); }
   .side-title-muted { color: #3a3a3a !important; font-style: italic; font-weight: 500 !important; }
+
+  /* ───────────────────────────────────────────────
+     Responsive — tablet & mobil
+     NOT: medya sorguları taban stillerden SONRA gelir
+     ki mobil override'lar (eşit özgüllükte) kazansın.
+  ─────────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    /* Tek sütun: görsel üstte, manşetler altında */
+    .hero-wrap {
+      grid-template-columns: 1fr;
+      height: auto;
+      min-height: 0;
+      max-height: none;
+      background-image: none;
+    }
+
+    .hero-main {
+      height: 56vh;
+      min-height: 300px;
+      background-image: inherit;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .hero-overlay {
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.15) 0%,
+        rgba(0, 0, 0, 0.55) 58%,
+        rgba(0, 0, 0, 0.90) 100%
+      );
+    }
+
+    .hero-content {
+      position: absolute;
+      inset: auto 0 0 0;
+      height: auto;
+      max-width: none;
+      padding: 1.5rem 1.25rem 2rem;
+    }
+
+    /* Diğer Manşetler — hero altında tam genişlik haber listesi */
+    .hero-side {
+      padding: 1.5rem 1.25rem 1.75rem;
+      background: var(--dark);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border-left: none;
+      border-top: 1px solid var(--border);
+      overflow: visible;
+    }
+    .hero-side::before { display: none; }
+
+    .side-label {
+      margin-bottom: .9rem;
+      padding-bottom: .8rem;
+    }
+
+    .side-list {
+      gap: 0;
+      overflow: visible;
+    }
+
+    .side-item {
+      align-items: center;
+      padding: .85rem .25rem;
+    }
+
+    .side-thumb,
+    .side-thumb-empty {
+      width: 104px;
+      height: 72px;
+    }
+
+    .side-title {
+      font-size: .9rem;
+      -webkit-line-clamp: 2;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .hero-title { font-size: 1.55rem; }
+    .hero-content { padding: 1.25rem 1rem 1.6rem; }
+
+    .side-thumb,
+    .side-thumb-empty {
+      width: 90px;
+      height: 64px;
+    }
+    .side-title { font-size: .85rem; }
+  }
 </style>

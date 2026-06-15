@@ -44,10 +44,18 @@ function linkify(text: string): string {
         <div class="news-grid">
           {news.map(n => (
             <article class="news-card">
-              <div
-                class="news-img"
-                style={`background-image: url('${n.image_url ?? fallbackImg}')`}
-              ></div>
+              <div class="news-img">
+                <div
+                  class="news-img-bg"
+                  style={`background-image: url('${n.image_url ?? fallbackImg}')`}
+                ></div>
+                <img
+                  class="news-img-fg"
+                  src={n.image_url ?? fallbackImg}
+                  alt={n.title}
+                  loading="lazy"
+                />
+              </div>
               <div class="news-body">
                 <span class="news-tag">Haber</span>
                 <h2>{n.title}</h2>
@@ -146,10 +154,30 @@ function linkify(text: string): string {
   }
 
   .news-img {
-    height: 200px;
+    position: relative;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background: #0a0a0a;
+    flex-shrink: 0;
+  }
+  /* Bulanık dolgu: boş kenarları fotoğrafın kendisiyle doldurur */
+  .news-img-bg {
+    position: absolute;
+    inset: 0;
     background-size: cover;
     background-position: center;
-    flex-shrink: 0;
+    filter: blur(22px) brightness(.45);
+    transform: scale(1.2);
+  }
+  /* Asıl fotoğraf: kırpılmadan, ortalanmış şekilde tamamı görünür */
+  .news-img-fg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
   }
 
   .news-body {

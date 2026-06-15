@@ -56,7 +56,9 @@ const photos: GalleryItem[] = galleryData ?? [];
         <div class="photos-grid">
           {photos.map(p => (
             <figure class="photo-card">
-              <img src={p.image_url} alt={p.caption ?? ''} loading="lazy" />
+              <div class="photo-media" style={`--img: url('${p.image_url}')`}>
+                <img src={p.image_url} alt={p.caption ?? ''} loading="lazy" />
+              </div>
               {p.caption && <figcaption>{p.caption}</figcaption>}
             </figure>
           ))}
@@ -226,10 +228,31 @@ const photos: GalleryItem[] = galleryData ?? [];
     transform: translateY(-4px);
     box-shadow: 0 12px 32px rgba(0,0,0,.5);
   }
+  .photo-media {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background: #0a0a0a;
+  }
+  /* Bulanık dolgu: boş kenarları fotoğrafın kendisiyle doldurur */
+  .photo-media::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: var(--img);
+    background-size: cover;
+    background-position: center;
+    filter: blur(22px) brightness(.4);
+    transform: scale(1.2);
+  }
+  /* Asıl fotoğraf: kırpılmadan, ortalanmış şekilde tamamı görünür */
   .photo-card img {
+    position: relative;
+    z-index: 1;
     width: 100%;
-    height: 260px;
-    object-fit: cover;
+    height: 100%;
+    object-fit: contain;
     display: block;
     transition: transform .4s;
   }
