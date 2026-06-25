@@ -321,8 +321,15 @@ if (Astro.request.method === 'POST') {
 // Verileri çek
 const { data }      = await supabase.from('matches').select('*').order('id', { ascending: false });
 const matches: Match[] = data ?? [];
-const u15Matches = matches.filter(m => m.badge === 'U15');
-const u13Matches = matches.filter(m => m.badge === 'U13');
+
+// Maçları kategori (badge) başlığına göre dinamik grupla
+const matchGroupMap = new Map<string, Match[]>();
+for (const m of matches) {
+  const key = m.badge || 'Diğer';
+  if (!matchGroupMap.has(key)) matchGroupMap.set(key, []);
+  matchGroupMap.get(key)!.push(m);
+}
+const matchGroups: [string, Match[]][] = [...matchGroupMap.entries()];
 
 const { data: allArticlesData } = await supabase.from('news').select('*').order('id', { ascending: false });
 const allArticles: NewsItem[] = allArticlesData ?? [];
@@ -483,13 +490,12 @@ const videoSlots: (VideoItem | null)[] = [
     <section class="panel">
       <h2>Maç Sonuçları</h2>
 
-      <!-- U15 Alt Bölümü -->
-      <div class="match-subsection">
-        <p class="subsection-label">U15</p>
-
-        {u15Matches.length > 0 && (
+      <!-- Mevcut maçlar — kategori başlığına göre dinamik listeleme -->
+      {matchGroups.map(([title, list]) => (
+        <div class="match-subsection">
+          <p class="subsection-label">{title}</p>
           <div class="article-list">
-            {u15Matches.map(m => (
+            {list.map(m => (
               <div class="article-row">
                 <div class="article-meta">
                   <span class="article-title">{m.home_name} {m.score_home} – {m.score_away} {m.away_name}</span>
@@ -503,141 +509,73 @@ const videoSlots: (VideoItem | null)[] = [
               </div>
             ))}
           </div>
-        )}
+        </div>
+      ))}
 
-        <form method="POST" enctype="multipart/form-data" class="match-form new-match">
-          <input type="hidden" name="_action" value="match_add" />
-          <input type="hidden" name="badge"   value="U15" />
-          <input type="hidden" name="sort_order" value="99" />
-          <p class="slot-label">+ Yeni U15 Maçı Ekle</p>
+      {matches.length === 0 && (
+        <p class="empty-hint">Henüz maç eklenmemiş. Aşağıdan ilk maçı ekleyebilirsiniz.</p>
+      )}
 
-          <div class="form-row">
-            <label>Tarih
-              <input type="date" name="match_date" required />
+      <!-- Tek Maç Ekleme Formu — kategori başlığını siz yazarsınız -->
+      <form method="POST" enctype="multipart/form-data" class="match-form new-match">
+        <input type="hidden" name="_action" value="match_add" />
+        <input type="hidden" name="sort_order" value="99" />
+        <p class="slot-label">+ Yeni Maç Ekle</p>
+
+        <div class="form-row">
+          <label>Kategori / Başlık
+            <input name="badge" list="badge-options" placeholder="örn. U13, U15, 1.Lig" required />
+            <datalist id="badge-options">
+              {matchGroups.map(([title]) => <option value={title} />)}
+            </datalist>
+          </label>
+          <label>Tarih
+            <input type="date" name="match_date" required />
+          </label>
+        </div>
+
+        <div class="form-row teams-row">
+          <div class="team-block">
+            <span class="team-label">Ev Sahibi</span>
+            <label>Takım Adı
+              <input name="home_name" placeholder="KKFK" required />
+            </label>
+            <label>Logo — Cihazdan Yükle
+              <input type="file" name="home_logo_file" accept="image/*" class="file-input" />
+            </label>
+            <label>veya URL
+              <input name="home_logo_url" placeholder="https://..." />
             </label>
           </div>
 
-          <div class="form-row teams-row">
-            <div class="team-block">
-              <span class="team-label">Ev Sahibi</span>
-              <label>Takım Adı
-                <input name="home_name" placeholder="KKFK U15" required />
-              </label>
-              <label>Logo — Cihazdan Yükle
-                <input type="file" name="home_logo_file" accept="image/*" class="file-input" />
-              </label>
-              <label>veya URL
-                <input name="home_logo_url" placeholder="https://..." />
-              </label>
-            </div>
-
-            <div class="score-block">
-              <label>Skor
-                <div class="score-inputs">
-                  <input type="number" name="score_home" value="0" min="0" required />
-                  <span>–</span>
-                  <input type="number" name="score_away" value="0" min="0" required />
-                </div>
-              </label>
-            </div>
-
-            <div class="team-block">
-              <span class="team-label">Deplasman</span>
-              <label>Takım Adı
-                <input name="away_name" placeholder="Rakip FK" required />
-              </label>
-              <label>Logo — Cihazdan Yükle
-                <input type="file" name="away_logo_file" accept="image/*" class="file-input" />
-              </label>
-              <label>veya URL
-                <input name="away_logo_url" placeholder="https://..." />
-              </label>
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" class="btn-save">Maç Ekle</button>
-          </div>
-        </form>
-      </div>
-
-      <!-- U13 Alt Bölümü -->
-      <div class="match-subsection match-subsection-alt">
-        <p class="subsection-label">U13</p>
-
-        {u13Matches.length > 0 && (
-          <div class="article-list">
-            {u13Matches.map(m => (
-              <div class="article-row">
-                <div class="article-meta">
-                  <span class="article-title">{m.home_name} {m.score_home} – {m.score_away} {m.away_name}</span>
-                  <span class="article-desc">{m.match_date}</span>
-                </div>
-                <form method="POST" enctype="application/x-www-form-urlencoded" class="article-delete-form">
-                  <input type="hidden" name="_action" value="delete" />
-                  <input type="hidden" name="id" value={m.id} />
-                  <button type="submit" class="btn-delete btn-delete-small">Sil</button>
-                </form>
+          <div class="score-block">
+            <label>Skor
+              <div class="score-inputs">
+                <input type="number" name="score_home" value="0" min="0" required />
+                <span>–</span>
+                <input type="number" name="score_away" value="0" min="0" required />
               </div>
-            ))}
-          </div>
-        )}
-
-        <form method="POST" enctype="multipart/form-data" class="match-form new-match">
-          <input type="hidden" name="_action" value="match_add" />
-          <input type="hidden" name="badge"   value="U13" />
-          <input type="hidden" name="sort_order" value="99" />
-          <p class="slot-label">+ Yeni U13 Maçı Ekle</p>
-
-          <div class="form-row">
-            <label>Tarih
-              <input type="date" name="match_date" required />
             </label>
           </div>
 
-          <div class="form-row teams-row">
-            <div class="team-block">
-              <span class="team-label">Ev Sahibi</span>
-              <label>Takım Adı
-                <input name="home_name" placeholder="KKFK U13" required />
-              </label>
-              <label>Logo — Cihazdan Yükle
-                <input type="file" name="home_logo_file" accept="image/*" class="file-input" />
-              </label>
-              <label>veya URL
-                <input name="home_logo_url" placeholder="https://..." />
-              </label>
-            </div>
-
-            <div class="score-block">
-              <label>Skor
-                <div class="score-inputs">
-                  <input type="number" name="score_home" value="0" min="0" required />
-                  <span>–</span>
-                  <input type="number" name="score_away" value="0" min="0" required />
-                </div>
-              </label>
-            </div>
-
-            <div class="team-block">
-              <span class="team-label">Deplasman</span>
-              <label>Takım Adı
-                <input name="away_name" placeholder="Rakip FK" required />
-              </label>
-              <label>Logo — Cihazdan Yükle
-                <input type="file" name="away_logo_file" accept="image/*" class="file-input" />
-              </label>
-              <label>veya URL
-                <input name="away_logo_url" placeholder="https://..." />
-              </label>
-            </div>
+          <div class="team-block">
+            <span class="team-label">Deplasman</span>
+            <label>Takım Adı
+              <input name="away_name" placeholder="Rakip FK" required />
+            </label>
+            <label>Logo — Cihazdan Yükle
+              <input type="file" name="away_logo_file" accept="image/*" class="file-input" />
+            </label>
+            <label>veya URL
+              <input name="away_logo_url" placeholder="https://..." />
+            </label>
           </div>
+        </div>
 
-          <div class="form-actions">
-            <button type="submit" class="btn-save">Maç Ekle</button>
-          </div>
-        </form>
-      </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-save">Maç Ekle</button>
+        </div>
+      </form>
     </section>
 
     <!-- ── HABERLER ── -->
@@ -1290,6 +1228,12 @@ const videoSlots: (VideoItem | null)[] = [
   .match-subsection:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 
   .match-subsection-alt { background: transparent; }
+
+  .empty-hint {
+    color: var(--text-muted, #888);
+    font-size: .85rem;
+    margin: 0 0 1.5rem;
+  }
 
   .subsection-label {
     font-size: .68rem;

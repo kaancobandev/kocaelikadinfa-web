@@ -1,15 +1,23 @@
 ---
 import { supabase, type Match } from '../lib/supabase';
 
-const [{ data: u15Data }, { data: u13Data }] = await Promise.all([
-  supabase.from('matches').select('*').eq('badge', 'U15').order('id', { ascending: false }).limit(1),
-  supabase.from('matches').select('*').eq('badge', 'U13').order('id', { ascending: false }).limit(1),
-]);
+// Tüm maçları çek, her kategoriden (badge) en son eklenen maçı göster
+const { data } = await supabase
+  .from('matches')
+  .select('*')
+  .order('id', { ascending: false });
 
-const latestMatches: Match[] = [
-  ...(u15Data ?? []),
-  ...(u13Data ?? []),
-];
+const allMatches: Match[] = data ?? [];
+
+const seen = new Set<string>();
+const latestMatches: Match[] = [];
+for (const m of allMatches) {
+  const key = m.badge || 'Diğer';
+  if (!seen.has(key)) {
+    seen.add(key);
+    latestMatches.push(m);
+  }
+}
 
 function initials(name: string) {
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();

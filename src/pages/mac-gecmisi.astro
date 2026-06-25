@@ -11,9 +11,14 @@ const { data } = await supabase
 
 const matches: Match[] = data ?? [];
 
-const u15Matches = matches.filter(m => m.badge === 'U15');
-const u13Matches = matches.filter(m => m.badge === 'U13');
-const otherMatches = matches.filter(m => m.badge !== 'U15' && m.badge !== 'U13');
+// Maçları kategori (badge) başlığına göre dinamik grupla
+const groupMap = new Map<string, Match[]>();
+for (const m of matches) {
+  const key = m.badge || 'Diğer';
+  if (!groupMap.has(key)) groupMap.set(key, []);
+  groupMap.get(key)!.push(m);
+}
+const matchGroups: [string, Match[]][] = [...groupMap.entries()];
 
 function result(m: Match): 'win' | 'draw' | 'loss' | null {
   // KKFK'nın ev sahibi veya deplasman olduğunu home_name ile anlıyoruz
@@ -69,205 +74,70 @@ function stats(list: Match[]) {
       </div>
     </section>
 
-    <!-- U15 Takım -->
-    {u15Matches.length > 0 && (() => {
-      return (
-        <section class="group-section">
-          <div class="group-header">
-            <div class="group-title-wrap">
-              <span class="group-badge">U15</span>
-              <h2>U15 Maçları</h2>
-            </div>
+    <!-- Kategori başlığına göre dinamik bölümler -->
+    {matchGroups.map(([title, list], gi) => (
+      <section class={`group-section${gi % 2 === 1 ? ' alt' : ''}`}>
+        <div class="group-header">
+          <div class="group-title-wrap">
+            <span class="group-badge">{title}</span>
+            <h2>{title} Maçları</h2>
           </div>
+        </div>
 
-          <div class="matches-list">
-            {u15Matches.map(m => {
-              const r = result(m);
-              return (
-                <div class="match-card">
-                  <div class="match-meta-left">
-                    <span class="match-date">{formatDate(m.match_date)}</span>
+        <div class="matches-list">
+          {list.map(m => {
+            const r = result(m);
+            return (
+              <div class="match-card">
+                <div class="match-meta-left">
+                  <span class="match-date">{formatDate(m.match_date)}</span>
+                </div>
+
+                <div class="match-teams">
+                  <div class="team-side home">
+                    <div class="team-logo-wrap">
+                      {m.home_logo
+                        ? <img src={m.home_logo} alt={m.home_name} class="team-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                        : null
+                      }
+                      <span class="team-logo-fallback" style={m.home_logo ? 'display:none' : 'display:flex'}>
+                        {initials(m.home_name)}
+                      </span>
+                    </div>
+                    <span class="team-name">{m.home_name}</span>
                   </div>
 
-                  <div class="match-teams">
-                    <div class="team-side home">
-                      <div class="team-logo-wrap">
-                        {m.home_logo
-                          ? <img src={m.home_logo} alt={m.home_name} class="team-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-                          : null
-                        }
-                        <span class="team-logo-fallback" style={m.home_logo ? 'display:none' : 'display:flex'}>
-                          {initials(m.home_name)}
-                        </span>
-                      </div>
-                      <span class="team-name">{m.home_name}</span>
-                    </div>
-
-                    <div class="score-center">
-                      <span class="score-big">{m.score_home}</span>
-                      <span class="score-sep">–</span>
-                      <span class="score-big">{m.score_away}</span>
-                    </div>
-
-                    <div class="team-side away">
-                      <div class="team-logo-wrap">
-                        {m.away_logo
-                          ? <img src={m.away_logo} alt={m.away_name} class="team-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-                          : null
-                        }
-                        <span class="team-logo-fallback" style={m.away_logo ? 'display:none' : 'display:flex'}>
-                          {initials(m.away_name)}
-                        </span>
-                      </div>
-                      <span class="team-name">{m.away_name}</span>
-                    </div>
+                  <div class="score-center">
+                    <span class="score-big">{m.score_home}</span>
+                    <span class="score-sep">–</span>
+                    <span class="score-big">{m.score_away}</span>
                   </div>
 
-                  <div class="match-result">
-                    <span class={`result-badge ${r ?? ''}`}>
-                      {resultLabel[r ?? 'null']}
-                    </span>
+                  <div class="team-side away">
+                    <div class="team-logo-wrap">
+                      {m.away_logo
+                        ? <img src={m.away_logo} alt={m.away_name} class="team-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                        : null
+                      }
+                      <span class="team-logo-fallback" style={m.away_logo ? 'display:none' : 'display:flex'}>
+                        {initials(m.away_name)}
+                      </span>
+                    </div>
+                    <span class="team-name">{m.away_name}</span>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </section>
-      );
-    })()}
 
-    <!-- U13 Takım -->
-    {u13Matches.length > 0 && (() => {
-      return (
-        <section class="group-section alt">
-          <div class="group-header">
-            <div class="group-title-wrap">
-              <span class="group-badge">U13</span>
-              <h2>U13 Maçları</h2>
-            </div>
-          </div>
-
-          <div class="matches-list">
-            {u13Matches.map(m => {
-              const r = result(m);
-              return (
-                <div class="match-card">
-                  <div class="match-meta-left">
-                    <span class="match-date">{formatDate(m.match_date)}</span>
-                  </div>
-
-                  <div class="match-teams">
-                    <div class="team-side home">
-                      <div class="team-logo-wrap">
-                        {m.home_logo
-                          ? <img src={m.home_logo} alt={m.home_name} class="team-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-                          : null
-                        }
-                        <span class="team-logo-fallback" style={m.home_logo ? 'display:none' : 'display:flex'}>
-                          {initials(m.home_name)}
-                        </span>
-                      </div>
-                      <span class="team-name">{m.home_name}</span>
-                    </div>
-
-                    <div class="score-center">
-                      <span class="score-big">{m.score_home}</span>
-                      <span class="score-sep">–</span>
-                      <span class="score-big">{m.score_away}</span>
-                    </div>
-
-                    <div class="team-side away">
-                      <div class="team-logo-wrap">
-                        {m.away_logo
-                          ? <img src={m.away_logo} alt={m.away_name} class="team-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-                          : null
-                        }
-                        <span class="team-logo-fallback" style={m.away_logo ? 'display:none' : 'display:flex'}>
-                          {initials(m.away_name)}
-                        </span>
-                      </div>
-                      <span class="team-name">{m.away_name}</span>
-                    </div>
-                  </div>
-
-                  <div class="match-result">
-                    <span class={`result-badge ${r ?? ''}`}>
-                      {resultLabel[r ?? 'null']}
-                    </span>
-                  </div>
+                <div class="match-result">
+                  <span class={`result-badge ${r ?? ''}`}>
+                    {resultLabel[r ?? 'null']}
+                  </span>
                 </div>
-              );
-            })}
-          </div>
-        </section>
-      );
-    })()}
-
-    {otherMatches.length > 0 && (() => {
-      return (
-        <section class="group-section">
-          <div class="group-header">
-            <div class="group-title-wrap">
-              <span class="group-badge">Diğer</span>
-              <h2>Diğer Maçlar</h2>
-            </div>
-          </div>
-
-          <div class="matches-list">
-            {otherMatches.map(m => {
-              const r = result(m);
-              return (
-                <div class="match-card">
-                  <div class="match-meta-left">
-                    <span class="match-date">{formatDate(m.match_date)}</span>
-                  </div>
-
-                  <div class="match-teams">
-                    <div class="team-side home">
-                      <div class="team-logo-wrap">
-                        {m.home_logo
-                          ? <img src={m.home_logo} alt={m.home_name} class="team-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-                          : null
-                        }
-                        <span class="team-logo-fallback" style={m.home_logo ? 'display:none' : 'display:flex'}>
-                          {initials(m.home_name)}
-                        </span>
-                      </div>
-                      <span class="team-name">{m.home_name}</span>
-                    </div>
-
-                    <div class="score-center">
-                      <span class="score-big">{m.score_home}</span>
-                      <span class="score-sep">–</span>
-                      <span class="score-big">{m.score_away}</span>
-                    </div>
-
-                    <div class="team-side away">
-                      <div class="team-logo-wrap">
-                        {m.away_logo
-                          ? <img src={m.away_logo} alt={m.away_name} class="team-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-                          : null
-                        }
-                        <span class="team-logo-fallback" style={m.away_logo ? 'display:none' : 'display:flex'}>
-                          {initials(m.away_name)}
-                        </span>
-                      </div>
-                      <span class="team-name">{m.away_name}</span>
-                    </div>
-                  </div>
-
-                  <div class="match-result">
-                    <span class={`result-badge ${r ?? ''}`}>
-                      {resultLabel[r ?? 'null']}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      );
-    })()}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    ))}
 
     {matches.length === 0 && (
       <div class="empty-state">
