@@ -6,4 +6,10 @@ export default defineConfig({
   site: 'https://kocaelikadinfa.com',
   output: 'server',
   adapter: netlify(),
+
+  // Supabase Storage'daki görsellerin Netlify Image CDN üzerinden
+  // yeniden boyutlandırılıp WebP'ye çevrilmesine izin verir.
+  image: {
+    domains: ['ysozqdfbmferemehaylv.supabase.co'],
+  },
 });
