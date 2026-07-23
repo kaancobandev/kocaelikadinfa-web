@@ -33,7 +33,14 @@ const links = [
     {links.map(l => (
       <li><a href={l.href}>{l.label}</a></li>
     ))}
-    <li><a href="/aramiza-katil" class="btn-join">Aramıza Katıl</a></li>
+    <li>
+      <a href="/aramiza-katil" class="btn-join">
+        <!-- Shimmer: dönen konik degrade, kenar payında görünür -->
+        <span class="sb-spark-wrap" aria-hidden="true"><span class="sb-spark"></span></span>
+        <span class="sb-text">Aramıza Katıl</span>
+        <span class="sb-backdrop" aria-hidden="true"></span>
+      </a>
+    </li>
   </ul>
 </nav>
 
@@ -119,14 +126,99 @@ const links = [
   }
   .nav-links a:hover { color: var(--green-bright); }
 
+  /* ── Aramıza Katıl — Shimmer Button (Magic UI portu) ──────────────────
+     Çim yeşili zemin, beyaz shimmer. Dönen konik degrade tüm butonu
+     kaplar; ortasını backdrop kapatır, geriye yalnızca --cut kadar bir
+     kenar payı kalır ve shimmer orada dolaşır. */
   .btn-join {
-    background: var(--green) !important;
-    color: #fff !important;
+    --sb-spread: 90deg;
+    --sb-shimmer: #ffffff;          /* beyaz */
+    --sb-radius: 50px;
+    --sb-speed: 3s;
+    --sb-cut: 2px;                  /* kenar shimmer kalınlığı */
+    --sb-bg: var(--green);          /* çim yeşili */
+
+    position: relative;
+    z-index: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    text-align: center;
     padding: .5rem 1.2rem;
-    border-radius: 50px;
-    transition: background .25s, transform .2s !important;
+    background: var(--sb-bg);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: var(--sb-radius);
+    transition: transform .2s, box-shadow .25s;
   }
-  .btn-join:hover { background: var(--green-mid) !important; transform: translateY(-1px); }
+  .btn-join:hover {
+    --sb-bg: var(--green-mid);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(13,77,30,.45);
+  }
+  .btn-join:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 2px; }
+
+  /* Metin: her koşulda beyaz (üstteki .nav-links a:hover'ı etkilemesin) */
+  .sb-text {
+    position: relative;
+    z-index: 1;
+    color: #fff !important;
+    font-weight: 700;
+  }
+
+  /* Dönen ışık huzmesi */
+  .sb-spark-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: -30;
+    overflow: visible;
+    container-type: size;
+    filter: blur(1.5px);
+  }
+  .sb-spark {
+    position: absolute;
+    inset: 0;
+    height: 100cqh;
+    aspect-ratio: 1;
+    animation: sb-slide var(--sb-speed) ease-in-out infinite alternate;
+  }
+  .sb-spark::before {
+    content: '';
+    position: absolute;
+    inset: -100%;
+    background: conic-gradient(
+      from calc(270deg - (var(--sb-spread) * 0.5)),
+      transparent 0,
+      var(--sb-shimmer) var(--sb-spread),
+      transparent var(--sb-spread)
+    );
+    animation: sb-spin calc(var(--sb-speed) * 2) infinite linear;
+  }
+
+  /* Ortayı kapatan katman: shimmer sadece kenarda kalsın */
+  .sb-backdrop {
+    position: absolute;
+    z-index: -20;
+    inset: var(--sb-cut);
+    background: var(--sb-bg);
+    border-radius: var(--sb-radius);
+    transition: background .25s;
+  }
+
+  @keyframes sb-spin {
+    0%        { transform: rotate(0deg); }
+    15%, 35%  { transform: rotate(90deg); }
+    65%, 85%  { transform: rotate(270deg); }
+    100%      { transform: rotate(360deg); }
+  }
+  @keyframes sb-slide {
+    to { transform: translate(calc(100cqw - 100%), 0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sb-spark, .sb-spark::before { animation: none; }
+    .sb-spark-wrap { display: none; }   /* düz yeşil buton kalır */
+  }
 
   @media (max-width: 768px) {
     /* Tek satırda kalması için kısa ad */
