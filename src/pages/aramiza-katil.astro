@@ -2,80 +2,311 @@
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
+import PageHero from '../components/PageHero.astro';
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ⚠️  BURAYI GÜNCELLE — sayfadaki tüm değişken bilgi bu blokta.
+
+   Aşağıdaki alanlardan BOŞ bırakılanlar sayfada gösterilmez; onun yerine
+   "bilgi için bize ulaşın" yönlendirmesi çıkar. Yani yanlış/uydurma bilgi
+   yayına çıkmaz, sadece eksik kalır.
+
+   Doldurulması gerekenler:
+     • grupların `gunler` alanları  (ör. "Salı & Perşembe 18:00–19:30")
+     • sahaların `adres` ve `mapsQuery` alanları
+     • ucretBilgisi  (boşsa SSS'te "iletişime geçin" yazar)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const TELEFON      = '+905326944509';
+const TELEFON_GOSTER = '+90 532 694 45 09';
+const EPOSTA       = 'kocaelikadinfa@gmail.com';
+const ON_KAYIT_URL = 'https://kocaelikadinfk.sporakademik.com/OnKayit';
+
+/** Ücret bilgisi. Boş bırakılırsa SSS'te iletişim yönlendirmesi görünür. */
+const ucretBilgisi = '';
+
+/** Yaş grupları / takımlar. `gunler` boşsa kartta gün-saat satırı çıkmaz. */
+const gruplar = [
+  {
+    ad: 'Akademi',
+    yas: '4 – 16 yaş',
+    aciklama: 'Futbola yeni başlayanlar için temel eğitim. Önceden deneyim gerekmez; akademik eğitimli antrenörler eşliğinde eğlenerek gelişim.',
+    gunler: '',
+  },
+  {
+    ad: 'Pilot Takım',
+    yas: 'Altyapıdan seçilen sporcular',
+    aciklama: 'Kocaeli Gölcük İdmanocağı iş birliğiyle Kadınlar 3. Lig\'de forma giyme ve maç tecrübesi kazanma fırsatı.',
+    gunler: '',
+  },
+  {
+    ad: 'A Takım',
+    yas: 'Seçmeyle',
+    aciklama: 'Kadınlar 1. Lig kadromuz. Tamamen kendi altyapımızdan yetişen sporculardan oluşuyor; seçmeler dönemsel olarak duyurulur.',
+    gunler: '',
+  },
+];
+
+/** Antrenman sahaları. `adres` boşsa yalnızca saha adı gösterilir. */
+const sahalar = [
+  { ad: 'İzmit Seka Halı Saha',          ilce: 'İzmit',  adres: '', mapsQuery: 'Seka Halı Saha İzmit Kocaeli' },
+  { ad: 'Gölcük Kavaklı Deniz Halı Saha', ilce: 'Gölcük', adres: '', mapsQuery: 'Kavaklı Deniz Halı Saha Gölcük Kocaeli' },
+  { ad: 'Yahya Kaptan',                   ilce: 'İzmit',  adres: '', mapsQuery: 'Yahya Kaptan Spor Tesisi İzmit Kocaeli' },
+];
+
+const adimlar = [
+  { no: '1', baslik: 'Ön kayıt formunu doldur', metin: 'Sporcu ön kayıt formunu doldurarak bize ulaş. Birkaç dakika sürüyor.' },
+  { no: '2', baslik: 'Seni arayalım',           metin: 'Yaşına ve seviyene uygun grubu belirleyip antrenman gün ve saatini birlikte planlayalım.' },
+  { no: '3', baslik: 'Deneme antrenmanına gel', metin: 'Sahada bizi tanı, takımla tanış. Beğenirsen kayıt işlemlerini tamamlıyoruz.' },
+];
+
+const getirilecekler = [
+  'Halı saha ayakkabısı (krampon)',
+  'Rahat spor kıyafeti — şort ve tişört',
+  'Futbol çorabı ve tekmelik',
+  'Su matarası',
+  'Havlu ve yedek tişört',
+];
+
+const sss = [
+  {
+    s: 'Hiç futbol oynamamış biri katılabilir mi?',
+    c: 'Evet. Akademimiz futbola yeni başlayan sporcuları temel seviyeden alıyor; önceden deneyim şartı yok. Antrenörlerimiz her sporcunun seviyesine göre program uyguluyor.',
+  },
+  {
+    s: 'Hangi yaş aralığındaki sporcuları kabul ediyorsunuz?',
+    c: 'Akademi gruplarımız 4–16 yaş arasındaki sporculara açık. Üst yaş kategorileri için Pilot Takım ve A Takım seçmelerimizi takip edebilirsin.',
+  },
+  {
+    s: 'Antrenmanlar nerede yapılıyor?',
+    c: 'İzmit Seka Halı Saha, Gölcük Kavaklı Deniz Halı Saha ve Yahya Kaptan tesislerinde çalışıyoruz. Sana en yakın sahayı birlikte belirliyoruz.',
+  },
+  {
+    s: 'Aidat / ücret ne kadar?',
+    c: ucretBilgisi ||
+       `Güncel ücret ve ödeme seçenekleri dönemsel olarak değişebiliyor. En doğru bilgi için ${TELEFON_GOSTER} numaralı telefondan bize ulaşabilirsin.`,
+  },
+  {
+    s: 'Kayıt için hangi evraklar gerekiyor?',
+    c: 'Gerekli evraklar yaş grubuna göre değişiyor. Ön kayıt formunu doldurduktan sonra sizi arayıp süreci adım adım anlatıyoruz.',
+  },
+  {
+    s: 'Velim antrenmanları izleyebilir mi?',
+    c: 'Antrenman ziyaretleri ve veli bilgilendirmesi için bizimle iletişime geçebilirsin; sahaya göre uygulama değişebiliyor.',
+  },
+];
+
+const gunBilgisiVar = gruplar.some(g => g.gunler);
 ---
 
 <Layout
   title="Aramıza Katıl — Kocaeli Kadın Futbol Kulübü"
-  description="Kocaeli Kadın Futbol Kulübü ailesine katıl! Seçmelere başvur, antrenmanlara katıl. Kadın futbolu kariyerine Kocaeli'de başla."
+  description="Kocaeli Kadın Futbol Kulübü'ne nasıl katılırsın? Yaş grupları, antrenman sahaları, kayıt adımları ve sık sorulan sorular. 4–16 yaş akademi kayıtları açık."
 >
   <Navbar />
 
   <main class="join-page">
 
-    <section class="join-hero">
-      <div class="join-hero-inner">
-        <span class="tag">Bize Katıl</span>
-        <h1>Aramıza<br /><span>Katıl</span></h1>
-        <p>Kocaeli Kadın Futbol Kulübü ailesine katılmak için aşağıdaki seçeneklerden birini kullanabilirsin.</p>
+    <PageHero
+      tag="Bize Katıl"
+      title="Aramıza"
+      accent="Katıl"
+      description="Futbola yeni başlıyor ya da kendini geliştirmek istiyorsan doğru yerdesin. 4–16 yaş akademi kayıtlarımız açık."
+      minHeight="44vh"
+      maxTitle="5rem"
+    >
+        <div class="hero-actions">
+          <a href={ON_KAYIT_URL} target="_blank" rel="noopener noreferrer" class="btn-primary">Ön Kayıt Formunu Doldur</a>
+          <a href={`tel:${TELEFON}`} class="btn-ghost">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.6 19.79 19.79 0 0 1 1.6 5a2 2 0 0 1 1.95-2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 10.9a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 18.18v-1.26z"/>
+            </svg>
+            {TELEFON_GOSTER}
+          </a>
+        </div>
+    </PageHero>
+
+    <!-- ── Kimler katılabilir ── -->
+    <section class="section groups-section">
+      <div class="section-inner">
+        <span class="section-eyebrow">Kimler Katılabilir?</span>
+        <h2>Yaş Grupları ve Takımlar</h2>
+        <p class="section-lead">Her seviyeye uygun bir grubumuz var. Hangisine uygun olduğundan emin değilsen bize sor, birlikte belirleyelim.</p>
+
+        <div class="groups-grid">
+          {gruplar.map(g => (
+            <div class="group-card">
+              <span class="group-yas">{g.yas}</span>
+              <h3>{g.ad}</h3>
+              <p>{g.aciklama}</p>
+              {g.gunler
+                ? <p class="group-gun"><strong>Antrenman:</strong> {g.gunler}</p>
+                : <p class="group-gun muted">Gün ve saat bilgisi için bize ulaşın</p>
+              }
+            </div>
+          ))}
+        </div>
+
+        {!gunBilgisiVar && (
+          <p class="note">
+            Antrenman gün ve saatleri gruba ve sahaya göre değişiyor.
+            <a href={`tel:${TELEFON}`}>{TELEFON_GOSTER}</a> numarasından güncel programı öğrenebilirsin.
+          </p>
+        )}
       </div>
     </section>
 
-    <section class="join-options">
-      <div class="options-grid">
+    <!-- ── Sahalar ── -->
+    <section class="section fields-section">
+      <div class="section-inner">
+        <span class="section-eyebrow">Nerede Antrenman Yapıyoruz?</span>
+        <h2>Antrenman Sahalarımız</h2>
 
-        <!-- Online Başvuru -->
-        <a
-          href="https://kocaelikadinfk.sporakademik.com/OnKayit"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="option-card"
-        >
-          <div class="option-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10 9 9 9 8 9"/>
-            </svg>
-          </div>
-          <div class="option-body">
-            <h2>Online Başvuru</h2>
-            <p>Sporcu ön kayıt formunu doldurarak hemen başvurunu tamamla.</p>
-          </div>
-          <div class="option-arrow">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"/>
-              <polyline points="12 5 19 12 12 19"/>
-            </svg>
-          </div>
-        </a>
+        <div class="fields-grid">
+          {sahalar.map(s => (
+            <a
+              class="field-card"
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.mapsQuery)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="field-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+              </span>
+              <div class="field-body">
+                <h3>{s.ad}</h3>
+                <span class="field-ilce">{s.ilce}</span>
+                {s.adres && <span class="field-adres">{s.adres}</span>}
+              </div>
+              <span class="field-map">Haritada aç →</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
 
-        <!-- WhatsApp İletişim -->
-        <a
-          href="https://wa.me/905326944509"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="option-card option-whatsapp"
-        >
-          <div class="option-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
-            </svg>
-          </div>
-          <div class="option-body">
-            <h2>WhatsApp ile İletişim</h2>
-            <p>Sorularını sormak ya da bilgi almak için bize WhatsApp'tan ulaş.</p>
-            <span class="phone-num">+90 532 694 45 09</span>
-          </div>
-          <div class="option-arrow">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"/>
-              <polyline points="12 5 19 12 12 19"/>
-            </svg>
-          </div>
-        </a>
+    <!-- ── Adımlar ── -->
+    <section class="section steps-section">
+      <div class="section-inner">
+        <span class="section-eyebrow">Nasıl Başlarım?</span>
+        <h2>3 Adımda Aramıza Katıl</h2>
 
+        <ol class="steps">
+          {adimlar.map(a => (
+            <li class="step">
+              <span class="step-no">{a.no}</span>
+              <div>
+                <h3>{a.baslik}</h3>
+                <p>{a.metin}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        <a href={ON_KAYIT_URL} target="_blank" rel="noopener noreferrer" class="btn-primary steps-cta">Ön Kayıt Formunu Doldur</a>
+      </div>
+    </section>
+
+    <!-- ── Ne getirmeli ── -->
+    <section class="section bring-section">
+      <div class="section-inner bring-inner">
+        <div class="bring-text">
+          <span class="section-eyebrow">Hazırlık</span>
+          <h2>İlk Antrenmana Ne Getirmeli?</h2>
+          <p class="section-lead">Deneme antrenmanına gelirken yanında bulunması gerekenler. Eksiğin varsa sorun değil, bize haber ver.</p>
+        </div>
+        <ul class="bring-list">
+          {getirilecekler.map(item => (
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              {item}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ── SSS ── -->
+    <section class="section faq-section">
+      <div class="section-inner">
+        <span class="section-eyebrow">Merak Edilenler</span>
+        <h2>Sık Sorulan Sorular</h2>
+
+        <div class="faq-list">
+          {sss.map(item => (
+            <details class="faq-item">
+              <summary>
+                {item.s}
+                <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </summary>
+              <p>{item.c}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ── İletişim ── -->
+    <section class="section contact-section">
+      <div class="section-inner">
+        <span class="section-eyebrow">İletişim</span>
+        <h2>Sorularını Bize Sor</h2>
+
+        <div class="options-grid">
+          <a href={ON_KAYIT_URL} target="_blank" rel="noopener noreferrer" class="option-card">
+            <div class="option-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+            </div>
+            <div class="option-body">
+              <h3>Online Başvuru</h3>
+              <p>Sporcu ön kayıt formunu doldurarak hemen başvurunu tamamla.</p>
+            </div>
+            <div class="option-arrow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </div>
+          </a>
+
+          <a href={`https://wa.me/${TELEFON.replace('+', '')}`} target="_blank" rel="noopener noreferrer" class="option-card option-whatsapp">
+            <div class="option-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+              </svg>
+            </div>
+            <div class="option-body">
+              <h3>WhatsApp ile İletişim</h3>
+              <p>Sorularını sormak ya da bilgi almak için bize WhatsApp'tan ulaş.</p>
+              <span class="phone-num">{TELEFON_GOSTER}</span>
+            </div>
+            <div class="option-arrow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </div>
+          </a>
+        </div>
+
+        <p class="contact-alt">
+          E-posta: <a href={`mailto:${EPOSTA}`}>{EPOSTA}</a>
+          <span class="dot">•</span>
+          Telefon: <a href={`tel:${TELEFON}`}>{TELEFON_GOSTER}</a>
+        </p>
       </div>
     </section>
 
@@ -85,60 +316,243 @@ import Footer from '../components/Footer.astro';
 </Layout>
 
 <style>
-  /* ── Hero ── */
-  .join-hero {
-    min-height: 40vh;
-    display: flex;
+  .hero-actions { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 2rem; }
+  .btn-ghost {
+    display: inline-flex;
     align-items: center;
-    background:
-      radial-gradient(ellipse 60% 80% at 50% 50%, rgba(26,122,46,0.22) 0%, transparent 65%),
-      linear-gradient(160deg, #0d1a0f 0%, var(--black) 60%);
-    padding: 5rem 8%;
-    position: relative;
-    overflow: hidden;
+    gap: .55rem;
+    padding: .8rem 1.6rem;
+    border-radius: 50px;
+    border: 1px solid rgba(44,184,74,0.3);
+    background: rgba(44,184,74,0.06);
+    color: var(--green-bright);
+    font-size: .875rem;
+    font-weight: 700;
+    letter-spacing: .5px;
+    text-decoration: none;
+    transition: background .25s, border-color .25s, transform .2s;
   }
-  .join-hero::before {
-    content: '';
-    position: absolute; inset: 0;
-    background-image:
-      repeating-linear-gradient(0deg, transparent, transparent 80px, rgba(26,122,46,0.05) 80px, rgba(26,122,46,0.05) 81px),
-      repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(26,122,46,0.05) 80px, rgba(26,122,46,0.05) 81px);
-    pointer-events: none;
+  .btn-ghost:hover {
+    background: rgba(44,184,74,0.14);
+    border-color: var(--green-bright);
+    transform: translateY(-2px);
   }
-  .join-hero-inner { position: relative; max-width: 680px; }
 
-  .tag {
+  /* ── Ortak bölüm ── */
+  .section { padding: 5rem 8%; border-top: 1px solid var(--border); }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+
+  .section-eyebrow {
     display: inline-block;
-    font-size: .7rem; font-weight: 700; letter-spacing: 3px;
-    text-transform: uppercase; color: var(--green-bright); margin-bottom: 1rem;
+    font-size: .68rem; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--green-bright); margin-bottom: .8rem;
   }
-  .join-hero h1 {
-    font-size: clamp(2.8rem, 7vw, 5rem);
-    font-weight: 900; line-height: 1.05; letter-spacing: -2px; margin-bottom: 1.2rem;
+  .section h2 {
+    font-size: clamp(1.5rem, 3.2vw, 2.2rem);
+    font-weight: 900;
+    margin-bottom: 1rem;
   }
-  .join-hero h1 span {
-    background: linear-gradient(135deg, var(--green-bright) 0%, #5dde7c 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  }
-  .join-hero p { font-size: 1rem; color: var(--text-muted); max-width: 440px; }
+  .section-lead { color: var(--text-muted); max-width: 560px; margin-bottom: 2.5rem; line-height: 1.7; }
 
-  /* ── Seçenekler ── */
-  .join-options {
-    padding: 5rem 8%;
-    background: var(--dark);
-    border-top: 1px solid var(--border);
-    min-height: 40vh;
-    display: flex;
-    align-items: center;
+  .note {
+    margin-top: 1.5rem;
+    font-size: .85rem;
+    color: var(--text-muted);
+    background: rgba(44,184,74,0.05);
+    border: 1px solid rgba(44,184,74,0.15);
+    border-radius: 8px;
+    padding: .9rem 1.1rem;
   }
+  .note a { color: var(--green-bright); font-weight: 700; text-decoration: none; }
+  .note a:hover { text-decoration: underline; }
 
-  .options-grid {
-    width: 100%;
-    max-width: 800px;
-    display: flex;
-    flex-direction: column;
+  /* ── Gruplar ── */
+  .groups-section { background: var(--dark); }
+  .groups-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.2rem;
   }
+  @media (max-width: 860px) { .groups-grid { grid-template-columns: 1fr; } }
+
+  .group-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.6rem 1.5rem 1.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+    transition: border-color .25s, transform .2s;
+  }
+  .group-card:hover { border-color: var(--green); transform: translateY(-3px); }
+
+  .group-yas {
+    align-self: flex-start;
+    font-size: .68rem; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--green-bright);
+    background: rgba(44,184,74,0.1);
+    border: 1px solid rgba(44,184,74,0.22);
+    border-radius: 50px;
+    padding: .25rem .75rem;
+  }
+  .group-card h3 { font-size: 1.15rem; font-weight: 900; }
+  .group-card p  { font-size: .875rem; color: var(--text-muted); line-height: 1.65; }
+  .group-gun {
+    margin-top: auto;
+    padding-top: .8rem;
+    border-top: 1px solid var(--border);
+    font-size: .82rem !important;
+  }
+  .group-gun strong { color: var(--text); }
+  .group-gun.muted { font-style: italic; opacity: .8; }
+
+  /* ── Sahalar ── */
+  .fields-section { background: var(--black); }
+  .fields-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+  }
+  @media (max-width: 860px) { .fields-grid { grid-template-columns: 1fr; } }
+
+  .field-card {
+    display: flex;
+    flex-direction: column;
+    gap: .7rem;
+    padding: 1.5rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: var(--text);
+    transition: border-color .25s, background .25s, transform .2s;
+  }
+  .field-card:hover { border-color: var(--green-bright); background: #111; transform: translateY(-3px); }
+  .field-card:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
+
+  .field-icon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    background: rgba(44,184,74,0.1);
+    border: 1px solid rgba(44,184,74,0.2);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--green-bright);
+  }
+  .field-body { display: flex; flex-direction: column; gap: .25rem; }
+  .field-body h3 { font-size: 1rem; font-weight: 800; }
+  .field-ilce { font-size: .78rem; color: var(--green-bright); font-weight: 700; letter-spacing: .5px; }
+  .field-adres { font-size: .82rem; color: var(--text-muted); line-height: 1.5; }
+  .field-map {
+    margin-top: auto;
+    font-size: .78rem; font-weight: 700;
+    color: var(--text-muted);
+    transition: color .25s;
+  }
+  .field-card:hover .field-map { color: var(--green-bright); }
+
+  /* ── Adımlar ── */
+  .steps-section { background: var(--dark); }
+  .steps {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+  @media (max-width: 860px) { .steps { grid-template-columns: 1fr; } }
+
+  .step { display: flex; gap: 1rem; align-items: flex-start; }
+  .step-no {
+    flex-shrink: 0;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--green);
+    color: #fff;
+    font-size: .95rem; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step h3 { font-size: 1rem; font-weight: 800; margin-bottom: .35rem; }
+  .step p  { font-size: .875rem; color: var(--text-muted); line-height: 1.65; }
+  .steps-cta { display: inline-block; }
+
+  /* ── Ne getirmeli ── */
+  .bring-section { background: var(--black); }
+  .bring-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+  @media (max-width: 860px) { .bring-inner { grid-template-columns: 1fr; gap: 2rem; } }
+  .bring-text .section-lead { margin-bottom: 0; }
+
+  .bring-list { list-style: none; display: flex; flex-direction: column; gap: .8rem; }
+  .bring-list li {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    padding: .9rem 1.1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: .9rem;
+    font-weight: 600;
+  }
+  .bring-list svg { color: var(--green-bright); flex-shrink: 0; }
+
+  /* ── SSS ── */
+  .faq-section { background: var(--dark); }
+  /* SSS iki kolon — tek kolonda sağ yarı boş kalıyordu */
+  .faq-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-content: start;
+    gap: .7rem;
+  }
+  @media (max-width: 860px) { .faq-list { grid-template-columns: 1fr; } }
+
+  .faq-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color .25s;
+  }
+  .faq-item[open] { border-color: rgba(44,184,74,0.35); }
+
+  .faq-item summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem 1.3rem;
+    cursor: pointer;
+    font-size: .95rem;
+    font-weight: 700;
+    list-style: none;
+    transition: color .2s;
+  }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary:hover { color: var(--green-bright); }
+  .faq-item summary:focus-visible { outline: 2px solid var(--green-bright); outline-offset: -2px; }
+
+  .faq-chevron { flex-shrink: 0; color: var(--green-bright); transition: transform .25s; }
+  .faq-item[open] .faq-chevron { transform: rotate(180deg); }
+
+  .faq-item p {
+    padding: 0 1.3rem 1.3rem;
+    font-size: .9rem;
+    color: var(--text-muted);
+    line-height: 1.75;
+  }
+
+  /* ── İletişim ── */
+  .contact-section { background: var(--black); }
+  /* İki kart yan yana — 1280px'te sağ taraf boş kalmıyor */
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+  @media (max-width: 860px) { .options-grid { grid-template-columns: 1fr; } }
 
   .option-card {
     display: flex;
@@ -147,16 +561,13 @@ import Footer from '../components/Footer.astro';
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 2rem 2rem;
+    padding: 2rem;
     text-decoration: none;
     color: var(--text);
     transition: border-color .25s, background .25s, transform .2s;
   }
-  .option-card:hover {
-    border-color: var(--green-bright);
-    background: #111;
-    transform: translateY(-3px);
-  }
+  .option-card:hover { border-color: var(--green-bright); background: #111; transform: translateY(-3px); }
+  .option-card:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 
   .option-icon {
     width: 64px; height: 64px; flex-shrink: 0;
@@ -177,43 +588,36 @@ import Footer from '../components/Footer.astro';
   .option-card.option-whatsapp:hover { border-color: #25d366; }
   .option-card.option-whatsapp:hover .option-icon { background: rgba(37,211,102,0.18); }
 
-  .option-body {
-    flex: 1;
-    min-width: 0;
-  }
-  .option-body h2 {
-    font-size: 1.2rem; font-weight: 900;
-    margin-bottom: .5rem;
-  }
-  .option-body p {
-    font-size: .88rem; color: var(--text-muted);
-    line-height: 1.6;
-  }
+  .option-body { flex: 1; min-width: 0; }
+  .option-body h3 { font-size: 1.2rem; font-weight: 900; margin-bottom: .5rem; }
+  .option-body p  { font-size: .88rem; color: var(--text-muted); line-height: 1.6; }
   .phone-num {
     display: inline-block;
     margin-top: .5rem;
-    font-size: .9rem;
-    font-weight: 700;
-    color: #25d366;
-    letter-spacing: .5px;
+    font-size: .9rem; font-weight: 700;
+    color: #25d366; letter-spacing: .5px;
   }
 
-  .option-arrow {
-    flex-shrink: 0;
-    color: var(--text-muted);
-    transition: color .25s, transform .25s;
-  }
-  .option-card:hover .option-arrow {
-    color: var(--green-bright);
-    transform: translateX(4px);
-  }
+  .option-arrow { flex-shrink: 0; color: var(--text-muted); transition: color .25s, transform .25s; }
+  .option-card:hover .option-arrow { color: var(--green-bright); transform: translateX(4px); }
   .option-card.option-whatsapp:hover .option-arrow { color: #25d366; }
 
+  .contact-alt {
+    margin-top: 1.8rem;
+    font-size: .875rem;
+    color: var(--text-muted);
+  }
+  .contact-alt a { color: var(--green-bright); font-weight: 700; text-decoration: none; }
+  .contact-alt a:hover { text-decoration: underline; }
+  .contact-alt .dot { margin: 0 .6rem; opacity: .5; }
+
   @media (max-width: 600px) {
+    .section { padding: 3.5rem 6%; }
     .option-card { padding: 1.4rem 1.2rem; gap: 1rem; }
     .option-icon { width: 52px; height: 52px; border-radius: 12px; }
     .option-icon svg { width: 24px; height: 24px; }
-    .option-body h2 { font-size: 1rem; }
+    .option-body h3 { font-size: 1rem; }
     .option-arrow { display: none; }
+    .contact-alt .dot { display: block; height: 0; visibility: hidden; }
   }
 </style>
