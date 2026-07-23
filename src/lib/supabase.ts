@@ -39,6 +39,11 @@ export interface NewsItem {
   description: string;
   image_url: string | null;
   sort_order: number;
+  /**
+   * Yayın tarihi (date). Sütun veritabanına eklenmeden önce undefined gelir;
+   * bu durumda arayüz tarihi hiç göstermez. Migration için README'ye bakın.
+   */
+  published_at?: string | null;
 }
 
 export interface HeroSettings {

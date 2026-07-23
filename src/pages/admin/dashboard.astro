@@ -222,29 +222,47 @@ if (Astro.request.method === 'POST') {
     successMsg = error ? '' : 'Fotoğraf silindi.';
   }
 
+  // published_at sütunu migrations/001 çalıştırılana kadar tabloda olmayabilir.
+  // O durumda alanı düşürüp tekrar deniyoruz ki haber ekleme/güncelleme bozulmasın.
+  const missingPublishedAt = (msg?: string) =>
+    !!msg && /published_at/i.test(msg) && /(column|schema cache)/i.test(msg);
+
   // Haber makale ekle
   if (action === 'article_add') {
-    const title       = form.get('title')?.toString() ?? '';
-    const description = form.get('description')?.toString() ?? '';
-    const image_url   = await resolveImage(form, 'image_file', 'image_url', 'news');
+    const title        = form.get('title')?.toString() ?? '';
+    const description  = form.get('description')?.toString() ?? '';
+    const published_at = form.get('published_at')?.toString() || null;
+    const image_url    = await resolveImage(form, 'image_file', 'image_url', 'news');
 
-    const { error } = await db.from('news').insert({ title, description, image_url, sort_order: 0 });
+    let { error } = await db.from('news').insert({ title, description, image_url, published_at, sort_order: 0 });
+    if (missingPublishedAt(error?.message)) {
+      ({ error } = await db.from('news').insert({ title, description, image_url, sort_order: 0 }));
+    }
     errorMsg   = error ? 'Eklenemedi: ' + error.message : '';
     successMsg = error ? '' : 'Haber eklendi!';
   }
 
   // Haber makale güncelle
   if (action === 'article_update') {
-    const id          = Number(form.get('id'));
-    const title       = form.get('title')?.toString() ?? '';
-    const description = form.get('description')?.toString() ?? '';
-    const image_url   = await resolveImage(form, 'image_file', 'image_url', 'news');
+    const id           = Number(form.get('id'));
+    const title        = form.get('title')?.toString() ?? '';
+    const description  = form.get('description')?.toString() ?? '';
+    const published_at = form.get('published_at')?.toString() || null;
+    const image_url    = await resolveImage(form, 'image_file', 'image_url', 'news');
 
-    const { error } = await db
+    let { error } = await db
       .from('news')
-      .update({ title, description, ...(image_url && { image_url }) })
+      .update({ title, description, published_at, ...(image_url && { image_url }) })
       .eq('id', id);
-    errorMsg   = error ? 'Kaydedilemedi: ' + error.message : '';
+    if (missingPublishedAt(error?.message)) {
+      ({ error } = await db
+        .from('news')
+        .update({ title, description, ...(image_url && { image_url }) })
+        .eq('id', id));
+    }
+    errorMsg = error
+      ? 'Kaydedilemedi: ' + error.message
+      : '';
     successMsg = error ? '' : 'Haber güncellendi!';
   }
 
@@ -585,17 +603,60 @@ const videoSlots: (VideoItem | null)[] = [
       {allArticles.length > 0 && (
         <div class="article-list">
           {allArticles.map(n => (
-            <div class="article-row">
-              {n.image_url && <img src={n.image_url} alt={n.title} class="article-thumb" />}
-              <div class="article-meta">
-                <span class="article-title">{n.title}</span>
-                {n.description && <span class="article-desc">{n.description}</span>}
+            <div class="article-block">
+              <div class="article-row">
+                {n.image_url && <img src={n.image_url} alt={n.title} class="article-thumb" />}
+                <div class="article-meta">
+                  <span class="article-title">{n.title}</span>
+                  <span class={`article-date-badge${n.published_at ? '' : ' missing'}`}>
+                    {n.published_at ? n.published_at : 'tarih yok'}
+                  </span>
+                  {n.description && <span class="article-desc">{n.description}</span>}
+                </div>
+                <form method="POST" enctype="application/x-www-form-urlencoded" class="article-delete-form">
+                  <input type="hidden" name="_action" value="article_delete" />
+                  <input type="hidden" name="id" value={n.id} />
+                  <button type="submit" class="btn-delete btn-delete-small">Sil</button>
+                </form>
               </div>
-              <form method="POST" enctype="application/x-www-form-urlencoded" class="article-delete-form">
-                <input type="hidden" name="_action" value="article_delete" />
-                <input type="hidden" name="id" value={n.id} />
-                <button type="submit" class="btn-delete btn-delete-small">Sil</button>
-              </form>
+
+              <details class="article-edit">
+                <summary>Düzenle</summary>
+                <form method="POST" enctype="multipart/form-data" class="match-form">
+                  <input type="hidden" name="_action" value="article_update" />
+                  <input type="hidden" name="id" value={n.id} />
+
+                  <div class="form-row">
+                    <label style="flex:2">Başlık
+                      <input name="title" value={n.title} required />
+                    </label>
+                    <label style="flex:1">Yayın Tarihi
+                      <input type="date" name="published_at" value={n.published_at ?? ''} />
+                    </label>
+                  </div>
+
+                  <div class="form-row">
+                    <label style="flex:1">Açıklama
+                      <textarea name="description" rows="4">{n.description}</textarea>
+                    </label>
+                  </div>
+
+                  <div class="form-row">
+                    <label>Görseli Değiştir — Cihazdan Yükle
+                      <div class="file-wrap">
+                        <input type="file" name="image_file" accept="image/*" class="file-input" />
+                      </div>
+                    </label>
+                    <label>veya Görsel URL
+                      <input name="image_url" placeholder="Boş bırakılırsa mevcut görsel korunur" />
+                    </label>
+                  </div>
+
+                  <div class="form-actions">
+                    <button type="submit" class="btn-save">Kaydet</button>
+                  </div>
+                </form>
+              </details>
             </div>
           ))}
         </div>
@@ -608,6 +669,9 @@ const videoSlots: (VideoItem | null)[] = [
         <div class="form-row">
           <label style="flex:2">Başlık
             <input name="title" placeholder="Haber başlığı" required />
+          </label>
+          <label style="flex:1">Yayın Tarihi
+            <input type="date" name="published_at" />
           </label>
         </div>
 
@@ -1219,6 +1283,49 @@ const videoSlots: (VideoItem | null)[] = [
   }
 
   .article-delete-form { flex-shrink: 0; }
+
+  /* Yayın tarihi rozeti — tarihi olmayan haberler hemen görünsün */
+  .article-date-badge {
+    align-self: flex-start;
+    font-size: .65rem;
+    font-weight: 700;
+    letter-spacing: .5px;
+    color: #2cb84a;
+    background: rgba(44,184,74,.1);
+    border: 1px solid rgba(44,184,74,.25);
+    border-radius: 4px;
+    padding: .1rem .4rem;
+  }
+  .article-date-badge.missing {
+    color: #d4a052;
+    background: rgba(212,160,82,.1);
+    border-color: rgba(212,160,82,.3);
+  }
+
+  /* Haber düzenleme (katlanır) */
+  .article-block {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+  }
+  .article-block .article-row {
+    background: none;
+    border: none;
+    padding: .7rem 1rem;
+  }
+  .article-edit summary {
+    cursor: pointer;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #2cb84a;
+    padding: .5rem 1rem .7rem;
+    user-select: none;
+  }
+  .article-edit summary:hover { color: #fff; }
+  .article-edit[open] summary { border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .article-edit .match-form { padding: 1rem; }
 
   .match-subsection {
     margin-bottom: 2rem;
