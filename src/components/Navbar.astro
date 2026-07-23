@@ -12,10 +12,7 @@ const links = [
 <nav class="navbar" id="navbar">
   <a class="nav-logo" href="/">
     <img src="/logo.jpeg" alt="Kocaeli Kadın FA Logo" class="logo-img" />
-    <span class="logo-text">
-      <span class="logo-text-full">Kocaeli Kadın Futbol Kulübü</span>
-      <span class="logo-text-short">Kocaeli Kadın FK</span>
-    </span>
+    <span class="logo-text">Kocaeli Kadın Futbol Kulübü</span>
   </a>
 
   <button
@@ -82,7 +79,6 @@ const links = [
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
-  .logo-text-short { display: none; }
 
   .nav-burger {
     display: none;
@@ -221,10 +217,13 @@ const links = [
   }
 
   @media (max-width: 768px) {
-    /* Tek satırda kalması için kısa ad */
-    .logo-text { font-size: .95rem; letter-spacing: 1px; white-space: nowrap; }
-    .logo-text-full  { display: none; }
-    .logo-text-short { display: inline; }
+    /* Tam ad iki satıra düzgün sarılsın (navbar yüksekliğine sığar) */
+    .logo-text {
+      font-size: .82rem;
+      letter-spacing: .5px;
+      line-height: 1.15;
+      max-width: 180px;
+    }
 
     .nav-burger { display: flex; }
 
