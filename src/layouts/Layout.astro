@@ -1,4 +1,6 @@
 ---
+import IntroLoader from '../components/IntroLoader.astro';
+
 interface Props {
   title?: string;
   description?: string;
@@ -86,6 +88,7 @@ const jsonLd = {
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </head>
   <body>
+    <IntroLoader />
     <slot />
   </body>
 </html>
@@ -106,7 +109,19 @@ const jsonLd = {
     --border:       rgba(255,255,255,0.07);
     --radius:       12px;
     --nav-h:        70px;
+
+    /* ── Görsel boyut sistemi ──────────────────────────────────────────
+       Fotoğraflar kendi en-boy oranını korur; yalnızca bu sınırların
+       dışına taşanlar kırpılır. Böylece aşırı uzun dikey fotoğraflar
+       sayfayı ele geçirmez, aşırı geniş olanlar da şeride dönmez.     */
+    --media-min-h:     170px;   /* çok geniş fotoğraflar için taban   */
+    --media-max-h:     520px;   /* çok uzun fotoğraflar için tavan    */
+    --media-max-h-sm:  380px;   /* tek kolona düşen dar ekranlarda    */
+    --card-media-max-h: 440px;  /* sabit oranlı haber kartı görselleri */
   }
+
+  /* Tüm görseller kapsayıcısını taşmasın */
+  img { max-width: 100%; }
 
   html { scroll-behavior: smooth; }
 
