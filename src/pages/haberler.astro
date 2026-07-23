@@ -2,7 +2,10 @@
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
+import PageHero from '../components/PageHero.astro';
 import { supabase, type NewsItem } from '../lib/supabase';
+import { img, imgSet } from '../lib/img';
+import { newsPath, excerpt, formatDate, isoDate } from '../lib/news';
 
 const { data } = await supabase
   .from('news')
@@ -12,13 +15,6 @@ const { data } = await supabase
 const news: NewsItem[] = data ?? [];
 
 const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=800&q=80';
-
-function linkify(text: string): string {
-  return text.replace(
-    /(https?:\/\/[^\s<>"']+)/g,
-    '<a href="$1" target="_blank" rel="noopener noreferrer" class="news-link">$1</a>'
-  );
-}
 ---
 
 <Layout
@@ -29,14 +25,13 @@ function linkify(text: string): string {
 
   <main class="haberler-page">
 
-    <!-- Hero -->
-    <section class="page-hero">
-      <div class="page-hero-inner">
-        <span class="tag">Son Dakika</span>
-        <h1>Haber<br /><span>Merkezi</span></h1>
-        <p>Kulübümüzden son gelişmeler, maç haberleri ve duyurular.</p>
-      </div>
-    </section>
+    <PageHero
+      tag="Son Dakika"
+      title="Haber"
+      accent="Merkezi"
+      description="Kulübümüzden son gelişmeler, maç haberleri ve duyurular."
+      minHeight="38vh"
+    />
 
     <!-- Haberler grid -->
     {news.length > 0 ? (
@@ -44,23 +39,31 @@ function linkify(text: string): string {
         <div class="news-grid">
           {news.map(n => (
             <article class="news-card">
-              <div class="news-img">
-                <div
-                  class="news-img-bg"
-                  style={`background-image: url('${n.image_url ?? fallbackImg}')`}
-                ></div>
-                <img
-                  class="news-img-fg"
-                  src={n.image_url ?? fallbackImg}
-                  alt={n.title}
-                  loading="lazy"
-                />
-              </div>
-              <div class="news-body">
-                <span class="news-tag">Haber</span>
-                <h2>{n.title}</h2>
-                <p set:html={linkify(n.description ?? '')}></p>
-              </div>
+              <a href={newsPath(n)} class="news-link-wrap">
+                <div class="news-img">
+                  <div class="news-img-bg"></div>
+                  <img
+                    class="news-img-fg"
+                    src={img(n.image_url, 800) || fallbackImg}
+                    srcset={imgSet(n.image_url)}
+                    sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 33vw"
+                    alt={n.title}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <div class="news-body">
+                  <div class="news-meta">
+                    <span class="news-tag">Haber</span>
+                    {formatDate(n.published_at) && (
+                      <time class="news-date" datetime={isoDate(n.published_at)}>{formatDate(n.published_at)}</time>
+                    )}
+                  </div>
+                  <h2>{n.title}</h2>
+                  <p>{excerpt(n.description, 170)}</p>
+                  <span class="news-more">Devamını Oku →</span>
+                </div>
+              </a>
             </article>
           ))}
         </div>
@@ -78,44 +81,6 @@ function linkify(text: string): string {
 </Layout>
 
 <style>
-  .haberler-page { }
-
-  /* ── Hero ── */
-  .page-hero {
-    min-height: 38vh;
-    display: flex;
-    align-items: center;
-    background:
-      radial-gradient(ellipse 60% 80% at 50% 50%, rgba(26,122,46,0.20) 0%, transparent 65%),
-      linear-gradient(160deg, #0d1a0f 0%, var(--black) 60%);
-    padding: 5rem 8%;
-    position: relative;
-    overflow: hidden;
-  }
-  .page-hero::before {
-    content: '';
-    position: absolute; inset: 0;
-    background-image:
-      repeating-linear-gradient(0deg, transparent, transparent 80px, rgba(26,122,46,0.05) 80px, rgba(26,122,46,0.05) 81px),
-      repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(26,122,46,0.05) 80px, rgba(26,122,46,0.05) 81px);
-    pointer-events: none;
-  }
-  .page-hero-inner { position: relative; max-width: 680px; }
-  .tag {
-    display: inline-block;
-    font-size: .7rem; font-weight: 700; letter-spacing: 3px;
-    text-transform: uppercase; color: var(--green-bright); margin-bottom: 1rem;
-  }
-  .page-hero h1 {
-    font-size: clamp(2.8rem, 7vw, 5.5rem);
-    font-weight: 900; line-height: 1.05; letter-spacing: -2px; margin-bottom: 1.2rem;
-  }
-  .page-hero h1 span {
-    background: linear-gradient(135deg, var(--green-bright) 0%, #5dde7c 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  }
-  .page-hero p { font-size: 1rem; color: var(--text-muted); max-width: 420px; }
-
   /* ── Haber Grid ── */
   .news-section {
     padding: 4rem 5%;
@@ -152,22 +117,43 @@ function linkify(text: string): string {
     transform: translateY(-3px);
     box-shadow: 0 8px 32px rgba(13,77,30,0.18);
   }
+  .news-card:focus-within {
+    border-color: var(--green-bright);
+    outline: 2px solid var(--green-bright);
+    outline-offset: 3px;
+  }
 
+  /* Kartın tamamı tıklanabilir */
+  .news-link-wrap {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    text-decoration: none;
+    color: inherit;
+  }
+  .news-link-wrap:focus-visible { outline: none; }
+
+  /* Sabit oran, ama tavanla sınırlı: dar kolonlarda kart aşırı uzamıyor */
   .news-img {
     position: relative;
     aspect-ratio: 3 / 4;
+    max-height: var(--card-media-max-h);
     overflow: hidden;
     background: #0a0a0a;
     flex-shrink: 0;
   }
-  /* Bulanık dolgu: boş kenarları fotoğrafın kendisiyle doldurur */
+  /* Tek kolona düşünce kart tam genişlik oluyor — oranı koruyup
+     yüksekliği sınırlıyoruz (4/3'e çevirmek dikey görsellerde
+     kenarlarda büyük boşluk bırakıyordu). */
+  @media (max-width: 600px) {
+    .news-img { max-height: 440px; }
+  }
+  /* Görsellerin %73'ü zaten 3:4 dikey, kutuyu tam dolduruyor.
+     Yatay olanlarda bulanık leke yerine düz koyu panel kalıyor. */
   .news-img-bg {
     position: absolute;
     inset: 0;
-    background-size: cover;
-    background-position: center;
-    filter: blur(22px) brightness(.45);
-    transform: scale(1.2);
+    background: linear-gradient(160deg, #141814 0%, #0a0d0a 100%);
   }
   /* Asıl fotoğraf: kırpılmadan, ortalanmış şekilde tamamı görünür */
   .news-img-fg {
@@ -188,6 +174,12 @@ function linkify(text: string): string {
     flex: 1;
   }
 
+  .news-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .8rem;
+  }
   .news-tag {
     font-size: .65rem;
     font-weight: 700;
@@ -195,29 +187,45 @@ function linkify(text: string): string {
     text-transform: uppercase;
     color: var(--green-bright);
   }
+  .news-date {
+    font-size: .72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
 
   .news-body h2 {
     font-size: 1.1rem;
     font-weight: 800;
     line-height: 1.35;
     color: var(--text);
+    /* Kart yükseklikleri satır içinde tutarlı kalsın */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
+  /* Özet: en fazla 4 satır — kartlar artık uzayıp boşluk bırakmıyor */
   .news-body p {
     font-size: .875rem;
     color: var(--text-muted);
     line-height: 1.65;
     flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
-  .news-body p :global(.news-link) {
-    color: #4da6ff;
-    text-decoration: underline;
-    word-break: break-all;
+  .news-more {
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--green-bright);
+    letter-spacing: .3px;
+    transition: color .2s;
   }
-  .news-body p :global(.news-link:hover) {
-    color: #80c1ff;
-  }
+  .news-card:hover .news-more { color: #fff; }
 
   /* ── Boş durum ── */
   .empty-state {

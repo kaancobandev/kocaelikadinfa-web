@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
+import PageHero from '../components/PageHero.astro';
 import { supabase, type Match } from '../lib/supabase';
 
 const { data } = await supabase
@@ -65,14 +66,13 @@ function stats(list: Match[]) {
 
   <main class="mg-page">
 
-    <!-- Hero -->
-    <section class="page-hero">
-      <div class="page-hero-inner">
-        <span class="tag">Sezon 2025–26</span>
-        <h1>Maç<br /><span>Geçmişi</span></h1>
-        <p>Tüm maçlarımızın sonuçları, skorlar ve karşılaştığımız takımlar.</p>
-      </div>
-    </section>
+    <PageHero
+      tag="Sezon 2025–26"
+      title="Maç"
+      accent="Geçmişi"
+      description="Tüm maçlarımızın sonuçları, skorlar ve karşılaştığımız takımlar."
+      minHeight="40vh"
+    />
 
     <!-- Kategori başlığına göre dinamik bölümler -->
     {matchGroups.map(([title, list], gi) => (
@@ -152,44 +152,6 @@ function stats(list: Match[]) {
 </Layout>
 
 <style>
-  .mg-page { }
-
-  /* ── Hero ── */
-  .page-hero {
-    min-height: 40vh;
-    display: flex;
-    align-items: center;
-    background:
-      radial-gradient(ellipse 60% 80% at 50% 50%, rgba(26,122,46,0.20) 0%, transparent 65%),
-      linear-gradient(160deg, #0d1a0f 0%, var(--black) 60%);
-    padding: 5rem 8%;
-    position: relative;
-    overflow: hidden;
-  }
-  .page-hero::before {
-    content: '';
-    position: absolute; inset: 0;
-    background-image:
-      repeating-linear-gradient(0deg, transparent, transparent 80px, rgba(26,122,46,0.05) 80px, rgba(26,122,46,0.05) 81px),
-      repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(26,122,46,0.05) 80px, rgba(26,122,46,0.05) 81px);
-    pointer-events: none;
-  }
-  .page-hero-inner { position: relative; max-width: 680px; }
-  .tag {
-    display: inline-block;
-    font-size: .7rem; font-weight: 700; letter-spacing: 3px;
-    text-transform: uppercase; color: var(--green-bright); margin-bottom: 1rem;
-  }
-  .page-hero h1 {
-    font-size: clamp(2.8rem, 7vw, 5.5rem);
-    font-weight: 900; line-height: 1.05; letter-spacing: -2px; margin-bottom: 1.2rem;
-  }
-  .page-hero h1 span {
-    background: linear-gradient(135deg, var(--green-bright) 0%, #5dde7c 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  }
-  .page-hero p { font-size: 1rem; color: var(--text-muted); max-width: 420px; }
-
   /* ── Grup bölümü ── */
   .group-section {
     padding: 4rem 8%;
@@ -241,37 +203,6 @@ function stats(list: Match[]) {
     transition: border-color .2s, background .2s;
   }
   .match-card:hover { border-color: var(--green); background: #1a1a1a; }
-
-  @media (max-width: 640px) {
-    .match-card {
-      grid-template-columns: 1fr;
-      gap: .5rem;
-      padding: .8rem 1rem;
-    }
-    .match-meta-left {
-      flex-direction: row;
-      align-items: center;
-      gap: .6rem;
-      flex-wrap: wrap;
-    }
-    .match-teams { gap: .5rem; }
-    .team-side {
-      flex-direction: column;
-      align-items: center;
-      gap: .25rem;
-      min-width: 0;
-    }
-    .team-side.home,
-    .team-side.away { justify-content: center; }
-    .team-name {
-      font-size: .72rem;
-      white-space: normal;
-      max-width: 90px;
-      text-align: center;
-      line-height: 1.25;
-    }
-    .match-result { display: none; }
-  }
 
   .match-meta-left { display: flex; flex-direction: column; gap: .3rem; }
   .match-date   { font-size: .8rem; font-weight: 700; color: var(--text); }
@@ -338,5 +269,42 @@ function stats(list: Match[]) {
     text-align: center;
     color: var(--text-muted);
     display: flex; flex-direction: column; align-items: center; gap: 1.5rem;
+  }
+
+  /* ───────────────────────────────────────────────
+     Responsive — mobil
+     NOT: medya sorguları taban stillerden SONRA gelmeli,
+     yoksa eşit özgüllükteki taban kurallar bunları eziyor.
+  ─────────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    .match-card {
+      grid-template-columns: 1fr;
+      gap: .5rem;
+      padding: .8rem 1rem;
+    }
+    .match-meta-left {
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: .6rem;
+      flex-wrap: wrap;
+    }
+    .match-teams { gap: .5rem; }
+    .team-side {
+      flex-direction: column;
+      align-items: center;
+      gap: .25rem;
+      min-width: 0;
+    }
+    .team-side.home,
+    .team-side.away { justify-content: center; }
+    .team-name {
+      font-size: .72rem;
+      white-space: normal;
+      max-width: 90px;
+      text-align: center;
+      line-height: 1.25;
+    }
+    .match-result { display: none; }
   }
 </style>

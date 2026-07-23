@@ -1,5 +1,7 @@
 ---
 import { supabase, type Match } from '../lib/supabase';
+import { img } from '../lib/img';
+import { shortTeamName } from '../lib/news';
 
 // Tüm maçları çek, her kategoriden (badge) en son eklenen maçı göster
 const { data } = await supabase
@@ -43,14 +45,17 @@ function formatDate(d: string) {
           <div class="team home">
             <div class="team-logo-wrap">
               {m.home_logo
-                ? <img src={m.home_logo} alt={m.home_name} class="team-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                ? <img src={img(m.home_logo, 120)} alt={m.home_name} class="team-logo" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
                 : null
               }
               <span class="team-logo-fallback" style={m.home_logo ? "display:none" : "display:flex"}>
                 {initials(m.home_name)}
               </span>
             </div>
-            <span class="team-name">{m.home_name}</span>
+            <span class="team-name">
+              <span class="tn-full">{m.home_name}</span>
+              <span class="tn-short">{shortTeamName(m.home_name)}</span>
+            </span>
           </div>
 
           <div class="score-box">
@@ -62,18 +67,25 @@ function formatDate(d: string) {
           <div class="team away">
             <div class="team-logo-wrap">
               {m.away_logo
-                ? <img src={m.away_logo} alt={m.away_name} class="team-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                ? <img src={img(m.away_logo, 120)} alt={m.away_name} class="team-logo" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
                 : null
               }
               <span class="team-logo-fallback" style={m.away_logo ? "display:none" : "display:flex"}>
                 {initials(m.away_name)}
               </span>
             </div>
-            <span class="team-name">{m.away_name}</span>
+            <span class="team-name">
+              <span class="tn-full">{m.away_name}</span>
+              <span class="tn-short">{shortTeamName(m.away_name)}</span>
+            </span>
           </div>
 
         </div>
-        <div class="match-meta">{formatDate(m.match_date)} &nbsp;|&nbsp; {m.league}</div>
+        <div class="match-meta">
+          {formatDate(m.match_date)}
+          {m.league?.trim() && <span class="meta-sep">|</span>}
+          {m.league?.trim()}
+        </div>
       </div>
     ))}
   </div>
@@ -81,13 +93,30 @@ function formatDate(d: string) {
 
 <style>
   .scores-section {
+    position: relative;
     background: #ffffff;
-    padding: 4rem 5%;
-    border-top: 3px solid var(--green);
+    padding: 5rem 5% 4rem;
     border-bottom: 1px solid #e8e8e8;
+  }
+  /* Siyahtan beyaza yumuşak geçiş — sert kesik yerine.
+     Renk katmadan sadece karanlığı söndürüyor. */
+  .scores-section::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 120px;
+    background: linear-gradient(
+      to bottom,
+      var(--black) 0%,
+      rgba(6,8,6,.72) 28%,
+      rgba(6,8,6,.28) 62%,
+      rgba(6,8,6,0) 100%
+    );
+    pointer-events: none;
   }
 
   .section-label {
+    position: relative;
     text-align: center;
     font-size: .75rem;
     letter-spacing: 4px;
@@ -105,6 +134,7 @@ function formatDate(d: string) {
   }
 
   .scores-grid {
+    position: relative;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 1.5rem;
@@ -190,6 +220,13 @@ function formatDate(d: string) {
     text-align: center;
     color: #111;
   }
+  /* Dar ekranda kısa ad — "Kocaeli Kadın Futbol Kulübü" 4 satıra bölünmesin */
+  .tn-short { display: none; }
+  @media (max-width: 600px) {
+    .tn-full  { display: none; }
+    .tn-short { display: inline; }
+    .team-name { font-size: .8rem; }
+  }
 
   .score-box {
     display: flex;
@@ -206,4 +243,6 @@ function formatDate(d: string) {
   .score-sep { font-size: 1.6rem; color: #bbb; font-weight: 300; }
 
   .match-meta { font-size: .75rem; color: #888; margin-top: 1rem; }
+  /* Lig adı boşken ayraç da basılmıyor */
+  .meta-sep { margin: 0 .5rem; color: #c4c4c4; }
 </style>

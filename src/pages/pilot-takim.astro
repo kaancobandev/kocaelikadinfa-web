@@ -2,7 +2,9 @@
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
+import PageHero from '../components/PageHero.astro';
 import { supabase, type GalleryItem } from '../lib/supabase';
+import { img, imgSet } from '../lib/img';
 
 const [{ data: settingsData }, { data: galleryData }] = await Promise.all([
   supabase.from('hero_settings').select('image_url').eq('id', 2).single(),
@@ -19,16 +21,16 @@ const photos: GalleryItem[] = galleryData ?? [];
 >
   <Navbar />
 
-  <main class="pt-page" style={`--pilot-hero-bg: url('${heroImage}')`}>
+  <main class="pt-page">
 
-    <!-- Başlık -->
-    <section class="page-hero">
-      <div class="page-hero-inner">
-        <span class="tag">Pilot Takım</span>
-        <h1>Kocaeli'nin<br /><span>Şampiyonları</span></h1>
-        <p>Tutkuyla çalışan, disiplinle oynayan ve sahada hiçbir zaman pes etmeyen bir kadro.</p>
-      </div>
-    </section>
+    <PageHero
+      tag="Pilot Takım"
+      title="Kocaeli'nin"
+      accent="Şampiyonları"
+      description="Tutkuyla çalışan, disiplinle oynayan ve sahada hiçbir zaman pes etmeyen bir kadro."
+      minHeight="52vh"
+      image={img(heroImage, 1600, 70)}
+    />
 
     <!-- Yazı -->
     <section class="story-section">
@@ -56,8 +58,15 @@ const photos: GalleryItem[] = galleryData ?? [];
         <div class="photos-grid">
           {photos.map(p => (
             <figure class="photo-card">
-              <div class="photo-media" style={`--img: url('${p.image_url}')`}>
-                <img src={p.image_url} alt={p.caption ?? ''} loading="lazy" />
+              <div class="photo-media">
+                <img
+                  src={img(p.image_url, 800)}
+                  srcset={imgSet(p.image_url)}
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  alt={p.caption ?? ''}
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
               {p.caption && <figcaption>{p.caption}</figcaption>}
             </figure>
@@ -79,61 +88,6 @@ const photos: GalleryItem[] = galleryData ?? [];
 </Layout>
 
 <style>
-  .pt-page { }
-
-  /* ── Sayfa hero ── */
-  .page-hero {
-    min-height: 52vh;
-    display: flex;
-    align-items: center;
-    background:
-      radial-gradient(ellipse 70% 80% at 20% 50%, rgba(26,122,46,0.22) 0%, transparent 65%),
-      linear-gradient(160deg, rgba(13,26,15,0.80) 0%, rgba(10,10,10,0.88) 55%),
-      var(--pilot-hero-bg) center/cover no-repeat;
-    padding: 5rem 8%;
-    position: relative;
-    overflow: hidden;
-  }
-  .page-hero::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image:
-      repeating-linear-gradient(0deg, transparent, transparent 80px, rgba(26,122,46,0.05) 80px, rgba(26,122,46,0.05) 81px),
-      repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(26,122,46,0.05) 80px, rgba(26,122,46,0.05) 81px);
-    pointer-events: none;
-  }
-
-  .page-hero-inner { position: relative; max-width: 680px; }
-
-  .tag {
-    display: inline-block;
-    font-size: .7rem;
-    font-weight: 700;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--green-bright);
-    margin-bottom: 1rem;
-  }
-
-  .page-hero h1 {
-    font-size: clamp(2.8rem, 7vw, 5.5rem);
-    font-weight: 900;
-    line-height: 1.05;
-    letter-spacing: -2px;
-    margin-bottom: 1.2rem;
-  }
-  .page-hero h1 span {
-    background: linear-gradient(135deg, var(--green-bright) 0%, #5dde7c 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .page-hero p {
-    font-size: 1.05rem;
-    color: var(--text-muted);
-    max-width: 460px;
-  }
-
   /* ── Yazı ── */
   .story-section {
     padding: 6rem 8%;
@@ -178,8 +132,8 @@ const photos: GalleryItem[] = galleryData ?? [];
     margin-bottom: 2.5rem;
   }
   .partner-logo {
-    height: 200px;
-    width: 200px;
+    width: clamp(130px, 26vw, 200px);
+    height: clamp(130px, 26vw, 200px);
     object-fit: contain;
     border-radius: 50%;
     border: 2px solid var(--border);
@@ -209,56 +163,58 @@ const photos: GalleryItem[] = galleryData ?? [];
     border-radius: 2px;
   }
 
+  /* Kolon bazlı masonry: fotoğraflar kendi oranlarında, bulanık dolgu yok */
   .photos-grid {
+    /* Eşit boyutlu kutular: kolon sayısı ekrana göre değişir,
+       kutu genişliği kolondan gelir, yükseklik --pt-photo-h ile sabittir. */
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1.2rem;
+
+    --pt-photo-h: 260px;
   }
-  @media (max-width: 768px) {
-    .photos-grid { grid-template-columns: 1fr; }
+  @media (max-width: 980px) {
+    .photos-grid { grid-template-columns: repeat(2, 1fr); --pt-photo-h: 240px; }
+  }
+  @media (max-width: 640px) {
+    .photos-grid { grid-template-columns: 1fr; --pt-photo-h: 250px; }
+  }
+  @media (max-width: 400px) {
+    .photos-grid { --pt-photo-h: 210px; }
   }
 
   .photo-card {
     border-radius: var(--radius);
     overflow: hidden;
     border: 1px solid var(--border);
+    background: var(--card-bg);
+    display: flex;
+    flex-direction: column;
     transition: transform .3s, box-shadow .3s;
   }
   .photo-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 32px rgba(0,0,0,.5);
   }
+
+  /* Tanımlı yükseklik + kolon genişliği → tüm kutular birebir aynı boyutta */
   .photo-media {
-    position: relative;
-    aspect-ratio: 3 / 4;
+    height: var(--pt-photo-h);
     overflow: hidden;
-    background: #0a0a0a;
+    flex-shrink: 0;
   }
-  /* Bulanık dolgu: boş kenarları fotoğrafın kendisiyle doldurur */
-  .photo-media::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    background-image: var(--img);
-    background-size: cover;
-    background-position: center;
-    filter: blur(22px) brightness(.4);
-    transform: scale(1.2);
-  }
-  /* Asıl fotoğraf: kırpılmadan, ortalanmış şekilde tamamı görünür */
   .photo-card img {
-    position: relative;
-    z-index: 1;
+    display: block;
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    display: block;
+    object-fit: cover;
+    object-position: center 40%;
     transition: transform .4s;
   }
-  .photo-card:hover img { transform: scale(1.04); }
+  .photo-card:hover img { transform: scale(1.03); }
 
   figcaption {
+    /* Görselin hemen altında; artan yükseklik kartın dibinde kalır */
     background: var(--card-bg);
     padding: .8rem 1rem;
     font-size: .8rem;

@@ -1,0 +1,126 @@
+---
+/**
+ * Sayfa başlığı bloğu.
+ *
+ * Bu blok (ızgara deseni + degrade + vurgulu başlık) daha önce 7 sayfada
+ * birebir kopyalanmıştı. Tek yerde toplandı; sayfalar yalnızca farklılıkları
+ * prop olarak veriyor.
+ */
+interface Props {
+  /** Üstteki küçük etiket — ör. "Son Dakika" */
+  tag?: string;
+  /** Başlığın ilk satırı */
+  title: string;
+  /** Başlığın yeşil degradeli ikinci satırı */
+  accent?: string;
+  /** Başlık altındaki açıklama */
+  description?: string;
+  /** Bölüm yüksekliği — ör. "38vh" */
+  minHeight?: string;
+  /** Arka plan fotoğrafı (CSS url değeri hazır gelmeli) */
+  image?: string;
+  /** Metin hizası */
+  align?: 'left' | 'right';
+  /** Başlık boyutu için clamp üst sınırı */
+  maxTitle?: string;
+}
+
+const {
+  tag,
+  title,
+  accent,
+  description,
+  minHeight = '40vh',
+  image,
+  align = 'left',
+  maxTitle = '5.5rem',
+} = Astro.props;
+---
+
+<section
+  class:list={['page-hero', { 'has-image': !!image, right: align === 'right' }]}
+  style={`--ph-min:${minHeight};--ph-max-title:${maxTitle};${image ? `--ph-image:url('${image}');` : ''}`}
+>
+  <div class="page-hero-inner">
+    {tag && <span class="ph-tag">{tag}</span>}
+    <h1>
+      {title}{accent && <><br /><span>{accent}</span></>}
+    </h1>
+    {description && <p class="ph-desc">{description}</p>}
+    <slot />
+  </div>
+</section>
+
+<style>
+  .page-hero {
+    min-height: var(--ph-min);
+    display: flex;
+    align-items: center;
+    padding: 5rem 8%;
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 60% 80% at 50% 50%, rgba(26,122,46,0.20) 0%, transparent 65%),
+      linear-gradient(160deg, #0d1a0f 0%, var(--black) 60%);
+  }
+
+  /* Fotoğraflı varyant: görsel en altta, üstüne koyulaştırma */
+  .page-hero.has-image {
+    background:
+      radial-gradient(ellipse 70% 80% at 50% 50%, rgba(26,122,46,0.22) 0%, transparent 65%),
+      linear-gradient(160deg, rgba(10,10,10,0.88) 0%, rgba(13,26,15,0.80) 55%),
+      var(--ph-image) center / cover no-repeat;
+  }
+
+  /* İnce ızgara dokusu */
+  .page-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      repeating-linear-gradient(0deg,  transparent, transparent 80px, rgba(26,122,46,0.05) 80px, rgba(26,122,46,0.05) 81px),
+      repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(26,122,46,0.05) 80px, rgba(26,122,46,0.05) 81px);
+  }
+
+  .page-hero-inner {
+    position: relative;
+    max-width: 680px;
+  }
+  .page-hero.right .page-hero-inner { margin-left: auto; text-align: right; }
+  .page-hero.right .ph-desc { margin-left: auto; }
+
+  .ph-tag {
+    display: inline-block;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--green-bright);
+    margin-bottom: 1rem;
+  }
+
+  .page-hero h1 {
+    font-size: clamp(2.4rem, 7vw, var(--ph-max-title));
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 1.2rem;
+  }
+  .page-hero h1 span {
+    background: linear-gradient(135deg, var(--green-bright) 0%, #5dde7c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .ph-desc {
+    font-size: 1rem;
+    color: var(--text-muted);
+    max-width: 460px;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 600px) {
+    .page-hero { padding: 4rem 6%; }
+  }
+</style>
