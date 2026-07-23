@@ -2,6 +2,7 @@
 import { supabase, type Match } from '../lib/supabase';
 import { img } from '../lib/img';
 import { shortTeamName } from '../lib/news';
+import NumberTicker from './NumberTicker.astro';
 
 // Tüm maçları çek, her kategoriden (badge) en son eklenen maçı göster
 const { data } = await supabase
@@ -59,9 +60,9 @@ function formatDate(d: string) {
           </div>
 
           <div class="score-box">
-            <span class="score-num">{m.score_home}</span>
+            <span class="score-num"><NumberTicker value={m.score_home} /></span>
             <span class="score-sep">–</span>
-            <span class="score-num">{m.score_away}</span>
+            <span class="score-num"><NumberTicker value={m.score_away} /></span>
           </div>
 
           <div class="team away">

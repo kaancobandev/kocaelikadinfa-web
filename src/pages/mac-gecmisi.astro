@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 import PageHero from '../components/PageHero.astro';
+import NumberTicker from '../components/NumberTicker.astro';
 import { supabase, type Match } from '../lib/supabase';
 
 const { data } = await supabase
@@ -108,9 +109,9 @@ function stats(list: Match[]) {
                   </div>
 
                   <div class="score-center">
-                    <span class="score-big">{m.score_home}</span>
+                    <span class="score-big"><NumberTicker value={m.score_home} /></span>
                     <span class="score-sep">–</span>
-                    <span class="score-big">{m.score_away}</span>
+                    <span class="score-big"><NumberTicker value={m.score_away} /></span>
                   </div>
 
                   <div class="team-side away">

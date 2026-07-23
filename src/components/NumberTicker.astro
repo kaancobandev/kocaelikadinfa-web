@@ -1,0 +1,82 @@
+---
+/**
+ * NumberTicker — Magic UI portu (bağımlılıksız, saf JS).
+ *
+ * Öğe görünüme girdiğinde sayı `start` değerinden `value`'ya doğru
+ * animasyonla sayar. SSR'de gerçek değer basılır; böylece JavaScript
+ * kapalıyken ve arama motorları için doğru skor görünür. Script yalnızca
+ * animasyonu yönetir (görünene kadar start değerini gösterir).
+ */
+interface Props {
+  value: number;
+  start?: number;
+  duration?: number;   // ms
+  class?: string;
+}
+const { value, start = 0, duration = 1000, class: className } = Astro.props;
+---
+
+<span
+  class:list={['num-ticker', className]}
+  data-value={value}
+  data-start={start}
+  data-duration={duration}
+>{value}</span><script is:inline>
+  /* Boyamadan ÖNCE (senkron) başlangıç değerine indir; böylece görünümdeki
+     skorlarda gerçek değer bir an görünüp sıfıra düşme sıçraması olmaz.
+     JS kapalıysa bu çalışmaz ve SSR'deki gerçek değer korunur. */
+  (function () {
+    var s = document.currentScript, el = s && s.previousElementSibling;
+    if (el && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      el.textContent = el.getAttribute('data-start') || '0';
+    }
+  })();
+</script>
+
+<style>
+  /* Rakam genişliği sabit kalsın — sayarken zıplama olmasın */
+  .num-ticker { font-variant-numeric: tabular-nums; }
+</style>
+
+<script>
+  // Astro bu script'i sayfa başına bir kez üretir (bileşen kaç kez
+  // kullanılırsa kullanılsın), tüm .num-ticker öğelerini yönetir.
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function animate(el: HTMLElement) {
+    const target = Number(el.dataset.value ?? '0');
+    const from   = Number(el.dataset.start ?? '0');
+    const dur    = Number(el.dataset.duration ?? '1000');
+    const t0 = performance.now();
+
+    function frame(now: number) {
+      const p = Math.min((now - t0) / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3);              // easeOutCubic — yay gibi yumuşak
+      el.textContent = String(Math.round(from + (target - from) * eased));
+      if (p < 1) requestAnimationFrame(frame);
+      else el.textContent = String(target);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  const tickers = document.querySelectorAll<HTMLElement>('.num-ticker');
+
+  if (reduce) {
+    // Hareket azaltma tercihi: doğrudan gerçek değeri göster
+    tickers.forEach(el => { el.textContent = el.dataset.value ?? el.textContent; });
+  } else {
+    // Başlangıç değerine indir, görünüme girince say
+    tickers.forEach(el => { el.textContent = el.dataset.start ?? '0'; });
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          animate(e.target as HTMLElement);
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.6 });
+
+    tickers.forEach(el => io.observe(el));
+  }
+</script>
