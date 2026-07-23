@@ -12,15 +12,24 @@ const links = [
 <nav class="navbar" id="navbar">
   <a class="nav-logo" href="/">
     <img src="/logo.jpeg" alt="Kocaeli Kadın FA Logo" class="logo-img" />
-    <span class="logo-text">Kocaeli Kadın Futbol Kulübü</span>
+    <span class="logo-text">
+      <span class="logo-text-full">Kocaeli Kadın Futbol Kulübü</span>
+      <span class="logo-text-short">Kocaeli Kadın FK</span>
+    </span>
   </a>
 
-  <input type="checkbox" id="nav-toggle" class="nav-toggle" />
-  <label for="nav-toggle" class="nav-burger" aria-label="Menü">
+  <button
+    type="button"
+    id="nav-toggle"
+    class="nav-burger"
+    aria-label="Menüyü aç"
+    aria-expanded="false"
+    aria-controls="nav-links"
+  >
     <span></span><span></span><span></span>
-  </label>
+  </button>
 
-  <ul class="nav-links">
+  <ul class="nav-links" id="nav-links">
     {links.map(l => (
       <li><a href={l.href}>{l.label}</a></li>
     ))}
@@ -66,14 +75,20 @@ const links = [
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
-
-  .nav-toggle { display: none; }
+  .logo-text-short { display: none; }
 
   .nav-burger {
     display: none;
     flex-direction: column;
+    justify-content: center;
     gap: 5px;
     cursor: pointer;
+    /* Gerçek buton: klavyeyle odaklanabilir ve Enter/Space ile açılır */
+    background: none;
+    border: none;
+    padding: 10px 6px;
+    margin: -10px -6px;
+    border-radius: 6px;
   }
   .nav-burger span {
     display: block;
@@ -81,6 +96,10 @@ const links = [
     background: var(--text);
     border-radius: 2px;
     transition: .3s;
+  }
+  .nav-burger:focus-visible {
+    outline: 2px solid var(--green-bright);
+    outline-offset: 2px;
   }
 
   .nav-links {
@@ -110,7 +129,10 @@ const links = [
   .btn-join:hover { background: var(--green-mid) !important; transform: translateY(-1px); }
 
   @media (max-width: 768px) {
-    .logo-text { font-size: .75rem; letter-spacing: 1.5px; }
+    /* Tek satırda kalması için kısa ad */
+    .logo-text { font-size: .95rem; letter-spacing: 1px; white-space: nowrap; }
+    .logo-text-full  { display: none; }
+    .logo-text-short { display: inline; }
 
     .nav-burger { display: flex; }
 
@@ -125,9 +147,16 @@ const links = [
       padding: 0.5rem 0 2rem;
       transform: translateY(-110%);
       opacity: 0;
-      transition: transform .35s ease, opacity .3s ease;
+      /* Kapalıyken klavyeyle içine sekme yapılamasın.
+         visibility kapanışta animasyon bitince, açılışta ise anında değişsin. */
+      visibility: hidden;
+      transition: transform .35s ease, opacity .3s ease, visibility 0s linear .35s;
       border-bottom: 1px solid var(--border);
       z-index: 999;
+    }
+    .navbar.nav-open .nav-links {
+      visibility: visible;
+      transition: transform .35s ease, opacity .3s ease, visibility 0s;
     }
     .nav-links li { width: 100%; text-align: center; }
     .nav-links a {
@@ -138,28 +167,28 @@ const links = [
     }
     .nav-links li:last-child a { border-bottom: none; }
 
-    .nav-toggle:checked ~ .nav-links {
+    .navbar.nav-open .nav-links {
       transform: translateY(0);
       opacity: 1;
     }
 
     /* Burger → X animasyonu */
-    .nav-toggle:checked ~ .nav-burger span:nth-child(1) {
+    .nav-burger[aria-expanded='true'] span:nth-child(1) {
       transform: translateY(7px) rotate(45deg);
     }
-    .nav-toggle:checked ~ .nav-burger span:nth-child(2) {
+    .nav-burger[aria-expanded='true'] span:nth-child(2) {
       opacity: 0;
       transform: scaleX(0);
     }
-    .nav-toggle:checked ~ .nav-burger span:nth-child(3) {
+    .nav-burger[aria-expanded='true'] span:nth-child(3) {
       transform: translateY(-7px) rotate(-45deg);
     }
   }
 </style>
 
 <script>
-  const navbar  = document.getElementById('navbar');
-  const toggle  = document.getElementById('nav-toggle') as HTMLInputElement | null;
+  const navbar = document.getElementById('navbar');
+  const toggle = document.getElementById('nav-toggle') as HTMLButtonElement | null;
 
   // iOS Safari sticky fix: boş touchstart ile dokunma olayları etkinleşir
   navbar?.addEventListener('touchstart', () => {}, { passive: true });
@@ -169,17 +198,32 @@ const links = [
     navbar?.classList.toggle('scrolled', window.scrollY > 60);
   });
 
-  // Mobil: linke tıklayınca menüyü kapat
-  document.querySelectorAll('.nav-links a').forEach(link => {
-    link.addEventListener('click', () => {
-      if (toggle) toggle.checked = false;
-    });
+  function setMenu(open: boolean) {
+    navbar?.classList.toggle('nav-open', open);
+    toggle?.setAttribute('aria-expanded', String(open));
+    toggle?.setAttribute('aria-label', open ? 'Menüyü kapat' : 'Menüyü aç');
+  }
+
+  toggle?.addEventListener('click', () => {
+    setMenu(toggle.getAttribute('aria-expanded') !== 'true');
   });
 
-  // Logo tıklamasında menüyü kapat ve anasayfaya git
-  const logo = document.querySelector('.nav-logo') as HTMLAnchorElement | null;
-  logo?.addEventListener('click', (e) => {
-    if (toggle) toggle.checked = false;
-    // href="/" zaten var, navigate etmesine izin ver
+  // Escape ile kapat, odağı butona geri ver
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && toggle?.getAttribute('aria-expanded') === 'true') {
+      setMenu(false);
+      toggle.focus();
+    }
+  });
+
+  // Menü dışına tıklayınca kapat
+  document.addEventListener('click', e => {
+    if (toggle?.getAttribute('aria-expanded') !== 'true') return;
+    if (!navbar?.contains(e.target as Node)) setMenu(false);
+  });
+
+  // Mobil: linke tıklayınca menüyü kapat (logo dahil)
+  document.querySelectorAll('.nav-links a, .nav-logo').forEach(link => {
+    link.addEventListener('click', () => setMenu(false));
   });
 </script>
