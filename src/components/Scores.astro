@@ -94,26 +94,8 @@ function formatDate(d: string) {
 
 <style>
   .scores-section {
-    position: relative;
-    background: #ffffff;
+    background: var(--black);
     padding: 5rem 5% 4rem;
-    border-bottom: 1px solid #e8e8e8;
-  }
-  /* Siyahtan beyaza yumuşak geçiş — sert kesik yerine.
-     Renk katmadan sadece karanlığı söndürüyor. */
-  .scores-section::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 120px;
-    background: linear-gradient(
-      to bottom,
-      var(--black) 0%,
-      rgba(6,8,6,.72) 28%,
-      rgba(6,8,6,.28) 62%,
-      rgba(6,8,6,0) 100%
-    );
-    pointer-events: none;
   }
 
   .section-label {
@@ -122,7 +104,7 @@ function formatDate(d: string) {
     font-size: .75rem;
     letter-spacing: 4px;
     text-transform: uppercase;
-    color: var(--green);
+    color: var(--green-bright);
     margin-bottom: 2.5rem;
     font-weight: 700;
   }
@@ -148,8 +130,8 @@ function formatDate(d: string) {
   }
 
   .score-card {
-    background: #fff;
-    border: 1.5px solid #e0e0e0;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 1.8rem 2rem;
     text-align: center;
@@ -197,8 +179,8 @@ function formatDate(d: string) {
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    border: 1.5px solid #e0e0e0;
-    background: #f5f5f5;
+    border: 1px solid var(--border);
+    background: #0a0d0a;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -217,7 +199,7 @@ function formatDate(d: string) {
   .team-logo-fallback {
     font-size: .75rem;
     font-weight: 900;
-    color: var(--green);
+    color: var(--green-bright);
     letter-spacing: 1px;
     align-items: center;
     justify-content: center;
@@ -227,7 +209,7 @@ function formatDate(d: string) {
     font-weight: 700;
     font-size: .85rem;
     text-align: center;
-    color: #111;
+    color: var(--text);
   }
   /* Dar ekranda kısa ad — "Kocaeli Kadın Futbol Kulübü" 4 satıra bölünmesin */
   .tn-short { display: none; }
@@ -246,10 +228,10 @@ function formatDate(d: string) {
   .score-num {
     font-size: 2.4rem;
     font-weight: 900;
-    color: var(--green);
+    color: var(--green-bright);
     line-height: 1;
   }
-  .score-sep { font-size: 1.6rem; color: #bbb; font-weight: 300; }
+  .score-sep { font-size: 1.6rem; color: var(--text-muted); font-weight: 300; }
 
   .match-meta { font-size: .75rem; color: #888; margin-top: 1rem; }
   /* Lig adı boşken ayraç da basılmıyor */

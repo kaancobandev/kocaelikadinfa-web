@@ -96,9 +96,9 @@ const photos: GalleryItem[] = data ?? [];
 <style>
   /* ── Metin bölümü ── */
   .text-section {
-    background: #ffffff;
-    border-top: 3px solid var(--green);
-    border-bottom: 1px solid #e8e8e8;
+    background: var(--dark);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
     padding: 5rem 8%;
   }
   .text-inner { max-width: 760px; margin: 0 auto; }
@@ -110,25 +110,25 @@ const photos: GalleryItem[] = data ?? [];
   }
   .paragraphs p {
     font-size: 1.05rem;
-    color: #222;
+    color: var(--text-muted);
     line-height: 1.85;
   }
 
   .quote-block {
-    border-left: 4px solid var(--green);
+    border-left: 4px solid var(--green-bright);
     padding: 1.2rem 2rem;
-    background: #f4faf5;
+    background: rgba(13,77,30,0.15);
     border-radius: 0 10px 10px 0;
   }
   .quote-text {
     font-size: 1.2rem !important;
     font-weight: 900 !important;
-    color: var(--green) !important;
+    color: var(--green-bright) !important;
     margin-bottom: .4rem;
   }
   .quote-sub {
     font-size: .95rem !important;
-    color: #444 !important;
+    color: var(--text-muted) !important;
     font-style: italic;
   }
 

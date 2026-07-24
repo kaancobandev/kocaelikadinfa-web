@@ -81,26 +81,8 @@ function isYoutube(url: string): boolean {
 
 <style>
   .video-section {
-    position: relative;
     padding: 6rem 5%;
-    background: #ffffff;
-  }
-  /* Siyah bölümlere yumuşak geçiş — üstte ve altta */
-  .video-section::before,
-  .video-section::after {
-    content: '';
-    position: absolute;
-    left: 0; right: 0;
-    height: 120px;
-    pointer-events: none;
-  }
-  .video-section::before {
-    top: 0;
-    background: linear-gradient(to bottom, var(--black) 0%, rgba(6,8,6,.72) 28%, rgba(6,8,6,.28) 62%, rgba(6,8,6,0) 100%);
-  }
-  .video-section::after {
-    bottom: 0;
-    background: linear-gradient(to top, var(--black) 0%, rgba(6,8,6,.72) 28%, rgba(6,8,6,.28) 62%, rgba(6,8,6,0) 100%);
+    background: var(--black);
   }
   .video-section-inner,
   .video-grid { position: relative; }
@@ -109,12 +91,12 @@ function isYoutube(url: string): boolean {
     max-width: 600px;
     margin-bottom: 3rem;
   }
-  .video-section-inner .section-tag { color: var(--green); }
+  .video-section-inner .section-tag { color: var(--green-bright); }
   .video-section-inner h2 {
     font-size: clamp(1.8rem, 4vw, 2.6rem);
     font-weight: 900;
     margin-top: .6rem;
-    color: #111;
+    color: var(--text);
   }
 
   .btn-all {
@@ -127,7 +109,7 @@ function isYoutube(url: string): boolean {
     letter-spacing: .5px;
     transition: color .2s;
   }
-  .btn-all:hover { color: #111; }
+  .btn-all:hover { color: var(--text); }
 
   /* Kolon bazlı masonry: fotoğraflar kendi oranlarında */
   .video-grid {
@@ -139,8 +121,8 @@ function isYoutube(url: string): boolean {
   .video-card {
     break-inside: avoid;
     margin-bottom: 1.5rem;
-    background: #fff;
-    border: 1.5px solid #e0e0e0;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
     border-radius: var(--radius);
     overflow: hidden;
     transition: border-color .25s, box-shadow .25s, transform .2s;
@@ -169,7 +151,7 @@ function isYoutube(url: string): boolean {
   }
   .video-info p {
     font-size: .85rem;
-    color: #666;
+    color: var(--text-muted);
     line-height: 1.5;
   }
 
@@ -211,8 +193,8 @@ function isYoutube(url: string): boolean {
     display: block;
     padding: .6rem .9rem;
     font-size: .82rem;
-    color: #666;
-    background: #fff;
+    color: var(--text-muted);
+    background: var(--card-bg);
     text-align: left;
   }
 
