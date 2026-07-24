@@ -81,12 +81,10 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
   }
   .card:hover { background: var(--card-bg); }
 
-  /* Fotoğraflar kırpılmadan çerçeveye sığdırılıyor. Haber görselleri
-     Instagram formatında geliyor (1:1 kare veya 3:4 dikey), bu yüzden
-     çerçeve kare: kare görsel boşluksuz oturuyor, dikey görsel de
-     yüksekliği tamamen dolduruyor.
-     Tavan yalnızca 1920px üstü ekranlarda devreye girer; daha düşük
-     tutulunca kare oran bozuluyor ve kare görselde bile boşluk kalıyor. */
+  /* Haber görselleri Instagram formatında geliyor (1:1 kare veya 3:4
+     dikey), bu yüzden çerçeve kare: kare görseller hiç kırpılmadan tam
+     oturuyor, 3:4 dikey olanlar yalnızca %25 kırpılıyor.
+     Tavan yalnızca 1920px üstü ekranlarda devreye girer. */
   .card-img {
     position: relative;
     aspect-ratio: 1 / 1;
@@ -104,16 +102,17 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
     inset: 0;
     background: #070907;
   }
-  /* Fotoğrafın tamamı görünür, yatayda ve dikeyde ortalanmış */
+  /* Çerçeve boşluksuz doluyor. Kırpma odağı ortanın biraz üstünde:
+     başlık grafikleri ve yüzler görselin üst yarısında oluyor, kayıp
+     ağırlıkla alttan veriliyor. */
   .card-img-fg {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    object-position: 50% 50%;
+    object-fit: cover;
+    object-position: 50% 35%;
     display: block;
-    margin: 0 auto;
   }
   /* Alt kenarda karta yumuşak geçiş */
   .card-img::after {
