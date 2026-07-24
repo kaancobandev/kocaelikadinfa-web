@@ -26,8 +26,8 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
         <img
           class="card-img-fg"
           src={img(n?.image_url, 800) || fallbackImg}
-          srcset={imgSet(n?.image_url)}
-          sizes="(max-width: 900px) 100vw, 33vw"
+          srcset={imgSet(n?.image_url, [400, 800, 1200])}
+          sizes="(max-width: 900px) min(100vw, 460px), 33vw"
           alt={n?.title ?? 'Haber görseli'}
           loading="lazy"
           decoding="async"
@@ -69,40 +69,51 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
   .card:last-child { border-right: none; }
   .card:hover { background: var(--card-bg); }
 
-  /* Sabit oran, ama tavanla sınırlı: geniş ekranda kart aşırı uzamıyor */
+  /* Fotoğraflar kırpılmadan çerçeveye sığdırılıyor. Görsellerin çoğu
+     3:4 dikey olduğu için kare çerçeve hem dikeyde hem yatayda en az
+     boşluk bırakan orta noktadır: dikey fotoğraf yüksekliği tamamen,
+     yatay fotoğraf genişliği tamamen doldurur. */
   .card-img {
     position: relative;
-    aspect-ratio: 3 / 4;
-    max-height: var(--card-media-max-h);
+    aspect-ratio: 1 / 1;
+    max-height: 520px;
     overflow: hidden;
     background: #080808;
   }
-  /* Tek kolona düşünce oranı koruyup yüksekliği sınırlıyoruz */
+  /* Tek kolonda kart tam genişliğe yayılıyor; çerçeveyi de büyütürsek
+     dikey fotoğrafın iki yanında dev boşluk kalıyor. Bu yüzden görsel
+     bloğunun genişliğini sınırlayıp ortalıyoruz. */
   @media (max-width: 900px) {
-    .card-img { max-height: 440px; }
+    .card-img {
+      max-width: 460px;
+      max-height: none;
+      margin-inline: auto;
+      width: 100%;
+    }
   }
-  /* Bulanık leke yerine düz koyu panel */
+  /* Görsel yüklenene kadar görünen koyu zemin */
   .card-img-bg {
     position: absolute;
     inset: 0;
-    background: linear-gradient(160deg, #141814 0%, #0a0d0a 100%);
+    background: #070907;
   }
-  /* Asıl fotoğraf: kırpılmadan, ortalanmış şekilde tamamı görünür */
+  /* Fotoğrafın tamamı görünür, yatayda ve dikeyde ortalanmış */
   .card-img-fg {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: contain;
-    object-position: center;
+    object-position: 50% 50%;
     display: block;
+    margin: 0 auto;
   }
   /* Alt kenarda karta yumuşak geçiş */
   .card-img::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, transparent 68%, rgba(0,0,0,.8) 100%);
+    background: linear-gradient(to bottom, transparent 78%, rgba(0,0,0,.5) 100%);
     pointer-events: none;
   }
 
