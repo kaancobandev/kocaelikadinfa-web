@@ -137,7 +137,11 @@ function formatDate(d: string) {
   .scores-grid {
     position: relative;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    /* min() olmadan kolon tabanı 320px'de sabitleniyor; 320px'lik
+       ekranda dolgudan sonra 288px yer kaldığı için kart taşıyor ve
+       sayfa yatay kayıyordu (o zaman diğer bölümler sola kaymış
+       görünüyor). min(320px, 100%) tabanı dar ekranda kaldırıyor. */
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
     gap: 1.5rem;
     max-width: 900px;
     margin: 0 auto;
@@ -150,6 +154,10 @@ function formatDate(d: string) {
     padding: 1.8rem 2rem;
     text-align: center;
     transition: border-color .25s, box-shadow .25s, transform .2s;
+  }
+  /* Çok dar ekranda 2rem yan dolgu takım adlarına yer bırakmıyor */
+  @media (max-width: 380px) {
+    .score-card { padding: 1.5rem 1rem; }
   }
   .score-card:hover {
     border-color: var(--green);
