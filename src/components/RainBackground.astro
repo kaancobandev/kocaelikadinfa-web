@@ -11,6 +11,27 @@
 
 <div class="rain-bg" aria-hidden="true"></div>
 
+<script is:inline>
+  // Yağmur, background-position animasyonuyla çalışıyor. Bu özellik
+  // GPU'da birleştirilemediği için tam ekran katman her karede yeniden
+  // boyanıyor ve sayfayı kaydırmak tökezliyor (ölçüm: kare süresi
+  // 21 ms -> 49 ms). Kaydırma sürerken animasyonu duraklatıyoruz;
+  // kaydırma bitince kaldığı yerden devam ediyor. Hareket hâlindeyken
+  // yağmurun durduğu fark edilmiyor, kaydırma ise akıcı kalıyor.
+  (function () {
+    var el = document.querySelector('.rain-bg');
+    if (!el) return;
+    var zamanlayici = null;
+    window.addEventListener('scroll', function () {
+      el.classList.add('rain-duraklat');
+      if (zamanlayici) clearTimeout(zamanlayici);
+      zamanlayici = setTimeout(function () {
+        el.classList.remove('rain-duraklat');
+      }, 180);
+    }, { passive: true });
+  })();
+</script>
+
 <style>
   /* Giriş animasyonu oynarken yağmur tamamen kapanır. Perde opak olduğu
      için zaten görünmüyor; ama backdrop-filter + 36 gradyanlı animasyon
@@ -76,6 +97,8 @@
       300px 210px, 300px 210px, 300px 210px;
     animation: rain-fall 150s linear infinite;
   }
+  /* Kaydırma sürerken duraklar — bkz. yukarıdaki script */
+  .rain-bg.rain-duraklat { animation-play-state: paused; }
 
   /* Damlaların üzerine ızgara desenli parlama katmanı */
   .rain-bg::after {
