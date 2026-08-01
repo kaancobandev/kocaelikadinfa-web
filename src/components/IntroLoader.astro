@@ -170,25 +170,39 @@
     function sahneyiBaslat() {
       if (basladi || bitti) return;
       basladi = true;
-      if (video) {
-        // currentTime'a dokunulmuyor: element zaten 0'dan başlıyor ve
-        // gereksiz seek, ilk karenin basılmasını geciktiriyor.
-        oynat();
-        // play() sessizce reddedilirse (otomatik oynatma engeli, iOS
-        // düşük güç modu) video 0. karede donar; o kare neredeyse siyah
-        // olduğu için ekranda hiçbir şey görünmez. Birkaç kez deneriz.
-        var deneme = 0;
-        var nabiz = setInterval(function () {
-          if (bitti || ++deneme > 6 || (!video.paused && video.currentTime > 0)) {
-            clearInterval(nabiz);
-            return;
-          }
-          oynat();
-        }, 250);
-      }
       perde.classList.add('plate-hazir');
-      zam.push(setTimeout(function () { perde.classList.add('kilit'); }, KILIT));
-      zam.push(setTimeout(bitir, ACILIS));
+
+      // OYNATMA İLK BOYAMAYA KADAR ERTELENİR. Aksi hâlde video, sayfa
+      // hâlâ yükleniyorken (ayrıştırma sırasında) oynamaya başlıyor;
+      // ana iş parçacığı meşgulken hiçbir kare ekrana basılamıyor ama
+      // medya saati gerçek zamanda akmaya devam ediyor. Yavaş makinede
+      // tarayıcı ilk kareyi basabildiğinde yıldız akışı (0.1-1.2 sn)
+      // çoktan bitmiş oluyor; geriye yalnızca sönmüş parıltı kalıyor.
+      // İç içe iki rAF, tarayıcı gerçekten boyayabilene kadar bekler.
+      var raf = window.requestAnimationFrame || function (f) { return setTimeout(f, 16); };
+      raf(function () {
+        raf(function () {
+          if (bitti) return;
+          if (video) {
+            oynat();
+            // play() sessizce reddedilirse (otomatik oynatma engeli, iOS
+            // düşük güç modu) video 0. karede donar; o kare neredeyse
+            // siyah olduğu için hiçbir şey görünmez. Birkaç kez deneriz.
+            var deneme = 0;
+            var nabiz = setInterval(function () {
+              if (bitti || ++deneme > 6 || (!video.paused && video.currentTime > 0)) {
+                clearInterval(nabiz);
+                return;
+              }
+              oynat();
+            }, 250);
+          }
+          // Kapanış sayacı da buradan başlar: perde, videonun görünür
+          // olduğu andan itibaren ölçülen süre kadar açık kalsın.
+          zam.push(setTimeout(function () { perde.classList.add('kilit'); }, KILIT));
+          zam.push(setTimeout(bitir, ACILIS));
+        });
+      });
     }
 
     if (video) {
