@@ -1,12 +1,18 @@
 ---
-// Siteye giriş animasyonu — KKFK teknik-çizim temalı.
-// Kaynak: kkfk-giris-animasyonu.html (Higgsfield çizimleri + arma).
-// Gömülü base64 görseller public/img/kfk/ altına dosya olarak çıkarıldı.
+// Siteye giriş animasyonu — "Yıldız Akışı" (Higgsfield plate videosu).
+// Kaynak: kkfk-yildiz-akisi-higgsfield.html
 //
-// Davranış: oturum başına BİR kez oynar; reduced-motion tercihinde atlanır.
-// Overlay'den önce çalışan script "atla" durumunu belirleyip flash'ı önler;
-// paftalar yalnızca animasyon gerçekten oynayacaksa JS ile üretilir, böylece
-// atlandığında hiç görsel indirilmez.
+// Yıldızlar 4 köşeden armaya akar (Higgsfield'de üretilmiş video plate,
+// mix-blend-mode:screen ile siyah zemin şeffaflaşır), arma dokunulmamış
+// orijinal olarak plate'in ÜSTÜNDE durur. Video yüklenmezse arkadaki
+// yeşil ışık devralır.
+//
+// Altyapı davranışı: oturum başına BİR kez oynar; reduced-motion'da
+// atlanır; overlay'den önce çalışan pre-paint script flash'ı önler.
+// Video ve arma yalnızca animasyon oynayacaksa indirilir (atlanırsa
+// 2.8MB'lık video hiç istenmez).
+//
+// Varlıklar: public/intro/kkfk-plate.mp4, public/intro/arma.webp
 ---
 
 <script is:inline>
@@ -18,313 +24,154 @@
       else sessionStorage.setItem('kkfa-intro-seen', '1');
     } catch (e) { /* gizli sekme vb. → her açılışta oynasın */ }
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) skip = true;
-    root.classList.add(skip ? 'kfk-skip' : 'kfk-playing');
+    root.classList.add(skip ? 'kkfk-skip' : 'kkfk-playing');
   })();
 </script>
 
-<div class="kfk" id="kfk" role="presentation" aria-hidden="true">
-  <div class="kfk__grid"></div>
-  <div class="kfk__scan"></div>
+<div id="kkfk-intro" role="presentation" aria-hidden="true">
+  <div class="yedek-isik"></div>
 
-  <div class="kfk__stage">
-    <div class="kfk__frame">
+  <!-- Higgsfield plate — src JS ile atanır (atlanınca indirilmesin) -->
+  <video class="plate" muted loop playsinline preload="auto"></video>
 
-      <div class="kfk__imgs" id="kfkImgs"></div>
+  <!-- Dokunulmamış arma — src JS ile atanır -->
+  <div class="arma"><img alt="" decoding="async" /></div>
 
-      <svg class="kfk__draft" viewBox="0 0 600 600" aria-hidden="true">
-        <g class="kfk-ring">
-          <circle data-draw pathLength="1" cx="300" cy="300" r="238"
-                  stroke="rgba(63,209,115,.7)" stroke-width="1.5" transform="rotate(-90 300 300)"></circle>
-          <path data-draw pathLength="1"
-                d="M36 92 V36 H92 M508 36 H564 V92 M564 508 V564 H508 M92 564 H36 V508"
-                stroke="rgba(63,209,115,.55)" stroke-width="1.5"></path>
-          <g id="kfkTicks"></g>
-        </g>
-      </svg>
-
-      <div class="kfk__mark" role="img" aria-label="Kocaeli Kadın Futbol Kulübü arması">
-        <div class="kfk__logo"></div>
-        <div class="kfk__shine"></div>
-      </div>
-
-      <span class="kfk__readout"><b>01</b></span>
-    </div>
-
-    <div class="kfk__ribbon" aria-hidden="true"><i></i><i></i></div>
-  </div>
-
-  <div class="kfk__vignette"></div>
+  <button class="gec" type="button">Geç</button>
 </div>
 
 <noscript>
-  <style>#kfk { display: none !important; }</style>
+  <style>#kkfk-intro { display: none !important; }</style>
 </noscript>
 
-<style is:global>
-  /* Bu bloklar dinamik üretilen .kfk-img öğelerini de kapsasın diye global. */
-
-  .kfk {
-    --ink:  #040806;
-    --halo: #3FD173;
-    --grid:      rgba(63,209,115,.10);
-    --grid-fine: rgba(63,209,115,.042);
-    --kfk-logo: url("/img/kfk/logo.png");
-
-    position: fixed; inset: 0; z-index: 9999;
-    display: grid; place-items: center;
-    background: var(--ink); overflow: hidden;
-    color: #EAF1EC;
-    transition: opacity .8s cubic-bezier(.4,0,.2,1),
-                transform .8s cubic-bezier(.4,0,.2,1);
+<style>
+  :root {
+    --kkfk-siyah:      #050705;
+    --kkfk-cim:        #2fa757;
+    --kkfk-cim-parlak: #62e58c;
+    --kkfk-arma-cap:   min(46vh, 78vw, 460px);
   }
-  .kfk--out { opacity: 0; transform: scale(1.04); pointer-events: none; }
-  .kfk--gone { visibility: hidden; }
 
   /* Görüldüyse / reduced-motion → hiç boyanmasın (flash yok) */
-  html.kfk-skip .kfk { display: none !important; }
+  :global(html.kkfk-skip) #kkfk-intro { display: none !important; }
   /* Oynarken sayfa kaymasın */
-  html.kfk-playing, html.kfk-playing body { overflow: hidden; }
+  :global(html.kkfk-playing),
+  :global(html.kkfk-playing body) { overflow: hidden; }
 
-  /* ---------- MİLİMETRİK ZEMİN ---------- */
-  .kfk__grid {
-    position: absolute; inset: -8%;
-    background-image:
-      linear-gradient(var(--grid) 1px, transparent 1px),
-      linear-gradient(90deg, var(--grid) 1px, transparent 1px),
-      linear-gradient(var(--grid-fine) 1px, transparent 1px),
-      linear-gradient(90deg, var(--grid-fine) 1px, transparent 1px);
-    background-size: 104px 104px, 104px 104px, 13px 13px, 13px 13px;
-    -webkit-mask-image: radial-gradient(ellipse 74% 76% at 50% 50%,
-        transparent 10%, #000 32%, #000 58%, transparent 90%);
-            mask-image: radial-gradient(ellipse 74% 76% at 50% 50%,
-        transparent 10%, #000 32%, #000 58%, transparent 90%);
-    opacity: 0; transform: scale(1.05);
-    animation: kfk-grid 1.4s .05s cubic-bezier(.16,.84,.32,1) forwards;
+  /* ---------- PERDE ---------- */
+  #kkfk-intro {
+    position: fixed; inset: 0; z-index: 9999;
+    display: grid; place-items: center; overflow: hidden;
+    background: var(--kkfk-siyah);
+    transition: opacity .85s cubic-bezier(.4,0,.2,1), transform .85s cubic-bezier(.4,0,.2,1);
   }
+  #kkfk-intro.bitti { opacity: 0; transform: scale(1.07); pointer-events: none; }
+  #kkfk-intro.kapali { display: none; }
 
-  .kfk__scan {
-    position: absolute; left: -5%; right: -5%; top: 0; height: 1px;
-    background: linear-gradient(90deg,
-      transparent, rgba(63,209,115,.2) 15%, var(--halo) 50%, rgba(63,209,115,.2) 85%, transparent);
-    box-shadow: 0 0 26px 3px rgba(63,209,115,.4);
-    transform: translateY(-10vh); opacity: 0;
-    animation: kfk-scan 1.6s .05s cubic-bezier(.45,0,.35,1) 2 forwards;
-  }
-
-  .kfk__vignette {
-    position: absolute; inset: 0;
-    background: radial-gradient(ellipse 62% 66% at 50% 50%, transparent 40%, rgba(2,5,3,.74) 88%);
-    pointer-events: none;
-  }
-
-  /* ---------- SAHNE ---------- */
-  .kfk__stage {
-    position: relative; display: grid; justify-items: center;
-    gap: clamp(28px, 5vh, 50px); padding: 0 20px;
-  }
-  .kfk__frame {
-    position: relative; width: min(88vw, 480px);
-    aspect-ratio: 1; display: grid; place-items: center;
-  }
-
-  /* --- PAFTA KATMANLARI --- */
-  .kfk__imgs { position: absolute; inset: 0; pointer-events: none; }
-  .kfk-img {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%; object-fit: contain;
+  /* ---------- PLATE (Higgsfield videosu) ---------- */
+  .plate {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; pointer-events: none;
+    /* siyah zemini şeffaflaştırır: banding ve kutu kenarı görünmez */
     mix-blend-mode: screen;
     opacity: 0;
-    animation: kfk-plate 1.55s var(--d) cubic-bezier(.16,.84,.32,1) forwards;
+    animation: kkfk-plateGir 1.2s .05s ease-out forwards;
+  }
+  @keyframes kkfk-plateGir { to { opacity: 1; } }
+
+  /* Video yüklenmezse arkada yine yeşil ışık kalsın */
+  .yedek-isik {
+    position: absolute; left: 50%; top: 50%;
+    width: min(92vh, 150vw); aspect-ratio: 1 / 1;
+    transform: translate(-50%, -50%);
+    border-radius: 50%; pointer-events: none; z-index: 0;
+    background: radial-gradient(circle,
+      rgba(98,229,140,.20) 0%, rgba(47,167,87,.10) 34%, transparent 66%);
+    filter: blur(14px);
+    animation: kkfk-nefes 4.2s ease-in-out infinite;
+  }
+  @keyframes kkfk-nefes {
+    0%, 100% { transform: translate(-50%, -50%) scale(1);    opacity: .75; }
+    50%      { transform: translate(-50%, -50%) scale(1.07); opacity: 1; }
   }
 
-  /* --- ÖLÇÜ HALKASI --- */
-  .kfk__draft { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; fill: none; }
-  .kfk-ring {
-    transform-box: fill-box; transform-origin: center; opacity: 0;
-    animation: kfk-ring 1.5s 1.78s cubic-bezier(.16,.84,.32,1) forwards;
+  /* ---------- ARMA (dokunulmamış orijinal) ---------- */
+  .arma {
+    position: relative; z-index: 2;
+    width: var(--kkfk-arma-cap); aspect-ratio: 1 / 1;
+    opacity: 0; animation: kkfk-armaGir 1.15s .15s cubic-bezier(.2,.7,.25,1) forwards;
   }
-  .kfk-ring [data-draw] {
-    stroke-dasharray: 1; stroke-dashoffset: 1;
-    animation: kfk-draw .8s 1.78s cubic-bezier(.45,0,.2,1) forwards;
+  @keyframes kkfk-armaGir {
+    from { opacity: 0; transform: scale(.9); }
+    to   { opacity: 1; transform: none; }
   }
-
-  /* --- ARMA --- */
-  .kfk__mark {
-    position: relative; width: 56%; aspect-ratio: 1;
-    opacity: 0; transform: scale(1.12);
-    animation: kfk-mark 1.15s 2.15s cubic-bezier(.16,.84,.32,1) forwards;
+  .arma img {
+    width: 100%; height: 100%; display: block; user-select: none;
+    filter: drop-shadow(0 0 30px rgba(47,167,87,.45));
+    transition: filter .9s cubic-bezier(.2,.7,.25,1);
   }
-  .kfk__logo {
-    position: absolute; inset: 0;
-    background-image: var(--kfk-logo);
-    background-size: contain; background-position: center; background-repeat: no-repeat;
-    filter: drop-shadow(0 16px 40px rgba(0,0,0,.85));
-  }
-  .kfk__shine {
-    position: absolute; inset: 0;
-    background: linear-gradient(100deg, transparent 40%, rgba(126,255,178,.8) 50%, transparent 60%);
-    background-size: 280% 100%; background-position: 200% 0;
-    -webkit-mask-image: var(--kfk-logo);   mask-image: var(--kfk-logo);
-    -webkit-mask-size: contain;            mask-size: contain;
-    -webkit-mask-position: center;         mask-position: center;
-    -webkit-mask-repeat: no-repeat;        mask-repeat: no-repeat;
-    mix-blend-mode: screen; opacity: 0;
-    animation: kfk-shine 1.25s 2.55s cubic-bezier(.4,0,.2,1) forwards;
+  #kkfk-intro.kilit .arma img {
+    filter: drop-shadow(0 0 50px rgba(47,167,87,.8)) brightness(1.05);
   }
 
-  .kfk__readout {
-    position: absolute; bottom: -30px; left: 0;
-    font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 10px; letter-spacing: .2em;
-    color: rgba(63,209,115,.5); white-space: nowrap;
-    opacity: 0; animation: kfk-fade .5s .3s ease forwards;
+  /* ---------- GEÇ ---------- */
+  .gec {
+    position: absolute; z-index: 3;
+    right: clamp(16px, 4vw, 38px); bottom: clamp(16px, 4vh, 34px);
+    background: none; border: 0; cursor: pointer; color: rgba(255,255,255,.42);
+    font: inherit; font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+    padding: 10px 4px; opacity: 0; animation: kkfk-fadeIn .5s 1s forwards; transition: color .25s;
   }
-  .kfk__readout b { color: rgba(63,209,115,.95); font-weight: 500; }
-
-  .kfk__ribbon { position: relative; display: flex; width: min(62vw, 330px); height: 2px; }
-  .kfk__ribbon i {
-    flex: 1; height: 100%; transform: scaleX(0);
-    animation: kfk-ribbon 1.3s 2.5s cubic-bezier(.22,.7,.3,1) forwards;
-  }
-  .kfk__ribbon i:first-child {
-    transform-origin: right center;
-    background: linear-gradient(90deg, rgba(63,209,115,0), var(--halo));
-  }
-  .kfk__ribbon i:last-child {
-    transform-origin: left center;
-    background: linear-gradient(90deg, var(--halo), rgba(63,209,115,0));
-  }
-
-  /* ---------- KEYFRAMES ---------- */
-  @keyframes kfk-grid { to { opacity: 1; transform: scale(1); } }
-  @keyframes kfk-scan {
-    0% { transform: translateY(-10vh); opacity: 0; }
-    10% { opacity: 1; } 86% { opacity: 1; }
-    100% { transform: translateY(112vh); opacity: 0; }
-  }
-  @keyframes kfk-draw { to { stroke-dashoffset: 0; } }
-  @keyframes kfk-fade { to { opacity: 1; } }
-  @keyframes kfk-plate {
-    0%   { opacity: 0;        transform: translate(var(--x), var(--y)) scale(calc(var(--s) * 1.09)); }
-    14%  { opacity: var(--o); }
-    56%  { opacity: var(--o); transform: translate(var(--x), var(--y)) scale(var(--s)); }
-    100% { opacity: 0;        transform: translate(var(--x), var(--y)) scale(calc(var(--s) * .975)); }
-  }
-  @keyframes kfk-ring {
-    0% { opacity: 0; transform: scale(1.09); }
-    20% { opacity: 1; }
-    100% { opacity: .42; transform: scale(1); }
-  }
-  @keyframes kfk-mark { to { opacity: 1; transform: scale(1); } }
-  @keyframes kfk-shine {
-    0% { background-position: 200% 0; opacity: 0; }
-    18% { opacity: .95; } 82% { opacity: .95; }
-    100% { background-position: -100% 0; opacity: 0; }
-  }
-  @keyframes kfk-ribbon { to { transform: scaleX(1); } }
-
-  @media (max-width: 540px) { .kfk__readout { font-size: 9px; bottom: -24px; } }
+  .gec:hover, .gec:focus-visible { color: var(--kkfk-cim-parlak); }
+  @keyframes kkfk-fadeIn { to { opacity: 1; } }
 
   /* Reduced-motion'da zaten pre-paint script atlıyor; yine de güvence */
-  @media (prefers-reduced-motion: reduce) { .kfk { display: none !important; } }
+  @media (prefers-reduced-motion: reduce) { #kkfk-intro { display: none !important; } }
 </style>
 
 <script is:inline>
-  // Main: overlay DOM hazır. Atlanıyorsa kaldır; değilse kur → zamanla → kapat.
+  // Main: overlay DOM hazır. Atlanıyorsa kaldır; değilse oynat → kapat.
   (function () {
-    var el = document.getElementById('kfk');
-    if (!el) return;
+    var perde = document.getElementById('kkfk-intro');
+    if (!perde) return;
 
-    if (document.documentElement.classList.contains('kfk-skip')) {
-      if (el.parentNode) el.parentNode.removeChild(el);
+    if (document.documentElement.classList.contains('kkfk-skip')) {
+      if (perde.parentNode) perde.parentNode.removeChild(perde);
       return;
     }
 
-    var MIN_MS = 3550, MAX_MS = 6500;
-    var started = Date.now(), done = false, timers = [];
+    var video = perde.querySelector('.plate');
+    var logo  = perde.querySelector('.arma img');
+    var gec   = perde.querySelector('.gec');
+    var KILIT = 2400;   // ms — armanın parladığı an
+    var ACILIS = 3100;  // ms — perdenin kalkması
+    var zam = [], bitti = false;
 
-    var SPOTS = [
-      { x:'0%',   y:'0%',   s:1.00, o:0.55 },
-      { x:'-22%', y:'-16%', s:0.66, o:0.92 },
-      { x:'24%',  y:'-15%', s:0.62, o:0.88 },
-      { x:'-20%', y:'22%',  s:0.60, o:0.92 },
-      { x:'21%',  y:'21%',  s:0.58, o:0.82 },
-      { x:'0%',   y:'-3%',  s:0.86, o:0.70 }
-    ];
-    var PLATES = [
-      '/img/kfk/pafta-1.png', '/img/kfk/pafta-2.png', '/img/kfk/pafta-3.png',
-      '/img/kfk/pafta-4.png', '/img/kfk/pafta-5.png', '/img/kfk/pafta-6.png'
-    ];
-
-    function paint() {
-      var host = el.querySelector('.kfk__imgs');
-      host.innerHTML = '';
-      PLATES.forEach(function (src, i) {
-        var s = SPOTS[i] || SPOTS[SPOTS.length - 1];
-        var img = document.createElement('img');
-        img.className = 'kfk-img'; img.src = src; img.alt = '';
-        img.style.setProperty('--x', s.x);
-        img.style.setProperty('--y', s.y);
-        img.style.setProperty('--s', s.s);
-        img.style.setProperty('--o', s.o);
-        img.style.setProperty('--d', (0.10 + i * 0.28).toFixed(2) + 's');
-        host.appendChild(img);
-      });
+    // Varlıklar yalnızca oynatılacaksa yüklenir
+    if (logo) logo.src = '/intro/arma.webp';
+    if (video) {
+      video.addEventListener('error', function () { video.style.display = 'none'; });
+      video.src = '/intro/kkfk-plate.mp4';
+      try { video.muted = true; video.currentTime = 0; var p = video.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
     }
 
-    function ticks(group) {
-      var NS = 'http://www.w3.org/2000/svg';
-      var frag = document.createDocumentFragment();
-      for (var i = 0; i < 48; i++) {
-        var a = (i / 48) * Math.PI * 2, long = i % 6 === 0;
-        var r2 = 238 + (long ? 13 : 6);
-        var ln = document.createElementNS(NS, 'line');
-        ln.setAttribute('x1', (300 + Math.cos(a) * 238).toFixed(2));
-        ln.setAttribute('y1', (300 + Math.sin(a) * 238).toFixed(2));
-        ln.setAttribute('x2', (300 + Math.cos(a) * r2).toFixed(2));
-        ln.setAttribute('y2', (300 + Math.sin(a) * r2).toFixed(2));
-        ln.setAttribute('stroke', long ? 'rgba(63,209,115,.6)' : 'rgba(63,209,115,.3)');
-        ln.setAttribute('stroke-width', long ? '1.5' : '1');
-        frag.appendChild(ln);
-      }
-      group.appendChild(frag);
-    }
-
-    function boot() {
-      var g = el.querySelector('#kfkTicks');
-      if (g) { g.innerHTML = ''; ticks(g); }
-      paint();
-
-      var out = el.querySelector('.kfk__readout');
-      for (var i = 0; i < PLATES.length; i++) (function (n) {
-        timers.push(setTimeout(function () {
-          out.innerHTML = '<b>' + ('0' + (n + 1)).slice(-2) + '</b>';
-        }, 100 + n * 280));
-      })(i);
-      timers.push(setTimeout(function () {
-        out.innerHTML = '40°46′N&nbsp;&nbsp;29°55′E';
-      }, 2450));
-    }
-
-    function hide() {
-      if (done) return;
-      done = true;
-      timers.forEach(clearTimeout); timers = [];
-      el.classList.add('kfk--out');
-      document.documentElement.classList.remove('kfk-playing');
+    function bitir() {
+      if (bitti) return;
+      bitti = true;
+      zam.forEach(clearTimeout); zam = [];
+      perde.classList.add('bitti');
+      document.documentElement.classList.remove('kkfk-playing');
       setTimeout(function () {
-        el.classList.add('kfk--gone');
-        if (el.parentNode) el.parentNode.removeChild(el);
-      }, 850);
+        perde.classList.add('kapali');
+        if (video) { try { video.pause(); } catch (e) {} }
+        if (perde.parentNode) perde.parentNode.removeChild(perde);
+      }, 900);
     }
 
-    function finish() {
-      setTimeout(hide, Math.max(0, MIN_MS - (Date.now() - started)));
-    }
+    gec.addEventListener('click', bitir);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') bitir(); });
 
-    boot();
-    if (document.readyState === 'complete') finish();
-    else window.addEventListener('load', finish);
-    setTimeout(hide, MAX_MS);
+    zam.push(setTimeout(function () { perde.classList.add('kilit'); }, KILIT));
+    zam.push(setTimeout(bitir, ACILIS));
   })();
 </script>
