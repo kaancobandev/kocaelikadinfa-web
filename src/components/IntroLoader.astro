@@ -162,19 +162,20 @@
     var ACILIS = 3100;  // ms — perdenin kalkması
     var zam = [], bitti = false;
 
-    // Varlıklar yalnızca oynatılacaksa yüklenir
-    if (logo) logo.src = '/intro/arma.webp';
-
-    // Video HAZIR OLANA KADAR oynatılmaz. Yoksa yükleme sürerken video
-    // görünmez hâlde ilerliyor ve yıldızların aktığı ilk ~1.2 sn kaçıyor;
-    // perde açıldığında geriye sadece sönen parıltı kalıyor.
-    // Hazır olunca: oynatma + görünürlük + kapanış sayacı hep birlikte
-    // başlar, böylece akış her zaman baştan izlenir ve takılma olmaz.
+    // ── HER ŞEY HAZIR OLMADAN SAHNE BAŞLAMAZ ────────────────────────
+    // Arma ve videonun TAMAMI inip çözülene kadar ekran simsiyah kalır;
+    // sonra yeşil ışık, arma ve yıldız akışı hep birlikte başlar.
+    // Video fetch ile bütünüyle belleğe alınıp blob olarak veriliyor:
+    // böylece oynarken ağ kaynaklı tampon boşalması / takılma olmuyor.
     var basladi = false, plateAcildi = false, sahneT0 = 0;
-    var kilitT = null, bitirT = null;
+    var kilitT = null, bitirT = null, blobUrl = null;
+    var kalanParca = video ? 2 : 1;   // arma + video
 
-    // Kapanış sayaçlarını "şu andan itibaren" kurar. Video geç gelirse
-    // yeniden kurulur ki animasyon her hâlükârda tam süre oynasın.
+    function parcaHazir() {
+      if (--kalanParca <= 0) sahneyiBaslat();
+    }
+
+    // Kapanış sayaçlarını "şu andan itibaren" kurar.
     function zamanlamaKur() {
       if (kilitT) clearTimeout(kilitT);
       if (bitirT) clearTimeout(bitirT);
@@ -193,9 +194,10 @@
     function sahneyiBaslat() {
       if (basladi || bitti) return;
       basladi = true;
-      // Buraya kadar ekran tamamen siyahtı; sahne (ışık + arma + plate)
-      // ancak şimdi görünür oluyor.
+      // Buraya kadar ekran tamamen siyahtı. Her şey hazır: ışık, arma ve
+      // yıldız akışı aynı anda sahneye giriyor.
       perde.classList.add('hazir');
+      if (video && video.readyState >= 2) plateAc();
 
       // OYNATMA İLK BOYAMAYA KADAR ERTELENİR. Aksi hâlde video, sayfa
       // hâlâ yükleniyorken (ayrıştırma sırasında) oynamaya başlıyor;
@@ -228,40 +230,67 @@
       });
     }
 
-    // Video oynatılabilir olduğunda plate'i görünür yapar. Sahne
-    // başlamadıysa etkisi olmaz; CSS iki sınıfı birden bekliyor.
+    // Plate'i görünür yapar. Normalde sahneyle aynı anda çağrılır;
+    // yalnızca güvence yolunda (video geç yetişirse) sonradan çalışır.
     function plateAc() {
       if (bitti || plateAcildi) return;
       plateAcildi = true;
       perde.classList.add('plate-hazir');
-      // Sahne, video gelmeden (siyah bekleme sınırı dolduğu için)
-      // başladıysa geriye yeterli süre kalmayabilir. Animasyonun tam
-      // oynayabilmesi için sayacı yeniden kur — ama introyu sonsuza
-      // kadar uzatmamak için yalnızca ilk 2.5 sn içinde.
-      if (basladi && Date.now() - sahneT0 < 2500) zamanlamaKur();
+      // Video sahneden sonra yetiştiyse animasyona tam süre tanı.
+      if (basladi && sahneT0 && Date.now() - sahneT0 > 250) zamanlamaKur();
     }
 
+    // ── 1) ARMA: tamamen inip çözülene kadar bekle ──────────────────
+    (function () {
+      if (!logo) return;
+      var im = new Image();
+      im.onload = function () {
+        logo.src = im.src;
+        if (im.decode) im.decode().then(parcaHazir, parcaHazir);
+        else parcaHazir();
+      };
+      im.onerror = parcaHazir;
+      im.src = '/intro/arma.webp';
+    })();
+
+    // ── 2) VİDEO: tamamını indir, sonra oynat ───────────────────────
     if (video) {
       video.muted = true;
-      // Motorlar farklı olaylarla hazır oluyor; hangisi önce gelirse.
-      video.addEventListener('canplay', function () { plateAc(); sahneyiBaslat(); });
-      video.addEventListener('loadeddata', function () { plateAc(); sahneyiBaslat(); });
-      video.addEventListener('playing', function () { plateAc(); sahneyiBaslat(); });
-      video.addEventListener('error', function () {
-        // Video yüklenemedi: plate hiç açılmaz (plate-hazir eklenmez),
-        // sahne yalnızca ışık + arma ile başlar. Video gizlenmiyor;
-        // mix-blend-mode: screen nedeniyle boş kutu zaten arkadaki
-        // ışığı örtmüyor.
-        sahneyiBaslat();
-      });
-      video.src = '/intro/kkfk-plate.mp4';
+      var videoSayildi = false;
+      function videoHazir() {
+        if (videoSayildi) return;
+        videoSayildi = true;
+        parcaHazir();
+      }
+      video.addEventListener('canplaythrough', videoHazir);
+      video.addEventListener('error', videoHazir);
+      // Sahne başladıktan sonra yetişirse plate yine de katılsın
+      video.addEventListener('canplay', function () { if (basladi) plateAc(); });
+
+      if (window.fetch) {
+        fetch('/intro/kkfk-plate.mp4')
+          .then(function (r) { if (!r.ok) throw 0; return r.blob(); })
+          .then(function (b) {
+            if (bitti) return;
+            blobUrl = URL.createObjectURL(b);
+            video.src = blobUrl;
+            // Dosya artık bellekte; canplaythrough gecikirse de sür.
+            zam.push(setTimeout(videoHazir, 600));
+          })
+          .catch(function () {
+            video.src = '/intro/kkfk-plate.mp4';
+            zam.push(setTimeout(videoHazir, 2500));
+          });
+      } else {
+        video.src = '/intro/kkfk-plate.mp4';
+        zam.push(setTimeout(videoHazir, 2500));
+      }
     }
-    // Siyah bekleme sınırı: video yavaş geliyorsa ekran donmuş gibi
-    // durmasın; sahne ışık ve armayla başlasın, plate hazır olunca
-    // katılsın (o an sayaç yeniden kurulur).
-    zam.push(setTimeout(sahneyiBaslat, 700));
-    // Mutlak güvence: hiçbir koşulda perde asılı kalmasın
-    zam.push(setTimeout(bitir, 6500));
+
+    // Mutlak güvence: ağ çok kötüyse bile ekran sonsuza kadar siyah
+    // kalmasın, perde de asılı kalmasın.
+    zam.push(setTimeout(sahneyiBaslat, 5000));
+    zam.push(setTimeout(bitir, 9000));
 
     function bitir() {
       if (bitti) return;
@@ -273,6 +302,8 @@
         perde.classList.add('kapali');
         if (video) { try { video.pause(); } catch (e) {} }
         if (perde.parentNode) perde.parentNode.removeChild(perde);
+        // Belleğe alınan video serbest bırakılsın
+        if (blobUrl) { try { URL.revokeObjectURL(blobUrl); } catch (e) {} blobUrl = null; }
       }, 900);
     }
 
