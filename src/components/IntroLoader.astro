@@ -80,7 +80,9 @@
     transition: opacity .45s ease-out;
     will-change: opacity;
   }
-  #kkfk-intro.plate-hazir .plate { opacity: 1; }
+  /* Plate yalnızca sahne başladıktan VE video oynatılabilir hâle
+     geldikten sonra görünür. Öncesinde ekran tamamen siyah kalır. */
+  #kkfk-intro.hazir.plate-hazir .plate { opacity: 1; }
 
   /* Video yüklenmezse arkada yine yeşil ışık kalsın */
   .yedek-isik {
@@ -93,6 +95,10 @@
     /* blur(14px) kaldırıldı: gradyan zaten yumuşak, görsel fark yok ama
        tam ekran filtre her karede yeniden rasterize ediliyordu. */
     will-change: transform, opacity;
+    /* Sahne başlayana kadar görünmez — ekran tamamen siyah. */
+    opacity: 0;
+  }
+  #kkfk-intro.hazir .yedek-isik {
     animation: kkfk-nefes 4.2s ease-in-out infinite;
   }
   @keyframes kkfk-nefes {
@@ -104,7 +110,10 @@
   .arma {
     position: relative; z-index: 2;
     width: var(--kkfk-arma-cap); aspect-ratio: 1 / 1;
-    opacity: 0; animation: kkfk-armaGir 1.15s .15s cubic-bezier(.2,.7,.25,1) forwards;
+    opacity: 0;   /* sahne başlayana kadar görünmez */
+  }
+  #kkfk-intro.hazir .arma {
+    animation: kkfk-armaGir 1.15s .15s cubic-bezier(.2,.7,.25,1) forwards;
   }
   @keyframes kkfk-armaGir {
     from { opacity: 0; transform: scale(.9); }
@@ -125,8 +134,9 @@
     right: clamp(16px, 4vw, 38px); bottom: clamp(16px, 4vh, 34px);
     background: none; border: 0; cursor: pointer; color: rgba(255,255,255,.42);
     font: inherit; font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
-    padding: 10px 4px; opacity: 0; animation: kkfk-fadeIn .5s 1s forwards; transition: color .25s;
+    padding: 10px 4px; opacity: 0; transition: color .25s;
   }
+  #kkfk-intro.hazir .gec { animation: kkfk-fadeIn .5s 1s forwards; }
   .gec:hover, .gec:focus-visible { color: var(--kkfk-cim-parlak); }
   @keyframes kkfk-fadeIn { to { opacity: 1; } }
 
@@ -170,7 +180,9 @@
     function sahneyiBaslat() {
       if (basladi || bitti) return;
       basladi = true;
-      perde.classList.add('plate-hazir');
+      // Buraya kadar ekran tamamen siyahtı; sahne (ışık + arma + plate)
+      // ancak şimdi görünür oluyor.
+      perde.classList.add('hazir');
 
       // OYNATMA İLK BOYAMAYA KADAR ERTELENİR. Aksi hâlde video, sayfa
       // hâlâ yükleniyorken (ayrıştırma sırasında) oynamaya başlıyor;
@@ -196,18 +208,6 @@
               }
               oynat();
             }, 250);
-
-            // Oynatma gerçekten engellendiyse (Opera'nın veri tasarrufu /
-            // otomatik oynatma kısıtı gibi) video 0. karede kalır ve o
-            // kare neredeyse siyah olduğu için ekranda hiçbir şey
-            // görünmez. Bu durumda yıldızların yoğun olduğu ana bir kez
-            // atlayıp duruk da olsa akışı gösteriyoruz.
-            zam.push(setTimeout(function () {
-              if (bitti) return;
-              if (video.paused || video.currentTime < 0.05) {
-                try { video.currentTime = 0.8; } catch (e) {}
-              }
-            }, 700));
           }
           // Kapanış sayacı da buradan başlar: perde, videonun görünür
           // olduğu andan itibaren ölçülen süre kadar açık kalsın.
@@ -217,22 +217,23 @@
       });
     }
 
+    // Video oynatılabilir olduğunda plate'i görünür yapar. Sahne
+    // başlamadıysa etkisi olmaz; CSS iki sınıfı birden bekliyor.
+    function plateAc() {
+      if (!bitti) perde.classList.add('plate-hazir');
+    }
+
     if (video) {
       video.muted = true;
-      // Kapak karesi: yıldızların en yoğun anından alınmış duruk görüntü.
-      // Opera gibi oynatmayı kısıtlayan tarayıcılarda video hiç
-      // başlamazsa ekran boş kalmasın, yıldızlar yine görünsün.
-      video.poster = '/intro/plate-poster.jpg';
       // Motorlar farklı olaylarla hazır oluyor; hangisi önce gelirse.
-      video.addEventListener('canplay', sahneyiBaslat);
-      video.addEventListener('loadeddata', sahneyiBaslat);
-      video.addEventListener('playing', sahneyiBaslat);
+      video.addEventListener('canplay', function () { plateAc(); sahneyiBaslat(); });
+      video.addEventListener('loadeddata', function () { plateAc(); sahneyiBaslat(); });
+      video.addEventListener('playing', function () { plateAc(); sahneyiBaslat(); });
       video.addEventListener('error', function () {
-        // Video ARTIK GİZLENMİYOR: hata durumunda tarayıcı kapak
-        // karesini gösterir, yani yıldızlar duruk da olsa görünür.
-        // Ayrıca mix-blend-mode: screen sayesinde siyah bir kutu zaten
-        // arkadaki yeşil ışığı örtmüyor; gizlemenin faydası yoktu,
-        // aksine ekranı boşaltıyordu.
+        // Video yüklenemedi: plate hiç açılmaz (plate-hazir eklenmez),
+        // sahne yalnızca ışık + arma ile başlar. Video gizlenmiyor;
+        // mix-blend-mode: screen nedeniyle boş kutu zaten arkadaki
+        // ışığı örtmüyor.
         sahneyiBaslat();
       });
       video.src = '/intro/kkfk-plate.mp4';
