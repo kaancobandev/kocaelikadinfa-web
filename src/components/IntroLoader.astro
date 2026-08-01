@@ -74,10 +74,14 @@
     object-fit: cover; pointer-events: none;
     /* siyah zemini şeffaflaştırır: banding ve kutu kenarı görünmez */
     mix-blend-mode: screen;
+    /* Sabit süreli animasyon yerine: video gerçekten oynayabildiğinde
+       açılır. Böylece yeterince tamponlanmadan başlayan ilk saniyenin
+       takılması görünmez. */
     opacity: 0;
-    animation: kkfk-plateGir 1.2s .05s ease-out forwards;
+    transition: opacity 1.2s ease-out;
+    will-change: opacity;
   }
-  @keyframes kkfk-plateGir { to { opacity: 1; } }
+  #kkfk-intro.plate-hazir .plate { opacity: 1; }
 
   /* Video yüklenmezse arkada yine yeşil ışık kalsın */
   .yedek-isik {
@@ -87,7 +91,9 @@
     border-radius: 50%; pointer-events: none; z-index: 0;
     background: radial-gradient(circle,
       rgba(98,229,140,.20) 0%, rgba(47,167,87,.10) 34%, transparent 66%);
-    filter: blur(14px);
+    /* blur(14px) kaldırıldı: gradyan zaten yumuşak, görsel fark yok ama
+       tam ekran filtre her karede yeniden rasterize ediliyordu. */
+    will-change: transform, opacity;
     animation: kkfk-nefes 4.2s ease-in-out infinite;
   }
   @keyframes kkfk-nefes {
@@ -151,6 +157,20 @@
     if (logo) logo.src = '/intro/arma.webp';
     if (video) {
       video.addEventListener('error', function () { video.style.display = 'none'; });
+
+      // Plate yalnızca oynatılabilir hâle gelince açılır; hazır değilken
+      // gösterilirse ilk kareler takılıyor. Yedek ışık o ana kadar zaten
+      // sahnede olduğu için boşluk hissedilmiyor.
+      var acildi = false;
+      function plateAc() {
+        if (acildi) return;
+        acildi = true;
+        perde.classList.add('plate-hazir');
+      }
+      video.addEventListener('playing', plateAc);
+      video.addEventListener('canplay', plateAc);
+      zam.push(setTimeout(plateAc, 1200)); // olay gelmezse yine de göster
+
       video.src = '/intro/kkfk-plate.mp4';
       try { video.muted = true; video.currentTime = 0; var p = video.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
     }

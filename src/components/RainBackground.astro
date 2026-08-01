@@ -12,6 +12,12 @@
 <div class="rain-bg" aria-hidden="true"></div>
 
 <style>
+  /* Giriş animasyonu oynarken yağmur tamamen kapanır. Perde opak olduğu
+     için zaten görünmüyor; ama backdrop-filter + 36 gradyanlı animasyon
+     her karede kompozit edilmeye devam ediyordu ve video plate'i
+     kastırıyordu. */
+  :global(html.kkfk-playing) .rain-bg { display: none; }
+
   .rain-bg {
     position: fixed;
     inset: 0;
