@@ -74,11 +74,10 @@
     object-fit: cover; pointer-events: none;
     /* siyah zemini şeffaflaştırır: banding ve kutu kenarı görünmez */
     mix-blend-mode: screen;
-    /* Sabit süreli animasyon yerine: video gerçekten oynayabildiğinde
-       açılır. Böylece yeterince tamponlanmadan başlayan ilk saniyenin
-       takılması görünmez. */
+    /* Video hazır olduğu an oynatmayla birlikte açılır. Açılma kısa
+       tutuldu: uzun fade, yıldızların aktığı ilk saniyeyi yutuyordu. */
     opacity: 0;
-    transition: opacity 1.2s ease-out;
+    transition: opacity .45s ease-out;
     will-change: opacity;
   }
   #kkfk-intro.plate-hazir .plate { opacity: 1; }
@@ -155,25 +154,42 @@
 
     // Varlıklar yalnızca oynatılacaksa yüklenir
     if (logo) logo.src = '/intro/arma.webp';
-    if (video) {
-      video.addEventListener('error', function () { video.style.display = 'none'; });
 
-      // Plate yalnızca oynatılabilir hâle gelince açılır; hazır değilken
-      // gösterilirse ilk kareler takılıyor. Yedek ışık o ana kadar zaten
-      // sahnede olduğu için boşluk hissedilmiyor.
-      var acildi = false;
-      function plateAc() {
-        if (acildi) return;
-        acildi = true;
-        perde.classList.add('plate-hazir');
+    // Video HAZIR OLANA KADAR oynatılmaz. Yoksa yükleme sürerken video
+    // görünmez hâlde ilerliyor ve yıldızların aktığı ilk ~1.2 sn kaçıyor;
+    // perde açıldığında geriye sadece sönen parıltı kalıyor.
+    // Hazır olunca: oynatma + görünürlük + kapanış sayacı hep birlikte
+    // başlar, böylece akış her zaman baştan izlenir ve takılma olmaz.
+    var basladi = false;
+    function sahneyiBaslat() {
+      if (basladi || bitti) return;
+      basladi = true;
+      if (video) {
+        // currentTime'a dokunulmuyor: element zaten 0'dan başlıyor ve
+        // gereksiz seek, ilk karenin basılmasını geciktiriyor.
+        try {
+          var p = video.play();
+          if (p && p.catch) p.catch(function () {});
+        } catch (e) {}
       }
-      video.addEventListener('playing', plateAc);
-      video.addEventListener('canplay', plateAc);
-      zam.push(setTimeout(plateAc, 1200)); // olay gelmezse yine de göster
-
-      video.src = '/intro/kkfk-plate.mp4';
-      try { video.muted = true; video.currentTime = 0; var p = video.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+      perde.classList.add('plate-hazir');
+      zam.push(setTimeout(function () { perde.classList.add('kilit'); }, KILIT));
+      zam.push(setTimeout(bitir, ACILIS));
     }
+
+    if (video) {
+      video.muted = true;
+      video.addEventListener('canplay', sahneyiBaslat);
+      video.addEventListener('error', function () {
+        video.style.display = 'none';   // yedek ışık devralır
+        sahneyiBaslat();
+      });
+      video.src = '/intro/kkfk-plate.mp4';
+    }
+    // Ağ yavaşsa ya da olay hiç gelmezse sahne yine de başlasın
+    zam.push(setTimeout(sahneyiBaslat, 1500));
+    // Mutlak güvence: hiçbir koşulda perde asılı kalmasın
+    zam.push(setTimeout(bitir, 6500));
 
     function bitir() {
       if (bitti) return;
@@ -190,8 +206,5 @@
 
     gec.addEventListener('click', bitir);
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') bitir(); });
-
-    zam.push(setTimeout(function () { perde.classList.add('kilit'); }, KILIT));
-    zam.push(setTimeout(bitir, ACILIS));
   })();
 </script>
