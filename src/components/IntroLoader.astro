@@ -196,6 +196,18 @@
               }
               oynat();
             }, 250);
+
+            // Oynatma gerçekten engellendiyse (Opera'nın veri tasarrufu /
+            // otomatik oynatma kısıtı gibi) video 0. karede kalır ve o
+            // kare neredeyse siyah olduğu için ekranda hiçbir şey
+            // görünmez. Bu durumda yıldızların yoğun olduğu ana bir kez
+            // atlayıp duruk da olsa akışı gösteriyoruz.
+            zam.push(setTimeout(function () {
+              if (bitti) return;
+              if (video.paused || video.currentTime < 0.05) {
+                try { video.currentTime = 0.8; } catch (e) {}
+              }
+            }, 700));
           }
           // Kapanış sayacı da buradan başlar: perde, videonun görünür
           // olduğu andan itibaren ölçülen süre kadar açık kalsın.
@@ -207,16 +219,20 @@
 
     if (video) {
       video.muted = true;
+      // Kapak karesi: yıldızların en yoğun anından alınmış duruk görüntü.
+      // Opera gibi oynatmayı kısıtlayan tarayıcılarda video hiç
+      // başlamazsa ekran boş kalmasın, yıldızlar yine görünsün.
+      video.poster = '/intro/plate-poster.jpg';
       // Motorlar farklı olaylarla hazır oluyor; hangisi önce gelirse.
       video.addEventListener('canplay', sahneyiBaslat);
       video.addEventListener('loadeddata', sahneyiBaslat);
       video.addEventListener('playing', sahneyiBaslat);
       video.addEventListener('error', function () {
-        // Yalnızca GERÇEKTEN bir kaynak yüklenip başarısız olduysa gizle.
-        // Kaynaksız <video preload="auto"> bazı tarayıcılarda boş yere
-        // error tetikliyor; orada gizlersek geriye sadece yedek ışık
-        // kalıyor ve yıldızlar hiç görünmüyor.
-        if (video.currentSrc && video.error) video.style.display = 'none';
+        // Video ARTIK GİZLENMİYOR: hata durumunda tarayıcı kapak
+        // karesini gösterir, yani yıldızlar duruk da olsa görünür.
+        // Ayrıca mix-blend-mode: screen sayesinde siyah bir kutu zaten
+        // arkadaki yeşil ışığı örtmüyor; gizlemenin faydası yoktu,
+        // aksine ekranı boşaltıyordu.
         sahneyiBaslat();
       });
       video.src = '/intro/kkfk-plate.mp4';
