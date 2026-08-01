@@ -161,16 +161,30 @@
     // Hazır olunca: oynatma + görünürlük + kapanış sayacı hep birlikte
     // başlar, böylece akış her zaman baştan izlenir ve takılma olmaz.
     var basladi = false;
+    function oynat() {
+      try {
+        var p = video.play();
+        if (p && p.catch) p.catch(function () {});
+      } catch (e) {}
+    }
     function sahneyiBaslat() {
       if (basladi || bitti) return;
       basladi = true;
       if (video) {
         // currentTime'a dokunulmuyor: element zaten 0'dan başlıyor ve
         // gereksiz seek, ilk karenin basılmasını geciktiriyor.
-        try {
-          var p = video.play();
-          if (p && p.catch) p.catch(function () {});
-        } catch (e) {}
+        oynat();
+        // play() sessizce reddedilirse (otomatik oynatma engeli, iOS
+        // düşük güç modu) video 0. karede donar; o kare neredeyse siyah
+        // olduğu için ekranda hiçbir şey görünmez. Birkaç kez deneriz.
+        var deneme = 0;
+        var nabiz = setInterval(function () {
+          if (bitti || ++deneme > 6 || (!video.paused && video.currentTime > 0)) {
+            clearInterval(nabiz);
+            return;
+          }
+          oynat();
+        }, 250);
       }
       perde.classList.add('plate-hazir');
       zam.push(setTimeout(function () { perde.classList.add('kilit'); }, KILIT));
@@ -179,9 +193,16 @@
 
     if (video) {
       video.muted = true;
+      // Motorlar farklı olaylarla hazır oluyor; hangisi önce gelirse.
       video.addEventListener('canplay', sahneyiBaslat);
+      video.addEventListener('loadeddata', sahneyiBaslat);
+      video.addEventListener('playing', sahneyiBaslat);
       video.addEventListener('error', function () {
-        video.style.display = 'none';   // yedek ışık devralır
+        // Yalnızca GERÇEKTEN bir kaynak yüklenip başarısız olduysa gizle.
+        // Kaynaksız <video preload="auto"> bazı tarayıcılarda boş yere
+        // error tetikliyor; orada gizlersek geriye sadece yedek ışık
+        // kalıyor ve yıldızlar hiç görünmüyor.
+        if (video.currentSrc && video.error) video.style.display = 'none';
         sahneyiBaslat();
       });
       video.src = '/intro/kkfk-plate.mp4';
