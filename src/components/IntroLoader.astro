@@ -170,7 +170,20 @@
     // perde açıldığında geriye sadece sönen parıltı kalıyor.
     // Hazır olunca: oynatma + görünürlük + kapanış sayacı hep birlikte
     // başlar, böylece akış her zaman baştan izlenir ve takılma olmaz.
-    var basladi = false;
+    var basladi = false, plateAcildi = false, sahneT0 = 0;
+    var kilitT = null, bitirT = null;
+
+    // Kapanış sayaçlarını "şu andan itibaren" kurar. Video geç gelirse
+    // yeniden kurulur ki animasyon her hâlükârda tam süre oynasın.
+    function zamanlamaKur() {
+      if (kilitT) clearTimeout(kilitT);
+      if (bitirT) clearTimeout(bitirT);
+      perde.classList.remove('kilit');
+      kilitT = setTimeout(function () { perde.classList.add('kilit'); }, KILIT);
+      bitirT = setTimeout(bitir, ACILIS);
+      zam.push(kilitT, bitirT);
+    }
+
     function oynat() {
       try {
         var p = video.play();
@@ -209,10 +222,8 @@
               oynat();
             }, 250);
           }
-          // Kapanış sayacı da buradan başlar: perde, videonun görünür
-          // olduğu andan itibaren ölçülen süre kadar açık kalsın.
-          zam.push(setTimeout(function () { perde.classList.add('kilit'); }, KILIT));
-          zam.push(setTimeout(bitir, ACILIS));
+          sahneT0 = Date.now();
+          zamanlamaKur();
         });
       });
     }
@@ -220,7 +231,14 @@
     // Video oynatılabilir olduğunda plate'i görünür yapar. Sahne
     // başlamadıysa etkisi olmaz; CSS iki sınıfı birden bekliyor.
     function plateAc() {
-      if (!bitti) perde.classList.add('plate-hazir');
+      if (bitti || plateAcildi) return;
+      plateAcildi = true;
+      perde.classList.add('plate-hazir');
+      // Sahne, video gelmeden (siyah bekleme sınırı dolduğu için)
+      // başladıysa geriye yeterli süre kalmayabilir. Animasyonun tam
+      // oynayabilmesi için sayacı yeniden kur — ama introyu sonsuza
+      // kadar uzatmamak için yalnızca ilk 2.5 sn içinde.
+      if (basladi && Date.now() - sahneT0 < 2500) zamanlamaKur();
     }
 
     if (video) {
@@ -238,8 +256,10 @@
       });
       video.src = '/intro/kkfk-plate.mp4';
     }
-    // Ağ yavaşsa ya da olay hiç gelmezse sahne yine de başlasın
-    zam.push(setTimeout(sahneyiBaslat, 1500));
+    // Siyah bekleme sınırı: video yavaş geliyorsa ekran donmuş gibi
+    // durmasın; sahne ışık ve armayla başlasın, plate hazır olunca
+    // katılsın (o an sayaç yeniden kurulur).
+    zam.push(setTimeout(sahneyiBaslat, 700));
     // Mutlak güvence: hiçbir koşulda perde asılı kalmasın
     zam.push(setTimeout(bitir, 6500));
 

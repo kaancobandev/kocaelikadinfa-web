@@ -13,3 +13,12 @@
   for = "/.netlify/images"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Giriş animasyonunun varlıkları. Netlify'ın varsayılanı
+# "max-age=0, must-revalidate" olduğu için video her açılışta yeniden
+# doğrulanıyordu; bu, animasyonun başlamasını geciktiriyor.
+# İçerik değişirse dosya adını değiştirmek gerekir.
+[[headers]]
+  for = "/intro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
