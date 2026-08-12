@@ -11,6 +11,38 @@ const { articles } = Astro.props;
 ---
 
 <Panel id="haberler" title="Haberler">
+  {/* Ekleme formu listenin üstünde: onlarca haberin arasından geçmeden
+      yenisini eklemek için. */}
+  <form method="POST" enctype="multipart/form-data" class="match-form new-match">
+    <input type="hidden" name="_action" value="article_add" />
+    <p class="slot-label">+ Yeni Haber Ekle</p>
+
+    <div class="form-row">
+      <label class="grow-2">Başlık
+        <input name="title" placeholder="Haber başlığı" required />
+      </label>
+      <label class="grow">Yayın Tarihi
+        <input type="date" name="published_at" />
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label class="grow">Açıklama
+        <textarea name="description" rows="3" placeholder="Haber içeriği..."></textarea>
+      </label>
+    </div>
+
+    <div class="form-row">
+      <ImageField />
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-save">Haber Ekle</button>
+    </div>
+  </form>
+
+  {articles.length > 0 && <p class="list-heading">Yayındaki haberler ({articles.length})</p>}
+
   {articles.length > 0 ? (
     <div class="article-list">
       {articles.map(n => (
@@ -74,34 +106,6 @@ const { articles } = Astro.props;
       ))}
     </div>
   ) : (
-    <p class="empty-hint">Henüz haber eklenmemiş. Aşağıdan ilkini ekleyebilirsiniz.</p>
+    <p class="empty-hint">Henüz haber eklenmemiş. Yukarıdaki formdan ilkini ekleyebilirsiniz.</p>
   )}
-
-  <form method="POST" enctype="multipart/form-data" class="match-form new-match spaced">
-    <input type="hidden" name="_action" value="article_add" />
-    <p class="slot-label">+ Yeni Haber Ekle</p>
-
-    <div class="form-row">
-      <label class="grow-2">Başlık
-        <input name="title" placeholder="Haber başlığı" required />
-      </label>
-      <label class="grow">Yayın Tarihi
-        <input type="date" name="published_at" />
-      </label>
-    </div>
-
-    <div class="form-row">
-      <label class="grow">Açıklama
-        <textarea name="description" rows="3" placeholder="Haber içeriği..."></textarea>
-      </label>
-    </div>
-
-    <div class="form-row">
-      <ImageField />
-    </div>
-
-    <div class="form-actions">
-      <button type="submit" class="btn-save">Haber Ekle</button>
-    </div>
-  </form>
 </Panel>

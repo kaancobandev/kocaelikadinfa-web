@@ -58,14 +58,16 @@ const photos: GalleryItem[] = data ?? [];
           <h2>Akademiden Kareler</h2>
         </div>
         <div class="gallery-grid">
-          {photos.map(p => (
+          {photos.map((p, i) => (
             <div class="gallery-item">
               <img
                 src={img(p.image_url, 800)}
                 srcset={imgSet(p.image_url)}
                 sizes="(max-width: 640px) 100vw, (max-width: 960px) 50vw, 33vw"
                 alt={p.caption ?? 'Akademi fotoğrafı'}
-                loading="lazy"
+                {/* İlk satır zaten ekranda; ertelemek yerine hemen insin */}
+                loading={i < 3 ? 'eager' : 'lazy'}
+                fetchpriority={i < 3 ? 'high' : undefined}
                 decoding="async"
               />
               {p.caption && <div class="gallery-caption">{p.caption}</div>}
@@ -148,41 +150,38 @@ const photos: GalleryItem[] = data ?? [];
     margin-top: .5rem;
   }
 
-  /* Kolon bazlı masonry: her fotoğraf kendi en-boy oranında durur,
-     bulanık dolguya gerek kalmaz. */
+  /* Izgara — satır satır soldan sağa. Kolon bazlı masonry'de (column-count)
+     belge sırası ekrandaki sırayla örtüşmediği için üstteki fotoğraflar en
+     son, alttakiler ilk iniyordu. */
   .gallery-grid {
-    column-count: 3;
-    column-gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    align-items: start;
   }
-  @media (max-width: 960px) { .gallery-grid { column-count: 2; } }
-  @media (max-width: 640px) { .gallery-grid { column-count: 1; } }
+  @media (max-width: 960px) { .gallery-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .gallery-grid { grid-template-columns: 1fr; } }
 
   .gallery-item {
     position: relative;
-    break-inside: avoid;
-    margin-bottom: 1rem;
     border-radius: var(--radius);
     overflow: hidden;
     border: 1px solid var(--border);
     background: var(--card-bg);
     cursor: pointer;
   }
-  /* Oran korunur; yalnızca min/max dışına taşanlar kırpılır */
+  /* Izgarada satırlar hizalı dursun diye ortak oran; yükseklik baştan belli
+     olduğu için görsel inerken sayfa kaymıyor. */
   .gallery-item img {
     display: block;
     width: 100%;
+    aspect-ratio: 4 / 3;
     height: auto;
-    min-height: var(--media-min-h);
-    max-height: var(--media-max-h);
     object-fit: cover;
     object-position: center 40%;
     transition: transform .4s ease;
   }
   .gallery-item:hover img { transform: scale(1.03); }
-
-  @media (max-width: 640px) {
-    .gallery-item img { max-height: var(--media-max-h-sm); }
-  }
 
   .gallery-caption {
     position: absolute;

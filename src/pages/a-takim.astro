@@ -53,7 +53,7 @@ const photos: GalleryItem[] = data ?? [];
       <section class="photos-section">
         <h2 class="photos-title">Sahadan Kareler</h2>
         <div class="photos-grid">
-          {photos.map(p => (
+          {photos.map((p, i) => (
             <figure class="photo-card">
               <div class="photo-media">
                 <img
@@ -61,7 +61,9 @@ const photos: GalleryItem[] = data ?? [];
                   srcset={imgSet(p.image_url)}
                   sizes="(max-width: 768px) 100vw, 33vw"
                   alt={p.caption ?? ''}
-                  loading="lazy"
+                  {/* İlk satır zaten ekranda; ertelemek yerine hemen insin */}
+                  loading={i < 3 ? 'eager' : 'lazy'}
+                  fetchpriority={i < 3 ? 'high' : undefined}
                   decoding="async"
                 />
               </div>
@@ -130,17 +132,19 @@ const photos: GalleryItem[] = data ?? [];
     border-radius: 2px;
   }
 
-  /* Kolon bazlı masonry: fotoğraflar kendi oranlarında, bulanık dolgu yok */
+  /* Izgara — satır satır soldan sağa. Kolon bazlı masonry'de (column-count)
+     belge sırası ekrandaki sırayla örtüşmediği için üstteki fotoğraflar en
+     son, alttakiler ilk iniyordu. */
   .photos-grid {
-    column-count: 3;
-    column-gap: 1.2rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+    align-items: start;
   }
-  @media (max-width: 960px) { .photos-grid { column-count: 2; } }
-  @media (max-width: 640px) { .photos-grid { column-count: 1; } }
+  @media (max-width: 960px) { .photos-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .photos-grid { grid-template-columns: 1fr; } }
 
   .photo-card {
-    break-inside: avoid;
-    margin-bottom: 1.2rem;
     border-radius: var(--radius);
     overflow: hidden;
     border: 1px solid var(--border);
@@ -149,22 +153,18 @@ const photos: GalleryItem[] = data ?? [];
   }
   .photo-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.5); }
   .photo-media { overflow: hidden; }
-  /* Oran korunur; yalnızca min/max dışına taşanlar kırpılır */
+  /* Izgarada satırlar hizalı dursun diye ortak oran; yükseklik baştan belli
+     olduğu için görsel inerken sayfa kaymıyor. */
   .photo-card img {
     display: block;
     width: 100%;
+    aspect-ratio: 4 / 3;
     height: auto;
-    min-height: var(--media-min-h);
-    max-height: var(--media-max-h);
     object-fit: cover;
     object-position: center 40%;
     transition: transform .4s;
   }
   .photo-card:hover img { transform: scale(1.03); }
-
-  @media (max-width: 640px) {
-    .photo-card img { max-height: var(--media-max-h-sm); }
-  }
   figcaption { background: var(--card-bg); padding: .8rem 1rem; font-size: .8rem; color: var(--text-muted); font-weight: 600; }
 
   /* ── CTA ── */

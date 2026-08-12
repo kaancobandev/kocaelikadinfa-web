@@ -44,7 +44,7 @@ function isYoutube(url: string): boolean {
     {items.length > 0 ? (
       <section class="galeri-section">
         <div class="galeri-grid">
-          {items.map(item => (
+          {items.map((item, i) => (
             <div class="galeri-card">
               {isYoutube(item.media_url) ? (
                 <div class="yt-wrap">
@@ -67,7 +67,9 @@ function isYoutube(url: string): boolean {
                       srcset={imgSet(item.media_url)}
                       sizes="(max-width: 640px) 100vw, (max-width: 960px) 50vw, 33vw"
                       alt={item.caption ?? ''}
-                      loading="lazy"
+                      {/* İlk satır zaten ekranda; ertelemek yerine hemen insin */}
+                      loading={i < 3 ? 'eager' : 'lazy'}
+                      fetchpriority={i < 3 ? 'high' : undefined}
                       decoding="async"
                     />
                     <span class="img-overlay">
@@ -107,19 +109,24 @@ function isYoutube(url: string): boolean {
     border-top: 1px solid var(--border);
   }
 
-  /* Kolon bazlı masonry: fotoğraflar kendi oranlarında, videolar 16:9 */
+  /* Izgara — satır satır soldan sağa.
+     Önceden kolon bazlı masonry (column-count) kullanılıyordu; orada içerik
+     önce 1. kolonu baştan sona doldurup 2. kolona geçtiği için belge sırası
+     ekrandaki sırayla örtüşmüyordu: üstte görünen fotoğraflar HTML'de çok
+     geride kalıyor, sayfanın en altındaki kareler onlardan önce iniyordu.
+     Izgarada sıra soldan sağa aktığı için tarayıcı da önce üstü yüklüyor. */
   .galeri-grid {
     max-width: 1200px;
     margin: 0 auto;
-    column-count: 3;
-    column-gap: 1.2rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+    align-items: start;
   }
-  @media (max-width: 960px) { .galeri-grid { column-count: 2; } }
-  @media (max-width: 640px) { .galeri-grid { column-count: 1; } }
+  @media (max-width: 960px) { .galeri-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .galeri-grid { grid-template-columns: 1fr; } }
 
   .galeri-card {
-    break-inside: avoid;
-    margin-bottom: 1.2rem;
     border-radius: var(--radius);
     overflow: hidden;
     border: 1px solid var(--border);
@@ -164,13 +171,13 @@ function isYoutube(url: string): boolean {
     display: block;
     overflow: hidden;
   }
-  /* Oran korunur; yalnızca min/max dışına taşanlar kırpılır */
+  /* Izgarada satırlar hizalı dursun diye ortak oran; yükseklik baştan belli
+     olduğu için görsel inerken sayfa da kaymıyor. */
   .img-btn img {
     display: block;
     width: 100%;
+    aspect-ratio: 4 / 3;
     height: auto;
-    min-height: var(--media-min-h);
-    max-height: var(--media-max-h);
     object-fit: cover;
     object-position: center 40%;
     transition: transform .35s;

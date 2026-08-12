@@ -191,14 +191,27 @@ body {
 .match-form:last-of-type,
 .match-form.flush { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 
+/* Ekleme formu panelin en üstünde durur; altındaki mevcut kayıt listesinden
+   belirgin bir boşlukla ayrılır. */
 .new-match {
-  margin-top: 1rem;
+  margin-bottom: 1.6rem;
   background: rgba(44,184,74,0.04);
   border: 1px dashed rgba(44,184,74,0.25);
   border-radius: 10px;
   padding: 1.4rem;
 }
-.new-match.spaced { margin-top: 1.4rem; }
+
+/* Ekleme formunun altındaki mevcut kayıtların başlığı */
+.list-heading {
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--a-dim);
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--a-line);
+  margin-bottom: .9rem;
+}
 
 .form-row { display: flex; flex-wrap: wrap; gap: .9rem; margin-bottom: .9rem; }
 .form-row .grow   { flex: 1; }

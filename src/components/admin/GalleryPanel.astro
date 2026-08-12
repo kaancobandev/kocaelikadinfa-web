@@ -60,31 +60,9 @@ function thumbOf(url: string): string {
 <Panel id={id} title={title}>
   <slot />
 
-  {items.length > 0 ? (
-    <div class="gallery-admin-grid">
-      {items.map(item => (
-        <div class="gallery-admin-item">
-          <img src={thumbOf(item.url)} alt={item.caption ?? ''} class="gallery-thumb" loading="lazy" decoding="async" />
-          {isYoutube(item.url) && <div class="yt-badge">▶ YT</div>}
-          {item.caption && <p class="gallery-admin-caption">{item.caption}</p>}
-          <form
-            method="POST"
-            enctype="application/x-www-form-urlencoded"
-            class="gallery-delete-form"
-            data-confirm={confirmText}
-          >
-            <input type="hidden" name="_action" value={deleteAction} />
-            <input type="hidden" name="id" value={item.id} />
-            <button type="submit" class="btn-delete btn-delete-small">Sil</button>
-          </form>
-        </div>
-      ))}
-    </div>
-  ) : (
-    <p class="empty-hint">{emptyHint}</p>
-  )}
-
-  <form method="POST" enctype="multipart/form-data" class="match-form new-match spaced">
+  {/* Ekleme formu listenin üstünde: onlarca fotoğrafın arasından geçmeden
+      yenisini eklemek için. */}
+  <form method="POST" enctype="multipart/form-data" class="match-form new-match">
     <input type="hidden" name="_action" value={addAction} />
     <p class="slot-label">{addLabel}</p>
 
@@ -111,4 +89,30 @@ function thumbOf(url: string): string {
       <button type="submit" class="btn-save">{submitLabel}</button>
     </div>
   </form>
+
+  {items.length > 0 && <p class="list-heading">Yüklenenler ({items.length})</p>}
+
+  {items.length > 0 ? (
+    <div class="gallery-admin-grid">
+      {items.map(item => (
+        <div class="gallery-admin-item">
+          <img src={thumbOf(item.url)} alt={item.caption ?? ''} class="gallery-thumb" loading="lazy" decoding="async" />
+          {isYoutube(item.url) && <div class="yt-badge">▶ YT</div>}
+          {item.caption && <p class="gallery-admin-caption">{item.caption}</p>}
+          <form
+            method="POST"
+            enctype="application/x-www-form-urlencoded"
+            class="gallery-delete-form"
+            data-confirm={confirmText}
+          >
+            <input type="hidden" name="_action" value={deleteAction} />
+            <input type="hidden" name="id" value={item.id} />
+            <button type="submit" class="btn-delete btn-delete-small">Sil</button>
+          </form>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p class="empty-hint">{emptyHint}</p>
+  )}
 </Panel>

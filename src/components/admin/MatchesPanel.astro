@@ -13,6 +13,77 @@ const { groups, categories } = Astro.props;
 ---
 
 <Panel id="maclar" title="Maç Sonuçları">
+  {/* Ekleme formu listenin üstünde: kategori kategori sıralanmış maçların
+      arasından geçmeden yenisini eklemek için. */}
+  <form method="POST" enctype="multipart/form-data" class="match-form new-match">
+    <input type="hidden" name="_action" value="match_add" />
+    <input type="hidden" name="sort_order" value="99" />
+    <p class="slot-label">+ Yeni Maç Ekle</p>
+
+    <div class="form-row">
+      <label>Kategori / Başlık
+        <input name="badge" list="badge-options" placeholder="örn. U13, U15, 1.Lig" required />
+        <datalist id="badge-options">
+          {categories.map(c => <option value={c} />)}
+        </datalist>
+      </label>
+      <label>Tarih
+        <input type="date" name="match_date" required />
+      </label>
+      <label>Lig (isteğe bağlı)
+        <input name="league" placeholder="örn. 1. Lig" />
+      </label>
+    </div>
+
+    <div class="form-row teams-row">
+      <div class="team-block">
+        <span class="team-label">Ev Sahibi</span>
+        <label>Takım Adı
+          <input name="home_name" placeholder="KKFK" required />
+        </label>
+        <label>Logo — Cihazdan Yükle
+          <div class="file-wrap">
+            <img class="news-preview file-preview" alt="Seçilen dosyanın önizlemesi" />
+            <input type="file" name="home_logo_file" accept="image/*" class="file-input" />
+          </div>
+        </label>
+        <label>veya URL
+          <input name="home_logo_url" placeholder="https://..." />
+        </label>
+      </div>
+
+      <div class="score-block">
+        <label>Skor
+          <div class="score-inputs">
+            <input type="number" name="score_home" value="0" min="0" required />
+            <span>–</span>
+            <input type="number" name="score_away" value="0" min="0" required />
+          </div>
+        </label>
+      </div>
+
+      <div class="team-block">
+        <span class="team-label">Deplasman</span>
+        <label>Takım Adı
+          <input name="away_name" placeholder="Rakip FK" required />
+        </label>
+        <label>Logo — Cihazdan Yükle
+          <div class="file-wrap">
+            <img class="news-preview file-preview" alt="Seçilen dosyanın önizlemesi" />
+            <input type="file" name="away_logo_file" accept="image/*" class="file-input" />
+          </div>
+        </label>
+        <label>veya URL
+          <input name="away_logo_url" placeholder="https://..." />
+        </label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-save">Maç Ekle</button>
+    </div>
+  </form>
+
   {groups.length > 0 ? (
     groups.map(([title, list]) => (
       <div class="match-subsection">
@@ -117,75 +188,6 @@ const { groups, categories } = Astro.props;
       </div>
     ))
   ) : (
-    <p class="empty-hint">Henüz maç eklenmemiş. Aşağıdan ilk maçı ekleyebilirsiniz.</p>
+    <p class="empty-hint">Henüz maç eklenmemiş. Yukarıdaki formdan ilk maçı ekleyebilirsiniz.</p>
   )}
-
-  <form method="POST" enctype="multipart/form-data" class="match-form new-match spaced">
-    <input type="hidden" name="_action" value="match_add" />
-    <input type="hidden" name="sort_order" value="99" />
-    <p class="slot-label">+ Yeni Maç Ekle</p>
-
-    <div class="form-row">
-      <label>Kategori / Başlık
-        <input name="badge" list="badge-options" placeholder="örn. U13, U15, 1.Lig" required />
-        <datalist id="badge-options">
-          {categories.map(c => <option value={c} />)}
-        </datalist>
-      </label>
-      <label>Tarih
-        <input type="date" name="match_date" required />
-      </label>
-      <label>Lig (isteğe bağlı)
-        <input name="league" placeholder="örn. 1. Lig" />
-      </label>
-    </div>
-
-    <div class="form-row teams-row">
-      <div class="team-block">
-        <span class="team-label">Ev Sahibi</span>
-        <label>Takım Adı
-          <input name="home_name" placeholder="KKFK" required />
-        </label>
-        <label>Logo — Cihazdan Yükle
-          <div class="file-wrap">
-            <img class="news-preview file-preview" alt="Seçilen dosyanın önizlemesi" />
-            <input type="file" name="home_logo_file" accept="image/*" class="file-input" />
-          </div>
-        </label>
-        <label>veya URL
-          <input name="home_logo_url" placeholder="https://..." />
-        </label>
-      </div>
-
-      <div class="score-block">
-        <label>Skor
-          <div class="score-inputs">
-            <input type="number" name="score_home" value="0" min="0" required />
-            <span>–</span>
-            <input type="number" name="score_away" value="0" min="0" required />
-          </div>
-        </label>
-      </div>
-
-      <div class="team-block">
-        <span class="team-label">Deplasman</span>
-        <label>Takım Adı
-          <input name="away_name" placeholder="Rakip FK" required />
-        </label>
-        <label>Logo — Cihazdan Yükle
-          <div class="file-wrap">
-            <img class="news-preview file-preview" alt="Seçilen dosyanın önizlemesi" />
-            <input type="file" name="away_logo_file" accept="image/*" class="file-input" />
-          </div>
-        </label>
-        <label>veya URL
-          <input name="away_logo_url" placeholder="https://..." />
-        </label>
-      </div>
-    </div>
-
-    <div class="form-actions">
-      <button type="submit" class="btn-save">Maç Ekle</button>
-    </div>
-  </form>
 </Panel>
