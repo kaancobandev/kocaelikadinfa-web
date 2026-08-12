@@ -201,6 +201,42 @@ body {
   padding: 1.4rem;
 }
 
+/* ── Toplu yükleme ilerlemesi ────────────────────────────────────────── */
+.upload-progress { margin-top: 1rem; }
+
+.upload-bar {
+  height: 6px;
+  border-radius: 50px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+.upload-bar span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--a-green);
+  transition: width .25s ease;
+}
+.upload-text {
+  margin-top: .5rem;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--a-muted);
+}
+
+/* Seçilen dosya sayısı ve toplam boyut */
+.file-count {
+  font-size: .74rem;
+  font-weight: 600;
+  color: var(--a-green);
+}
+
+.btn-save:disabled {
+  opacity: .55;
+  cursor: progress;
+  transform: none;
+}
+
 /* Ekleme formunun altındaki mevcut kayıtların başlığı */
 .list-heading {
   font-size: .7rem;

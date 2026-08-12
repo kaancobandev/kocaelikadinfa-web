@@ -83,7 +83,13 @@ async function resolveImage(
 const missingPublishedAt = (msg?: string) =>
   !!msg && /published_at/i.test(msg) && /(column|schema cache)/i.test(msg);
 
-/** Basit galeri tablolarının hepsi aynı şekilde çalışıyor. */
+/**
+ * Basit galeri tablolarının hepsi aynı şekilde çalışıyor.
+ *
+ * Birden fazla dosya seçilebilir. Açıklama YALNIZCA ilk görsele yazılır —
+ * aksi hâlde tek seferde eklenen otuz fotoğrafın hepsi aynı açıklamayı
+ * taşırdı. Sıra numarası da her görselde bir artar ki seçim sırası korunsun.
+ */
 function galleryAdd(
   panel: string,
   table: string,
@@ -94,16 +100,38 @@ function galleryAdd(
     panel,
     run: async (ctx) => {
       const caption = str(ctx.form, 'caption');
-      const sort_order = num(ctx.form, 'sort_order', 99);
-      const image_url = await resolveImage(ctx, 'image_file', urlField, folder);
-
-      if (!image_url) return { error: 'Lütfen bir görsel seçin veya geçerli bir URL girin.' };
-
+      const başlangıçSırası = num(ctx.form, 'sort_order', 99);
       const column = urlField === 'media_url' ? 'media_url' : 'image_url';
-      const { error } = await ctx.db
-        .from(table)
-        .insert({ [column]: image_url, caption, sort_order });
-      return done(error, 'Eklendi!', 'Eklenemedi');
+
+      const dosyalar = ctx.form
+        .getAll('image_file')
+        .filter((d): d is File => typeof d !== 'string' && d.size > 0);
+
+      const adresler: string[] = [];
+      for (const dosya of dosyalar) {
+        const yüklenen = await uploadFile(ctx.token, dosya, folder);
+        if (yüklenen) adresler.push(yüklenen);
+      }
+
+      // Dosya yoksa URL alanına düşülür
+      if (!adresler.length) {
+        const adres = safeUrl(ctx.form.get(urlField)?.toString());
+        if (adres) adresler.push(adres);
+      }
+
+      if (!adresler.length) {
+        return { error: 'Lütfen en az bir görsel seçin veya geçerli bir URL girin.' };
+      }
+
+      const satırlar = adresler.map((adres, i) => ({
+        [column]: adres,
+        caption: i === 0 ? caption : '',
+        sort_order: başlangıçSırası + i,
+      }));
+
+      const { error } = await ctx.db.from(table).insert(satırlar);
+      const mesaj = adresler.length > 1 ? `${adresler.length} görsel eklendi!` : 'Eklendi!';
+      return done(error, mesaj, 'Eklenemedi');
     },
   };
 }

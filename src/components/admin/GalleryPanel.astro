@@ -62,16 +62,25 @@ function thumbOf(url: string): string {
 
   {/* Ekleme formu listenin üstünde: onlarca fotoğrafın arasından geçmeden
       yenisini eklemek için. */}
-  <form method="POST" enctype="multipart/form-data" class="match-form new-match">
+  <form
+    method="POST"
+    enctype="multipart/form-data"
+    class="match-form new-match"
+    data-multi-upload
+  >
     <input type="hidden" name="_action" value={addAction} />
     <p class="slot-label">{addLabel}</p>
 
     <div class="form-row">
       <label>Açıklama (isteğe bağlı)
         <input name="caption" placeholder="Açıklama..." />
+        <span class="section-note">
+          Yalnızca ilk fotoğrafa yazılır; toplu yüklemede diğerleri açıklamasız kalır.
+        </span>
       </label>
       <label>Sıra
         <input type="number" name="sort_order" value="99" min="0" />
+        <span class="section-note">Sonraki fotoğraflar bu sayıdan itibaren sıralanır.</span>
       </label>
     </div>
 
@@ -82,7 +91,13 @@ function thumbOf(url: string): string {
         urlName={urlName}
         urlPlaceholder={urlPlaceholder}
         accept={allowVideo ? 'image/*,video/*' : 'image/*'}
+        multiple={true}
       />
+    </div>
+
+    <div class="upload-progress" hidden>
+      <div class="upload-bar"><span></span></div>
+      <p class="upload-text"></p>
     </div>
 
     <div class="form-actions">

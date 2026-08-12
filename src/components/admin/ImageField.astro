@@ -18,6 +18,8 @@ interface Props {
   accept?: string;
   /** Görseli boş bırakınca mevcudun korunacağını belirten formlar için. */
   hint?: string;
+  /** Aynı anda birden fazla dosya seçilebilsin mi (galeri panelleri). */
+  multiple?: boolean;
 }
 
 const {
@@ -30,6 +32,7 @@ const {
   urlPlaceholder = 'https://...',
   accept = 'image/*',
   hint,
+  multiple = false,
 } = Astro.props;
 ---
 
@@ -37,7 +40,14 @@ const {
   <div class="file-wrap">
     {current && <img src={current} class="news-preview" alt="Kayıtlı görsel" />}
     <img class="news-preview file-preview" alt="Seçilen dosyanın önizlemesi" />
-    <input type="file" name={fileName} accept={accept} class="file-input" />
+    <input type="file" name={fileName} accept={accept} class="file-input" multiple={multiple} />
+    {multiple && (
+      <span class="section-note">
+        Birden fazla seçebilirsin: Ctrl (Mac'te Cmd) basılı tutarak tıkla ya da hepsini
+        sürükleyip bırak. Fotoğraflar tarayıcıda küçültülüp tek tek yüklenir.
+      </span>
+    )}
+    <span class="file-count" hidden></span>
   </div>
 </label>
 
