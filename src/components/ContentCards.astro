@@ -27,7 +27,7 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
           class="card-img-fg"
           src={img(n?.image_url, 800) || fallbackImg}
           srcset={imgSet(n?.image_url, [400, 800, 1200])}
-          sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
+          sizes="(max-width: 640px) 100vw, (max-width: 960px) 50vw, 33vw"
           alt={n?.title ?? 'Haber görseli'}
           loading="lazy"
           decoding="async"
@@ -59,10 +59,10 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
   /* Tek kolona 900px'de düşürünce kart 900px eninde oluyor, kare görsel
      de onun ortasında küçük kalıyordu. Haberler sayfasıyla aynı kademe:
      tablette 2, telefonda 1 kolon. */
-  @media (max-width: 900px) {
+  @media (max-width: 960px) {
     .content-cards { grid-template-columns: repeat(2, 1fr); }
   }
-  @media (max-width: 600px) {
+  @media (max-width: 640px) {
     .content-cards { grid-template-columns: 1fr; }
   }
 
@@ -74,10 +74,10 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
     transition: background .25s;
   }
   .card:last-child { border-right: none; }
-  @media (max-width: 900px) {
+  @media (max-width: 960px) {
     .card:nth-child(2n) { border-right: none; }
   }
-  @media (max-width: 600px) {
+  @media (max-width: 640px) {
     .card { border-right: none; }
   }
   .card:hover { background: var(--card-bg); }
@@ -94,7 +94,7 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
     background: #080808;
   }
   /* Telefonda kolon zaten dar; tavanı kaldırıp kareyi bozmuyoruz. */
-  @media (max-width: 600px) {
+  @media (max-width: 640px) {
     .card-img { max-height: none; }
   }
   /* Görsel yüklenene kadar görünen koyu zemin */

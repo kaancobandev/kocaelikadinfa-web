@@ -68,7 +68,7 @@ const jsonLd = {
 >
   <Navbar />
 
-  <main class="article-page">
+  <main id="icerik" tabindex="-1" class="article-page">
     <article>
       <!-- Başlık -->
       <header class="article-hero">
@@ -94,7 +94,7 @@ const jsonLd = {
           <img
             src={img(article.image_url, 1200)}
             srcset={imgSet(article.image_url, [600, 1200, 1600])}
-            sizes="(max-width: 900px) 100vw, 900px"
+            sizes="(max-width: 960px) 100vw, 900px"
             alt={article.title}
             fetchpriority="high"
           />
@@ -148,7 +148,7 @@ const jsonLd = {
                 <img
                   src={img(n.image_url, 600)}
                   srcset={imgSet(n.image_url, [400, 800])}
-                  sizes="(max-width: 900px) 100vw, 33vw"
+                  sizes="(max-width: 960px) 100vw, 33vw"
                   alt={n.title}
                   loading="lazy"
                   decoding="async"
@@ -227,7 +227,7 @@ const jsonLd = {
   /* ── Görsel ── */
   .article-media {
     position: relative;
-    max-width: 900px;
+    max-width: 960px;
     margin: 2.5rem auto 0;
     border-radius: var(--radius);
     overflow: hidden;
@@ -249,10 +249,10 @@ const jsonLd = {
     max-height: min(70vh, 620px);
     object-fit: contain;
   }
-  @media (max-width: 600px) {
+  @media (max-width: 640px) {
     .article-media img { max-height: 60vh; }
   }
-  @media (max-width: 900px) { .article-media { margin-inline: 5%; border-radius: 10px; } }
+  @media (max-width: 960px) { .article-media { margin-inline: 5%; border-radius: 10px; } }
 
   /* ── Metin ── */
   .article-body {
@@ -347,7 +347,7 @@ const jsonLd = {
     grid-template-columns: repeat(3, 1fr);
     gap: 1.4rem;
   }
-  @media (max-width: 900px) { .more-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 960px) { .more-grid { grid-template-columns: 1fr; } }
 
   .more-card {
     display: flex;

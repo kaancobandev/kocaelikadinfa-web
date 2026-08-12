@@ -20,7 +20,7 @@ const photos: GalleryItem[] = data ?? [];
 >
   <Navbar />
 
-  <main class="akademi-page">
+  <main id="icerik" tabindex="-1" class="akademi-page">
 
     <PageHero
       tag="Akademi"
@@ -63,7 +63,7 @@ const photos: GalleryItem[] = data ?? [];
               <img
                 src={img(p.image_url, 800)}
                 srcset={imgSet(p.image_url)}
-                sizes="(max-width: 540px) 100vw, (max-width: 900px) 50vw, 33vw"
+                sizes="(max-width: 640px) 100vw, (max-width: 960px) 50vw, 33vw"
                 alt={p.caption ?? 'Akademi fotoğrafı'}
                 loading="lazy"
                 decoding="async"
@@ -154,8 +154,8 @@ const photos: GalleryItem[] = data ?? [];
     column-count: 3;
     column-gap: 1rem;
   }
-  @media (max-width: 900px) { .gallery-grid { column-count: 2; } }
-  @media (max-width: 540px) { .gallery-grid { column-count: 1; } }
+  @media (max-width: 960px) { .gallery-grid { column-count: 2; } }
+  @media (max-width: 640px) { .gallery-grid { column-count: 1; } }
 
   .gallery-item {
     position: relative;
@@ -180,7 +180,7 @@ const photos: GalleryItem[] = data ?? [];
   }
   .gallery-item:hover img { transform: scale(1.03); }
 
-  @media (max-width: 540px) {
+  @media (max-width: 640px) {
     .gallery-item img { max-height: var(--media-max-h-sm); }
   }
 

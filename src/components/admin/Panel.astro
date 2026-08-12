@@ -1,0 +1,14 @@
+---
+interface Props {
+  /** URL hash'i olarak da kullanılır; aksiyonların `panel` alanıyla eşleşmeli. */
+  id: string;
+  title: string;
+}
+
+const { id, title } = Astro.props;
+---
+
+<section class="panel" id={id} aria-labelledby={`${id}-baslik`}>
+  <h2 id={`${id}-baslik`}>{title}</h2>
+  <slot />
+</section>

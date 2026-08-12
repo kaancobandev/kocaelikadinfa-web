@@ -59,6 +59,11 @@ const links = [
   }
   .navbar.scrolled { height: 58px; }
 
+  /* Mobil menü açıkken arkadaki sayfa kaymasın. Sınıf <html> üzerinde
+     olduğu için :global gerekiyor (IntroLoader da aynı yöntemi kullanıyor). */
+  :global(html.nav-locked),
+  :global(html.nav-locked body) { overflow: hidden; }
+
   .nav-logo {
     display: flex;
     align-items: center;
@@ -67,7 +72,7 @@ const links = [
   }
   .logo-img { height: 42px; width: 42px; object-fit: contain; border-radius: 50%; }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1160px) {
     .nav-logo { padding: 8px 0; }
     .logo-img { height: 38px; width: 38px; }
   }
@@ -216,7 +221,21 @@ const links = [
     .sb-spark-wrap { display: none; }   /* düz yeşil buton kalır */
   }
 
-  @media (max-width: 768px) {
+  /* ── Dar masaüstü / büyük tablet ────────────────────────────────────
+     Kulübün tam adı (1.4rem + 3px harf aralığı) tek başına 384px yer
+     kaplıyordu; 6 link ve butonla birlikte tek satır için ~1280px
+     gerekiyordu (ölçüm: 1473px). Altında kalan genişliklerde logo üç satıra bölünüp
+     navbar'ın dışına taşıyordu. Bu bantta yazıyı ve boşlukları
+     sıkıştırıyoruz (ölçülen ihtiyaç: 1473px → 1155px); bunun da altında
+     hamburger menü devralıyor. */
+  @media (max-width: 1500px) {
+    .logo-text { font-size: 1rem; letter-spacing: .5px; }
+    .nav-links { gap: 1.2rem; }
+    .nav-links a { font-size: .8rem; letter-spacing: .5px; }
+    .btn-join { padding: .5rem 1rem; }
+  }
+
+  @media (max-width: 1160px) {
     /* Tam ad iki satıra düzgün sarılsın (navbar yüksekliğine sığar) */
     .logo-text {
       font-size: .82rem;
@@ -289,27 +308,74 @@ const links = [
     navbar?.classList.toggle('scrolled', window.scrollY > 60);
   });
 
+  const navLinks = document.getElementById('nav-links');
+
+  const isOpen = () => toggle?.getAttribute('aria-expanded') === 'true';
+
+  /** Menü açıkken Tab'ın dolaşabileceği öğeler — hamburger butonu dahil,
+   *  böylece Shift+Tab ile butona dönüp menüyü kapatmak mümkün. */
+  const odaklanabilirler = (): HTMLElement[] => [
+    ...(toggle ? [toggle] : []),
+    ...Array.from(navLinks?.querySelectorAll<HTMLElement>('a[href]') ?? []),
+  ];
+
   function setMenu(open: boolean) {
+    const odakMenüdeydi = !!navLinks?.contains(document.activeElement);
+
     navbar?.classList.toggle('nav-open', open);
+    // Menü açıkken arkadaki sayfa kaymasın
+    document.documentElement.classList.toggle('nav-locked', open);
     toggle?.setAttribute('aria-expanded', String(open));
     toggle?.setAttribute('aria-label', open ? 'Menüyü kapat' : 'Menüyü aç');
+
+    if (open) {
+      // Odağı menünün içine al; aksi hâlde Tab, menünün arkasındaki
+      // görünmeyen bağlantılar arasında dolaşıyordu.
+      odaklanabilirler()[1]?.focus();
+    } else if (odakMenüdeydi) {
+      // Menü kapanırken odak görünmez bir öğede kalmasın
+      toggle?.focus();
+    }
   }
 
-  toggle?.addEventListener('click', () => {
-    setMenu(toggle.getAttribute('aria-expanded') !== 'true');
+  toggle?.addEventListener('click', () => setMenu(!isOpen()));
+
+  document.addEventListener('keydown', e => {
+    if (!isOpen()) return;
+
+    if (e.key === 'Escape') {
+      setMenu(false);
+      toggle?.focus();
+      return;
+    }
+
+    // Odak tuzağı: Tab menünün dışına çıkmasın, başa/sona sarsın
+    if (e.key === 'Tab') {
+      const öğeler = odaklanabilirler();
+      if (!öğeler.length) return;
+      const ilk = öğeler[0];
+      const son = öğeler[öğeler.length - 1];
+
+      if (e.shiftKey && document.activeElement === ilk) {
+        e.preventDefault();
+        son.focus();
+      } else if (!e.shiftKey && document.activeElement === son) {
+        e.preventDefault();
+        ilk.focus();
+      }
+    }
   });
 
-  // Escape ile kapat, odağı butona geri ver
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && toggle?.getAttribute('aria-expanded') === 'true') {
-      setMenu(false);
-      toggle.focus();
-    }
+  // Ekran hamburger eşiğinin üstüne büyürse menü kapansın; aksi hâlde
+  // görünmeyen bir menü yüzünden sayfa kilitli kalıyor.
+  const genişEkran = window.matchMedia('(min-width: 1161px)');
+  genişEkran.addEventListener('change', e => {
+    if (e.matches && isOpen()) setMenu(false);
   });
 
   // Menü dışına tıklayınca kapat
   document.addEventListener('click', e => {
-    if (toggle?.getAttribute('aria-expanded') !== 'true') return;
+    if (!isOpen()) return;
     if (!navbar?.contains(e.target as Node)) setMenu(false);
   });
 

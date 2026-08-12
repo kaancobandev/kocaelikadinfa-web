@@ -23,7 +23,7 @@ const links = [
 >
   <Navbar />
 
-  <main class="nf-page">
+  <main id="icerik" tabindex="-1" class="nf-page">
     <PageHero
       tag="404"
       title="Bu Top"
@@ -78,8 +78,8 @@ const links = [
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
   }
-  @media (max-width: 900px) { .nf-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 520px) { .nf-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 960px) { .nf-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .nf-grid { grid-template-columns: 1fr; } }
 
   .nf-card {
     position: relative;

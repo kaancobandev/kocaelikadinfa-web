@@ -105,7 +105,7 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
 >
   <Navbar />
 
-  <main class="join-page">
+  <main id="icerik" tabindex="-1" class="join-page">
 
     <PageHero
       tag="Bize Katıl"
@@ -373,7 +373,7 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     grid-template-columns: repeat(3, 1fr);
     gap: 1.2rem;
   }
-  @media (max-width: 860px) { .groups-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 960px) { .groups-grid { grid-template-columns: 1fr; } }
 
   .group-card {
     background: var(--card-bg);
@@ -415,7 +415,7 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     grid-template-columns: repeat(3, 1fr);
     gap: 1.2rem;
   }
-  @media (max-width: 860px) { .fields-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 960px) { .fields-grid { grid-template-columns: 1fr; } }
 
   .field-card {
     display: flex;
@@ -461,7 +461,7 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     gap: 1.5rem;
     margin-bottom: 2.5rem;
   }
-  @media (max-width: 860px) { .steps { grid-template-columns: 1fr; } }
+  @media (max-width: 960px) { .steps { grid-template-columns: 1fr; } }
 
   .step { display: flex; gap: 1rem; align-items: flex-start; }
   .step-no {
@@ -485,7 +485,7 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     gap: 3rem;
     align-items: start;
   }
-  @media (max-width: 860px) { .bring-inner { grid-template-columns: 1fr; gap: 2rem; } }
+  @media (max-width: 960px) { .bring-inner { grid-template-columns: 1fr; gap: 2rem; } }
   .bring-text .section-lead { margin-bottom: 0; }
 
   .bring-list { list-style: none; display: flex; flex-direction: column; gap: .8rem; }
@@ -511,7 +511,7 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     align-content: start;
     gap: .7rem;
   }
-  @media (max-width: 860px) { .faq-list { grid-template-columns: 1fr; } }
+  @media (max-width: 960px) { .faq-list { grid-template-columns: 1fr; } }
 
   .faq-item {
     background: var(--card-bg);
@@ -552,7 +552,7 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
   .contact-section { background: var(--black); }
   /* İki kart yan yana — 1280px'te sağ taraf boş kalmıyor */
   .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
-  @media (max-width: 860px) { .options-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 960px) { .options-grid { grid-template-columns: 1fr; } }
 
   .option-card {
     display: flex;
@@ -611,7 +611,7 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
   .contact-alt a:hover { text-decoration: underline; }
   .contact-alt .dot { margin: 0 .6rem; opacity: .5; }
 
-  @media (max-width: 600px) {
+  @media (max-width: 640px) {
     .section { padding: 3.5rem 6%; }
     .option-card { padding: 1.4rem 1.2rem; gap: 1rem; }
     .option-icon { width: 52px; height: 52px; border-radius: 12px; }

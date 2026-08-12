@@ -1,0 +1,107 @@
+---
+import Panel from './Panel.astro';
+import ImageField from './ImageField.astro';
+import type { NewsItem } from '../../lib/supabase';
+
+interface Props {
+  articles: NewsItem[];
+}
+
+const { articles } = Astro.props;
+---
+
+<Panel id="haberler" title="Haberler">
+  {articles.length > 0 ? (
+    <div class="article-list">
+      {articles.map(n => (
+        <div class="article-block">
+          <div class="article-row">
+            {n.image_url && <img src={n.image_url} alt="" class="article-thumb" loading="lazy" decoding="async" />}
+            <div class="article-meta">
+              <span class="article-title">{n.title}</span>
+              <span class={`article-date-badge${n.published_at ? '' : ' missing'}`}>
+                {n.published_at ? n.published_at : 'tarih yok'}
+              </span>
+              {n.description && <span class="article-desc">{n.description}</span>}
+            </div>
+            <form
+              method="POST"
+              enctype="application/x-www-form-urlencoded"
+              class="article-delete-form"
+              data-confirm={`"${n.title}" haberi kalıcı olarak silinsin mi?`}
+            >
+              <input type="hidden" name="_action" value="article_delete" />
+              <input type="hidden" name="id" value={n.id} />
+              <button type="submit" class="btn-delete btn-delete-small">Sil</button>
+            </form>
+          </div>
+
+          <details class="article-edit">
+            <summary>Düzenle</summary>
+            <form method="POST" enctype="multipart/form-data" class="match-form flush">
+              <input type="hidden" name="_action" value="article_update" />
+              <input type="hidden" name="id" value={n.id} />
+
+              <div class="form-row">
+                <label class="grow-2">Başlık
+                  <input name="title" value={n.title} required />
+                </label>
+                <label class="grow">Yayın Tarihi
+                  <input type="date" name="published_at" value={n.published_at ?? ''} />
+                </label>
+              </div>
+
+              <div class="form-row">
+                <label class="grow">Açıklama
+                  <textarea name="description" rows="4">{n.description}</textarea>
+                </label>
+              </div>
+
+              <div class="form-row">
+                <ImageField
+                  label="Görseli Değiştir — Cihazdan Yükle"
+                  current={n.image_url}
+                  hint="Boş bırakılırsa mevcut görsel korunur."
+                />
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-save">Kaydet</button>
+              </div>
+            </form>
+          </details>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p class="empty-hint">Henüz haber eklenmemiş. Aşağıdan ilkini ekleyebilirsiniz.</p>
+  )}
+
+  <form method="POST" enctype="multipart/form-data" class="match-form new-match spaced">
+    <input type="hidden" name="_action" value="article_add" />
+    <p class="slot-label">+ Yeni Haber Ekle</p>
+
+    <div class="form-row">
+      <label class="grow-2">Başlık
+        <input name="title" placeholder="Haber başlığı" required />
+      </label>
+      <label class="grow">Yayın Tarihi
+        <input type="date" name="published_at" />
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label class="grow">Açıklama
+        <textarea name="description" rows="3" placeholder="Haber içeriği..."></textarea>
+      </label>
+    </div>
+
+    <div class="form-row">
+      <ImageField />
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-save">Haber Ekle</button>
+    </div>
+  </form>
+</Panel>

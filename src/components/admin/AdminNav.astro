@@ -1,0 +1,13 @@
+---
+interface Props {
+  panels: { id: string; label: string }[];
+}
+
+const { panels } = Astro.props;
+---
+
+<nav class="admin-nav" aria-label="Panel bölümleri">
+  {panels.map(p => (
+    <a href={`#${p.id}`} class="admin-tab" data-panel={p.id}>{p.label}</a>
+  ))}
+</nav>

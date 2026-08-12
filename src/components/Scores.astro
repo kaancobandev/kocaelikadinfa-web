@@ -126,7 +126,7 @@ function formatDate(d: string) {
        görünüyor). min(320px, 100%) tabanı dar ekranda kaldırıyor. */
     grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
     gap: 1.5rem;
-    max-width: 900px;
+    max-width: 960px;
     margin: 0 auto;
   }
 
@@ -139,7 +139,7 @@ function formatDate(d: string) {
     transition: border-color .25s, box-shadow .25s, transform .2s;
   }
   /* Çok dar ekranda 2rem yan dolgu takım adlarına yer bırakmıyor */
-  @media (max-width: 380px) {
+  @media (max-width: 400px) {
     .score-card { padding: 1.5rem 1rem; }
   }
   .score-card:hover {
@@ -214,7 +214,7 @@ function formatDate(d: string) {
   }
   /* Dar ekranda kısa ad — "Kocaeli Kadın Futbol Kulübü" 4 satıra bölünmesin */
   .tn-short { display: none; }
-  @media (max-width: 600px) {
+  @media (max-width: 640px) {
     .tn-full  { display: none; }
     .tn-short { display: inline; }
     .team-name { font-size: .8rem; }

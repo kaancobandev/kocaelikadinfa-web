@@ -21,7 +21,7 @@ const photos: GalleryItem[] = galleryData ?? [];
 >
   <Navbar />
 
-  <main class="pt-page">
+  <main id="icerik" tabindex="-1" class="pt-page">
 
     <PageHero
       tag="Pilot Takım"
@@ -173,7 +173,7 @@ const photos: GalleryItem[] = galleryData ?? [];
 
     --pt-photo-h: 260px;
   }
-  @media (max-width: 980px) {
+  @media (max-width: 960px) {
     .photos-grid { grid-template-columns: repeat(2, 1fr); --pt-photo-h: 240px; }
   }
   @media (max-width: 640px) {

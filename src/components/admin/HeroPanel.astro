@@ -1,0 +1,83 @@
+---
+import Panel from './Panel.astro';
+import ImageField from './ImageField.astro';
+import type { HeroSettings, NewsItem } from '../../lib/supabase';
+
+interface Props {
+  hero: HeroSettings | null;
+  /** Hero'nun sağ panelindeki 4 sabit manşet slotu. */
+  newsSlots: (NewsItem | null)[];
+}
+
+const { hero, newsSlots } = Astro.props;
+---
+
+<Panel id="hero" title="Ana Sayfa Hero">
+  <form method="POST" enctype="multipart/form-data" class="match-form flush">
+    <input type="hidden" name="_action" value="hero_save" />
+
+    <div class="form-row">
+      <label>Rozet (örn: Son Dakika)
+        <input name="badge" value={hero?.badge ?? ''} placeholder="Son Dakika" />
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label class="grow">Başlık (satır atlamak için yeni satıra geç)
+        <textarea name="title" rows="3" placeholder="SÜPER LIG'E EN FAZLA...">{hero?.title ?? ''}</textarea>
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label class="grow">Açıklama
+        <textarea name="description" rows="2" placeholder="Kısa açıklama...">{hero?.description ?? ''}</textarea>
+      </label>
+    </div>
+
+    <div class="form-row">
+      <ImageField
+        label="Arka Plan Görseli — Cihazdan Yükle"
+        current={hero?.image_url}
+        urlValue={hero?.image_url}
+      />
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-save">Kaydet</button>
+    </div>
+  </form>
+
+  <div class="section-divider">
+    <span class="slot-label">Diğer Manşetler (Hero Sağ Panel)</span>
+    <p class="section-note">Aşağıdaki manşetler hero'nun sağ tarafında görünür.</p>
+  </div>
+
+  <div class="slot-grid">
+    {newsSlots.map((n, i) => {
+      const slot = i + 1;
+      return (
+        <form method="POST" enctype="multipart/form-data" class="slot-form">
+          <input type="hidden" name="_action"     value="news_save" />
+          <input type="hidden" name="slot"        value={slot} />
+          <input type="hidden" name="existing_id" value={n?.id ?? ''} />
+
+          <p class="slot-label">Manşet {slot}</p>
+
+          <label>Başlık
+            <input name="title" value={n?.title ?? ''} placeholder="Haber başlığı" />
+          </label>
+
+          <label>Açıklama
+            <textarea name="description" rows="2" placeholder="Kısa açıklama...">{n?.description ?? ''}</textarea>
+          </label>
+
+          <ImageField current={n?.image_url} urlValue={n?.image_url} />
+
+          <div class="form-actions">
+            <button type="submit" class="btn-save">Kaydet</button>
+          </div>
+        </form>
+      );
+    })}
+  </div>
+</Panel>

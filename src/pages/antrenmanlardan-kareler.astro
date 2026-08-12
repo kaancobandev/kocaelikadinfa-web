@@ -29,7 +29,7 @@ function isYoutube(url: string): boolean {
 >
   <Navbar />
 
-  <main>
+  <main id="icerik" tabindex="-1">
 
     <PageHero
       tag="Videolar & Fotoğraflar"
@@ -65,7 +65,7 @@ function isYoutube(url: string): boolean {
                     <img
                       src={img(item.media_url, 800)}
                       srcset={imgSet(item.media_url)}
-                      sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 33vw"
+                      sizes="(max-width: 640px) 100vw, (max-width: 960px) 50vw, 33vw"
                       alt={item.caption ?? ''}
                       loading="lazy"
                       decoding="async"
@@ -115,7 +115,7 @@ function isYoutube(url: string): boolean {
     column-gap: 1.2rem;
   }
   @media (max-width: 960px) { .galeri-grid { column-count: 2; } }
-  @media (max-width: 600px) { .galeri-grid { column-count: 1; } }
+  @media (max-width: 640px) { .galeri-grid { column-count: 1; } }
 
   .galeri-card {
     break-inside: avoid;
@@ -177,7 +177,7 @@ function isYoutube(url: string): boolean {
   }
   .img-btn:hover img { transform: scale(1.03); }
 
-  @media (max-width: 600px) {
+  @media (max-width: 640px) {
     .img-btn img { max-height: var(--media-max-h-sm); }
   }
 
@@ -238,7 +238,7 @@ function isYoutube(url: string): boolean {
     color: rgba(255,255,255,.65);
     font-size: .85rem;
     text-align: center;
-    max-width: 600px;
+    max-width: 640px;
   }
   .lb-close {
     position: fixed;

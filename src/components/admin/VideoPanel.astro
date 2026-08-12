@@ -1,0 +1,53 @@
+---
+import Panel from './Panel.astro';
+import type { VideoItem } from '../../lib/supabase';
+
+interface Props {
+  /** Ana sayfadaki 3 sabit video slotu (sort_order 1/2/3). */
+  videoSlots: (VideoItem | null)[];
+}
+
+const { videoSlots } = Astro.props;
+---
+
+<Panel id="videolar" title="Videolar">
+  <p class="empty-hint">
+    Bu üç video ana sayfadaki video bölümünde görünür. YouTube linkini olduğu gibi yapıştırabilirsiniz.
+  </p>
+
+  <div class="slot-grid">
+    {videoSlots.map((v, i) => {
+      const slot = i + 1;
+      return (
+        <form method="POST" enctype="application/x-www-form-urlencoded" class="slot-form">
+          <input type="hidden" name="_action"     value="video_save" />
+          <input type="hidden" name="slot"        value={slot} />
+          <input type="hidden" name="existing_id" value={v?.id ?? ''} />
+
+          <p class="slot-label">Video {slot}</p>
+
+          <label>Başlık
+            <input name="title" value={v?.title ?? ''} placeholder="Video başlığı" />
+          </label>
+
+          <label>Açıklama
+            <textarea name="description" rows="2" placeholder="Kısa açıklama...">{v?.description ?? ''}</textarea>
+          </label>
+
+          <label>YouTube Linki
+            <input
+              type="url"
+              name="youtube_url"
+              value={v?.youtube_url ?? ''}
+              placeholder="https://www.youtube.com/watch?v=..."
+            />
+          </label>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-save">Kaydet</button>
+          </div>
+        </form>
+      );
+    })}
+  </div>
+</Panel>

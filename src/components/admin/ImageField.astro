@@ -1,0 +1,47 @@
+---
+/**
+ * "Cihazdan yükle veya URL gir" ikilisi — panelde 10'dan fazla yerde geçiyor.
+ * Dosya seçilince anlık önizleme dashboard.astro'daki delege dinleyici ile gelir.
+ */
+interface Props {
+  label?: string;
+  urlLabel?: string;
+  /** Dosya alanının adı. */
+  fileName?: string;
+  /** URL alanının adı — antrenman galerisi 'media_url' kullanıyor. */
+  urlName?: string;
+  /** Kayıtlı görsel; varsa küçük önizleme olarak gösterilir. */
+  current?: string | null;
+  /** URL alanının başlangıç değeri. */
+  urlValue?: string | null;
+  urlPlaceholder?: string;
+  accept?: string;
+  /** Görseli boş bırakınca mevcudun korunacağını belirten formlar için. */
+  hint?: string;
+}
+
+const {
+  label = 'Görsel — Cihazdan Yükle',
+  urlLabel = 'veya Görsel URL',
+  fileName = 'image_file',
+  urlName = 'image_url',
+  current = null,
+  urlValue = null,
+  urlPlaceholder = 'https://...',
+  accept = 'image/*',
+  hint,
+} = Astro.props;
+---
+
+<label>{label}
+  <div class="file-wrap">
+    {current && <img src={current} class="news-preview" alt="Kayıtlı görsel" />}
+    <img class="news-preview file-preview" alt="Seçilen dosyanın önizlemesi" />
+    <input type="file" name={fileName} accept={accept} class="file-input" />
+  </div>
+</label>
+
+<label>{urlLabel}
+  <input name={urlName} value={urlValue ?? ''} placeholder={urlPlaceholder} />
+  {hint && <span class="section-note">{hint}</span>}
+</label>

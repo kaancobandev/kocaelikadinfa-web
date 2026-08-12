@@ -1,0 +1,114 @@
+---
+/**
+ * A Takım, Pilot Takım, Akademi ve Antrenman galerileri aynı yapıda olduğu için
+ * hepsi bu tek bileşenden gelir. Panel başına ek içerik (ör. Pilot Takım hero
+ * formu) varsayılan slot ile ızgaranın üstüne yerleştirilir.
+ */
+import Panel from './Panel.astro';
+import ImageField from './ImageField.astro';
+
+export interface GalleryEntry {
+  id: number;
+  url: string;
+  caption: string | null;
+}
+
+interface Props {
+  id: string;
+  title: string;
+  items: GalleryEntry[];
+  addAction: string;
+  deleteAction: string;
+  /** Antrenman galerisi 'media_url' sütununu kullanıyor. */
+  urlName?: string;
+  /** YouTube linki ve video dosyası da kabul edilsin mi? */
+  allowVideo?: boolean;
+  addLabel?: string;
+  submitLabel?: string;
+  urlLabel?: string;
+  urlPlaceholder?: string;
+  emptyHint?: string;
+  confirmText?: string;
+}
+
+const {
+  id,
+  title,
+  items,
+  addAction,
+  deleteAction,
+  urlName = 'image_url',
+  allowVideo = false,
+  addLabel = '+ Yeni Fotoğraf Ekle',
+  submitLabel = 'Fotoğraf Ekle',
+  urlLabel = 'veya Görsel URL',
+  urlPlaceholder = 'https://...',
+  emptyHint = 'Henüz fotoğraf eklenmemiş. Aşağıdan ilkini ekleyebilirsiniz.',
+  confirmText = 'Bu görsel kalıcı olarak silinsin mi?',
+} = Astro.props;
+
+const isYoutube = (url: string) => /youtu(\.be|be\.com)/i.test(url);
+
+/** YouTube linkleri için kapak karesi, diğerleri için görselin kendisi. */
+function thumbOf(url: string): string {
+  if (!isYoutube(url)) return url;
+  const vid = url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/)?.[1];
+  return vid ? `https://img.youtube.com/vi/${vid}/hqdefault.jpg` : url;
+}
+---
+
+<Panel id={id} title={title}>
+  <slot />
+
+  {items.length > 0 ? (
+    <div class="gallery-admin-grid">
+      {items.map(item => (
+        <div class="gallery-admin-item">
+          <img src={thumbOf(item.url)} alt={item.caption ?? ''} class="gallery-thumb" loading="lazy" decoding="async" />
+          {isYoutube(item.url) && <div class="yt-badge">▶ YT</div>}
+          {item.caption && <p class="gallery-admin-caption">{item.caption}</p>}
+          <form
+            method="POST"
+            enctype="application/x-www-form-urlencoded"
+            class="gallery-delete-form"
+            data-confirm={confirmText}
+          >
+            <input type="hidden" name="_action" value={deleteAction} />
+            <input type="hidden" name="id" value={item.id} />
+            <button type="submit" class="btn-delete btn-delete-small">Sil</button>
+          </form>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p class="empty-hint">{emptyHint}</p>
+  )}
+
+  <form method="POST" enctype="multipart/form-data" class="match-form new-match spaced">
+    <input type="hidden" name="_action" value={addAction} />
+    <p class="slot-label">{addLabel}</p>
+
+    <div class="form-row">
+      <label>Açıklama (isteğe bağlı)
+        <input name="caption" placeholder="Açıklama..." />
+      </label>
+      <label>Sıra
+        <input type="number" name="sort_order" value="99" min="0" />
+      </label>
+    </div>
+
+    <div class="form-row">
+      <ImageField
+        label={allowVideo ? 'Fotoğraf / Video — Cihazdan Yükle' : 'Fotoğraf — Cihazdan Yükle'}
+        urlLabel={urlLabel}
+        urlName={urlName}
+        urlPlaceholder={urlPlaceholder}
+        accept={allowVideo ? 'image/*,video/*' : 'image/*'}
+      />
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-save">{submitLabel}</button>
+    </div>
+  </form>
+</Panel>

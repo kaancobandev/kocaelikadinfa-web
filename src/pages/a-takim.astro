@@ -20,7 +20,7 @@ const photos: GalleryItem[] = data ?? [];
 >
   <Navbar />
 
-  <main class="at-page">
+  <main id="icerik" tabindex="-1" class="at-page">
 
     <PageHero
       tag="A Takım"
@@ -135,7 +135,7 @@ const photos: GalleryItem[] = data ?? [];
     column-count: 3;
     column-gap: 1.2rem;
   }
-  @media (max-width: 980px) { .photos-grid { column-count: 2; } }
+  @media (max-width: 960px) { .photos-grid { column-count: 2; } }
   @media (max-width: 640px) { .photos-grid { column-count: 1; } }
 
   .photo-card {

@@ -3,13 +3,13 @@ import { supabase, type HeroSettings, type NewsItem } from '../lib/supabase';
 import { img, imgSet } from '../lib/img';
 import { newsPath } from '../lib/news';
 
-const { data: heroData } = await supabase
-  .from('hero_settings')
-  .select('*')
-  .eq('id', 1)
-  .single();
+// İki sorgu birbirinden bağımsız — sırayla değil paralel çalışsınlar.
+const [heroRes, newsRes] = await Promise.all([
+  supabase.from('hero_settings').select('*').eq('id', 1).maybeSingle(),
+  supabase.from('news').select('*').order('id', { ascending: false }).limit(4),
+]);
 
-const hero: HeroSettings = heroData ?? {
+const hero: HeroSettings = heroRes.data ?? {
   id: 1,
   badge: 'Son Dakika',
   title: 'Süper Lig\'e en fazla oyuncu gönderen altyapılardan biri olmanın gururunu yaşıyoruz.',
@@ -17,20 +17,28 @@ const hero: HeroSettings = heroData ?? {
   image_url: '/hero_section.jpeg',
 };
 
-const { data: newsData } = await supabase
-  .from('news')
-  .select('*')
-  .order('id', { ascending: false })
-  .limit(4);
-
-const sideNews: NewsItem[] = newsData ?? [];
+const sideNews: NewsItem[] = newsRes.data ?? [];
 const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=400&q=80';
+
+// Hero görseli sayfanın LCP'si. CSS background olarak dururken tarayıcı onu
+// ancak stil işlendikten sonra keşfedebiliyordu; gerçek <img> olarak preload
+// tarayıcısı HTML'i okur okumaz indirmeye başlar. srcset sayesinde telefon
+// 1600px yerine kendi genişliğine uygun dosyayı çeker.
+const heroSrc    = hero.image_url || '/hero_section.jpeg';
+const heroImg    = img(heroSrc, 1600, 70) || heroSrc;
+const heroSrcSet = imgSet(heroSrc, [640, 1024, 1600, 2000], 70);
 ---
 
-<div
-  class="hero-wrap"
-  style={`background-image: url('${img(hero.image_url, 1600, 70) || '/hero_section.jpeg'}')`}
->
+<div class="hero-wrap">
+  <img
+    class="hero-bg"
+    src={heroImg}
+    srcset={heroSrcSet}
+    sizes="100vw"
+    alt=""
+    fetchpriority="high"
+    decoding="async"
+  />
 
   <!-- SOL: Ana manşet -->
   <div class="hero-main">
@@ -62,7 +70,8 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
                 sizes="110px"
                 alt={n.title}
                 class="side-thumb"
-                loading="lazy"
+                width="110"
+                height="80"
                 decoding="async"
               />
               <div class="side-body">
@@ -86,19 +95,31 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
 
 <style>
   .hero-wrap {
+    position: relative;
     display: grid;
     grid-template-columns: 1fr 360px;
     height: calc(100vh - var(--nav-h));
     min-height: 560px;
     max-height: 920px;
     overflow: hidden;
-    background-size: cover;
-    background-position: center;
+  }
+
+  /* Arka plan görseli — iki sütunun da altını kaplar ki sağdaki cam panel
+     (backdrop-filter) bulanıklaştıracak bir şey bulsun. */
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
   }
 
   /* ── Sol panel ── */
   .hero-main {
     position: relative;
+    z-index: 1;
     overflow: hidden;
   }
 
@@ -180,6 +201,7 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
   /* ── Sağ panel — Glassmorphism ── */
   .hero-side {
     position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     padding: 2rem 1.6rem;
@@ -292,15 +314,19 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
       height: auto;
       min-height: 0;
       max-height: none;
-      background-image: none;
     }
 
     .hero-main {
       height: 56vh;
       min-height: 300px;
-      background-image: inherit;
-      background-size: cover;
-      background-position: center;
+    }
+
+    /* Görsel yalnızca üstteki manşet alanını kaplasın; altındaki haber
+       listesinin arkasına taşmasın. Ölçüler .hero-main ile aynı. */
+    .hero-bg {
+      inset: 0 0 auto 0;
+      height: 56vh;
+      min-height: 300px;
     }
 
     .hero-overlay {
