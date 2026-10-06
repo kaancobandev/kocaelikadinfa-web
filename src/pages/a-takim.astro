@@ -6,12 +6,15 @@ import PageHero from '../components/PageHero.astro';
 import { supabase, type GalleryItem } from '../lib/supabase';
 import { img, imgSet } from '../lib/img';
 
-const { data } = await supabase
-  .from('a_takim_gallery')
-  .select('*')
-  .order('sort_order', { ascending: true });
+// hero_settings satırları: 1 = ana sayfa, 2 = pilot takım, 3 = A takım
+const [{ data: settingsData }, { data: galleryData }] = await Promise.all([
+  supabase.from('hero_settings').select('image_url').eq('id', 3).maybeSingle(),
+  supabase.from('a_takim_gallery').select('*').order('sort_order', { ascending: true }),
+]);
 
-const photos: GalleryItem[] = data ?? [];
+// Panelden görsel yüklenmediyse depodaki varsayılan kullanılır
+const heroImage: string = settingsData?.image_url ?? '/a-takim-hero.jpeg';
+const photos: GalleryItem[] = galleryData ?? [];
 ---
 
 <Layout
@@ -28,7 +31,7 @@ const photos: GalleryItem[] = data ?? [];
       accent="Gururu"
       description="Altyapıya verdiğimiz önem ve genç oyuncularımıza duyduğumuz güvenle, kadın futbolunda sürdürülebilir başarı hedefliyoruz."
       minHeight="52vh"
-      image="/a-takim-hero.jpeg"
+      image={img(heroImage, 1600, 70)}
       align="right"
     />
 

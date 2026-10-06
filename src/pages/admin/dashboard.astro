@@ -67,13 +67,14 @@ const errorMsg   = Astro.url.searchParams.get('err') ?? '';
 // ── Veriler — hepsi paralel ───────────────────────────────────────────
 const [
   matchesRes, newsRes, heroRes, akademiRes,
-  pilotHeroRes, pilotRes, aTakimRes, antrenmanRes, videoRes,
+  pilotHeroRes, aTakimHeroRes, pilotRes, aTakimRes, antrenmanRes, videoRes,
 ] = await Promise.all([
   supabase.from('matches').select('*').order('id', { ascending: false }),
   supabase.from('news').select('*').order('id', { ascending: false }),
   supabase.from('hero_settings').select('*').eq('id', 1).maybeSingle(),
   supabase.from('gallery').select('*').order('sort_order'),
   supabase.from('hero_settings').select('image_url').eq('id', 2).maybeSingle(),
+  supabase.from('hero_settings').select('image_url').eq('id', 3).maybeSingle(),
   supabase.from('pilot_gallery').select('*').order('sort_order'),
   supabase.from('a_takim_gallery').select('*').order('sort_order'),
   supabase.from('antrenman_galeri').select('*').order('sort_order'),
@@ -89,6 +90,7 @@ const aTakimPhotos: GalleryItem[]         = aTakimRes.data    ?? [];
 const antrenmanItems: AntrenmanGaleriItem[] = antrenmanRes.data ?? [];
 const videos:       VideoItem[]           = videoRes.data     ?? [];
 const pilotHeroImage: string | null       = pilotHeroRes.data?.image_url ?? null;
+const aTakimHeroImage: string | null      = aTakimHeroRes.data?.image_url ?? null;
 
 // Maçları kategori (badge) başlığına göre grupla
 const matchGroupMap = new Map<string, Match[]>();
@@ -115,7 +117,7 @@ const panels = [
   { id: 'haberler',  label: 'Haberler'          },
   { id: 'videolar',  label: 'Videolar'          },
   { id: 'antrenman', label: 'Antrenman Kareleri'},
-  { id: 'a-takim',   label: 'A Takım Galerisi'  },
+  { id: 'a-takim',   label: 'A Takım'           },
   { id: 'pilot',     label: 'Pilot Takım'       },
   { id: 'akademi',   label: 'Akademi Galerisi'  },
 ];
@@ -188,11 +190,26 @@ const panels = [
 
       <GalleryPanel
         id="a-takim"
-        title="A Takım Galerisi"
+        title="A Takım"
         items={asEntries(aTakimPhotos)}
         addAction="a_takim_gallery_add"
         deleteAction="a_takim_gallery_delete"
-      />
+      >
+        <form method="POST" enctype="multipart/form-data" class="match-form">
+          <input type="hidden" name="_action" value="a_takim_hero_save" />
+          <p class="slot-label">Sayfa Hero Görseli</p>
+
+          <div class="form-row">
+            <ImageField current={aTakimHeroImage} urlValue={aTakimHeroImage} />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-save">Kaydet</button>
+          </div>
+        </form>
+
+        <p class="slot-label" style="margin-top:1.6rem">Galeri</p>
+      </GalleryPanel>
 
       <GalleryPanel
         id="pilot"

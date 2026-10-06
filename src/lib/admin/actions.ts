@@ -364,4 +364,15 @@ export const adminActions: Record<string, ActionDef> = {
       return upsertHero(ctx, 2, { image_url }, 'Pilot Takım hero görseli güncellendi!');
     },
   },
+
+  // ── A Takım hero görseli ──
+  // hero_settings satırları: 1 = ana sayfa, 2 = pilot takım, 3 = A takım
+  a_takim_hero_save: {
+    panel: 'a-takim',
+    run: async (ctx) => {
+      const image_url = await resolveImage(ctx, 'image_file', 'image_url', 'a-takim-hero');
+      if (!image_url) return { error: 'Lütfen bir görsel seçin veya geçerli bir URL girin.' };
+      return upsertHero(ctx, 3, { image_url }, 'A Takım hero görseli güncellendi!');
+    },
+  },
 };
