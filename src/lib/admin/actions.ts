@@ -161,6 +161,20 @@ async function upsertHero(
   const { error } = await ctx.db
     .from('hero_settings')
     .insert({ id, badge: '', title: '', description: '', ...fields });
+
+  // hero_settings başlangıçta tek satırlık ayar tablosu olarak kurulmuş ve
+  // "single row" tekillik kısıtı eklenmiş; tablo artık id ile anahtarlanan
+  // çok satırlı bir yapı. Kısıt kaldırılmadan yeni satır eklenemiyor.
+  // Ham Postgres hatası yerine ne yapılması gerektiğini söyle.
+  if (error && /hero_settings_single_row/i.test(error.message)) {
+    return {
+      error:
+        'Veritabanında bu kayda izin vermeyen eski bir kısıt var. ' +
+        'Supabase → SQL Editor\'da migrations/002_hero_settings_birden_fazla_satir.sql ' +
+        'dosyasını bir kez çalıştırın, sonra tekrar deneyin.',
+    };
+  }
+
   return done(error, okMsg);
 }
 
