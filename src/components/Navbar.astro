@@ -89,13 +89,18 @@ const links = [
     display: none;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
     gap: 5px;
     cursor: pointer;
     /* Gerçek buton: klavyeyle odaklanabilir ve Enter/Space ile açılır */
     background: none;
     border: none;
-    padding: 10px 6px;
-    margin: -10px -6px;
+    /* Parmakla basılan tek kontrol; 37x36 idi, dokunma hedefi sınırının
+       altındaydı. Çizgilerin görünümü aynı, yalnızca kutu büyüyor. */
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    margin-right: -9px;
     border-radius: 6px;
   }
   .nav-burger span {

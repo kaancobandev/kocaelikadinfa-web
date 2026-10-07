@@ -407,4 +407,17 @@
     transition: color .2s;
   }
   .admin-link:hover { color: var(--green-bright); }
+
+  /* ── Dokunmatik cihazlarda basılabilir alan ───────────────────────────
+     Linkler geniş ama inceydi: menü bağlantıları 22px yükseklikte ve
+     aralarında yalnızca 9px boşlukla duruyordu, parmakla yanlış linke
+     basmak kolaydı. Dolgu ekleniyor — yazının konumu değişmiyor, yalnızca
+     dokunulabilir alan ~44px'e çıkıyor. Fareyle kullanılan ekranlarda bu
+     kural hiç çalışmaz. */
+  @media (pointer: coarse) {
+    .footer-col ul { gap: 0; }
+    .footer-col ul a { padding: .7rem 0; }
+    .collab-phone { padding: .5rem 0; }
+    .admin-link { display: inline-block; padding: .85rem .25rem; }
+  }
 </style>

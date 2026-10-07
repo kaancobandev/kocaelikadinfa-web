@@ -202,6 +202,11 @@ const jsonLd = {
   .back-link:hover { color: var(--green-bright); gap: .7rem; }
   .back-link:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; border-radius: 4px; }
 
+  /* Dokunmatik cihazlarda basılabilir alan ~44px'e çıkar; yazı yerinde kalır. */
+  @media (pointer: coarse) {
+    .back-link { padding: .7rem 0; }
+  }
+
   .article-tag {
     display: block;
     font-size: .68rem;

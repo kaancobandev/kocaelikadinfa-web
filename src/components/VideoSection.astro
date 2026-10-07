@@ -112,6 +112,11 @@ function isYoutube(url: string): boolean {
   }
   .btn-all:hover { color: var(--text); }
 
+  /* Dokunmatik cihazlarda basılabilir alan ~44px'e çıkar; yazı yerinde kalır. */
+  @media (pointer: coarse) {
+    .btn-all { display: inline-block; padding: .75rem 0; }
+  }
+
   /* Kolon bazlı masonry: fotoğraflar kendi oranlarında */
   .video-grid {
     column-count: 3;
