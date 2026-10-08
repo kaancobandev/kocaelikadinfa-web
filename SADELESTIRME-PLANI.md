@@ -399,26 +399,59 @@ zamanlayıcılardan geliyordu.
 
 ## 8. Uygulama sırası
 
-### Faz 0 — Doğrulama (yarım gün, kod yazılmadan)
-- `select * from hero_settings` → `title` büyük harfle mi yazılı?
-  (uppercase silmenin kazancı buna bağlı)
-- `select * from news` → `published_at` her satırda dolu mu?
-  (özet kaldırılacaksa tarih kartın ikinci yarısı olacak)
-- 375px ve 1440px ekran görüntüleri al — referans yok, test yok, görsel
-  regresyon yok; tek doğrulama bu
-- `matches`'taki 6. kaydı kontrol et (kulübün maçı değil)
+### Faz 0 — Doğrulama ✅ yapıldı
 
-### Faz A — Risksiz kazanç (1 gün, 3 commit, hemen yayına çıkabilir)
-- **A1** `Layout.astro`'ya tüm token seti + `.band`/`.band-inner`/`.eyebrow` +
-  global reduced-motion bloğu. `--dark`/`--card-bg`/`--radius` **alias**.
-- **A2** Gri merdiveni: Footer 8 satır + `Hero:303` + `404:112` → doğru token.
-  Toplu `sed` **değil**, bölüm bölüm.
-- **A3** `Hero:168` uppercase sil + `hero_settings.title`'ı cümle düzenine
-  çevir (**aynı commit**, yoksa ekranda değişiklik görünmez). `white-space:
-  pre-line` yüzünden DB'deki elle satır sonları ilk kez gerçek haliyle
-  görünecek, tek tek kontrol edilmeli.
+**(a) `hero_settings.title` %100 BÜYÜK HARF.**
+`"SÜPER LİG'E EN FAZLA OYUNCU GÖNDEREN ALTYAPILARDAN BİRİ OLMANIN GURURU"`
+→ CSS'ten `text-transform: uppercase` silmek **tek başına hiçbir görsel
+değişiklik üretmez**. Planın uyardığı tuzak gerçek çıktı. Metnin kendisi de
+panelden cümle düzenine çevrilmeli (A3, kullanıcıya bağlı).
+id=2 ve id=3 (pilot/A takım hero) yalnızca görsel tutuyor, başlıkları boş.
 
-Üçü de tek başına geri alınabilir ve tek başına değer üretir.
+**(b) 47 haberin 30'unda `published_at` BOŞ (%64).**
+Planın "kart özetini kaldır, yerine başlık + tarih koy" önerisi bu hâliyle
+çoğu kartta tarihsiz kalır. Üç seçenek: (1) tarihleri panelden doldur,
+(2) tarihi olmayan kartta tarih satırını hiç basma, (3) özeti şimdilik
+koru. **Karar verilmeli — C5 adımı buna bağlı.**
+
+**(c) `matches`'taki 6. kayıt** (*İdmanocağı – Kocaeli Kadın Gücü*) kulübün
+maçı değil. Artık rozetsiz basılıyor (eskiden uydurma "M" basıyordu).
+Pilot takım maçı mı, yanlış giriş mi — kontrol edilmeli.
+
+### Faz A — Risksiz kazanç
+
+**A1 ✅ yapıldı.** `Layout.astro`'ya tüm token seti (tipografi, ağırlık, harf
+aralığı, satır yüksekliği, renk, boşluk, oluk, köşe) + global
+`.band`/`.band-inner`/`.eyebrow` + `prefers-reduced-motion` bloğu.
+`--dark`/`--card-bg`/`--radius` **alias** olarak bırakıldı.
+Tarayıcıda doğrulandı: `.band` → 80px/60px dolgu, `.band-inner` → 1120px,
+`.eyebrow` → 11px + 1,54px tracking, aliaslar `#0b0e0b` / `12px`.
+
+**A2 ✅ yapıldı.** Kontrast: `--text-muted` `#7a7a7a` → `#9a9a9a`
+(4,9:1 → 6,4:1, site geneli) + token'ı atlayan 10 elle yazılmış renk
+düzeltildi:
+
+| Yer | Önce | Sonra |
+|---|---|---|
+| Footer kolon başlığı | `#444` 2,2:1 | `--text-muted` |
+| Footer marka açıklaması | `#5a5a5a` 3,0:1 | `--text-muted` |
+| Footer sosyal ikon | `#555` 2,8:1 | `--text-muted` |
+| Footer menü linkleri | `#555` 2,8:1 | `--text-muted` |
+| Footer reklam açıklaması | `#505050` 2,6:1 | `--text-muted` |
+| Footer iletişim listesi | `#555` 2,8:1 | `--text-muted` |
+| Footer telif | `#2e2e2e` 1,6:1 | `--text-dim` |
+| Footer Admin Paneli | `#2a2a2a` 1,5:1 | `--text-dim` |
+| Hero "haber yakında" | `#3a3a3a` 1,9:1 | `--text-dim` |
+| 404 kart oku | `#3a3a3a` 1,9:1 | `--text-muted` |
+
+`Hero:272/280` ve `RainBackground:48` dokunulmadı — onlar `background-color`,
+metin değil. 9 sayfa × 2 genişlikte regresyon taraması temiz.
+
+**A3 ⏸ kullanıcıya bağlı.** CSS'ten `uppercase` silmek tek başına işe
+yaramıyor (bkz. Faz 0a). Panelden yapılacak: Ana Sayfa Hero → Başlık →
+büyük harfli metni cümle düzenine çevir. Önerilen yeni metin:
+**"Kadromuzun tamamı kendi altyapımızdan."** Metin değişince
+`Hero.astro:168`'deki `text-transform: uppercase` silinecek.
 
 ### Faz B — Silmeler (1,5 gün, 4 commit, **atomik olmak zorunda**)
 - **B1** RainBackground sil + 4 zemini **aynı commit'te** opaklaştır

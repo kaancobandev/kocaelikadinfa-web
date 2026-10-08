@@ -116,18 +116,88 @@ const jsonLd = {
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --black:        #000000;
-    --dark:         #060806;
-    --card-bg:      #0c100c;
-    --green:        #0d4d1e;
-    --green-mid:    #116025;
-    --green-bright: #2cb84a;
-    --green-glow:   rgba(13,77,30,0.35);
-    --text:         #ffffff;
-    --text-muted:   #7a7a7a;
-    --border:       rgba(255,255,255,0.07);
-    --radius:       12px;
-    --nav-h:        70px;
+    /* ══ TASARIM SİSTEMİ ══════════════════════════════════════════════
+       Ölçüldü: site 42 font-size, 7 ağırlık, 14 harf aralığı, 57 hex renk,
+       ~100 padding ve 18 köşe yarıçapı kullanıyordu. Karşılaştırma için
+       Venezia FC ana sayfası 1274 öğeyi 9 boyut, 3 ağırlık ve TEK harf
+       aralığıyla yönetiyor. "Amatör" hissi tek tek efektlerden değil, her
+       bölümün kendi kararını vermiş olmasından geliyor.
+
+       Bu blok hedef sistemi tanımlar. Bileşenler henüz çoğunlukla kendi
+       ham değerlerini kullanıyor; göç dosya dosya yapılacak (bkz.
+       SADELESTIRME-PLANI.md, Faz D). Token'ların burada olması göçün
+       önkoşulu — tek tek dosyalar bunlara bağlanabilsin diye.           */
+
+    /* ── Tipografi ── */
+    --fs-eyebrow: .6875rem;                              /* 11px */
+    --fs-sm:      .8125rem;                              /* 13px */
+    --fs-base:    1rem;                                  /* 16px */
+    --fs-md:      1.125rem;                              /* 18px */
+    --fs-lg:      1.5rem;                                /* 24px */
+    --fs-xl:      clamp(1.75rem, 2.5vw + 1rem, 2.5rem);  /* 28→40px, h2 */
+    --fs-display: clamp(2.25rem, 4vw + 1rem, 3.5rem);    /* 36→56px, h1 */
+
+    --fw-normal: 400;
+    --fw-medium: 500;
+    --fw-bold:   700;
+
+    --ls-display: -.02em;
+    --ls-tight:   -.01em;
+    --ls-eyebrow: .14em;
+
+    --lh-tight: 1.1;
+    --lh-snug:  1.3;
+    --lh-body:  1.65;
+
+    /* ── Renk ──
+       Kontrast oranları siyah zemine göre ölçüldü; hepsi WCAG AA üstü. */
+    --text:       #ffffff;   /* başlık            21:1  */
+    --text-body:  #d6d6d6;   /* gövde paragrafı   13,4:1 */
+    --text-muted: #9a9a9a;   /* meta, footer menü  6,4:1 */
+    --text-dim:   #8a8a8a;   /* telif, admin       5,2:1 — en soluk sınır */
+
+    --black:     #000000;
+    --surface:   #0b0e0b;
+    --surface-2: #141814;
+
+    --green:        #0d4d1e;   /* yalnız DOLGU  */
+    --green-mid:    #116025;   /* yalnız hover  */
+    --green-bright: #2cb84a;   /* yalnız KÜÇÜK METİN */
+
+    --border:        rgba(255,255,255,.08);
+    --border-strong: rgba(255,255,255,.14);
+    --surface-hover: rgba(255,255,255,.04);
+    --green-wash:    rgba(44,184,74,.08);
+    --scrim:         rgba(0,0,0,.80);
+
+    /* ── Boşluk (4px ızgara) ── */
+    --sp-1: .5rem;     /*  8px */
+    --sp-2: .75rem;    /* 12px */
+    --sp-3: 1.25rem;   /* 20px */
+    --sp-4: 2rem;      /* 32px */
+    --sp-5: 3rem;      /* 48px */
+    --sp-6: 5rem;      /* 80px */
+
+    --gutter:       clamp(1.25rem, 5vw, 4rem);
+    --measure:      1120px;   /* ızgara / bölüm genişliği */
+    --measure-text: 620px;    /* paragraf ~66 karakter/satır */
+
+    /* ── Köşe ── */
+    --r-sm:   6px;
+    --r-md:   12px;
+    --r-pill: 999px;
+
+    --nav-h: 70px;
+
+    /* ── Eski adlar: ALIAS, silinmedi ──────────────────────────────────
+       --dark, --card-bg ve --radius 12 dosyada ~51 yerde çağrılıyor
+       (Layout'un kendi scrollbar kuralı dahil). Silinirlerse zeminler
+       saydamlaşır ve panel köşeleri 0'a düşer. Alias ile sıfır regresyonla
+       geçiliyor; çağrı yerleri Faz D'de tek tek temizlenecek.           */
+    --dark:       var(--surface);
+    --card-bg:    var(--surface);
+    --radius:     var(--r-md);
+    --green-glow: rgba(13,77,30,0.35);
 
     /* ── Görsel boyut sistemi ──────────────────────────────────────────
        Fotoğraflar kendi en-boy oranını korur; yalnızca bu sınırların
@@ -187,6 +257,54 @@ const jsonLd = {
 
   .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
   .reveal.visible { opacity: 1; transform: none; }
+
+  /* ══ Bölüm kabı ════════════════════════════════════════════════════
+     Bugün her bölüm kendi `padding: Xrem Y%` değerini yazıyor — ölçülen
+     28 farklı padding, 3 farklı oluk, 22 farklı max-width. Bunlar Faz D'de
+     tek tek buraya bağlanacak.
+
+     Sınıf adı bilerek `.section` DEĞİL: aramiza-katil.astro'da zaten scoped
+     bir `.section` var ve Astro onu [data-astro-cid-…] ile 0,2,0 özgüllüğe
+     çıkarıyor; global bir `.section` (0,1,0) sıra ne olursa olsun kaybeder
+     ve sitenin en uzun sayfası yeni oluğu sessizce almazdı.               */
+  .band {
+    padding-block: var(--sp-6);
+    padding-inline: var(--gutter);
+  }
+  .band-inner {
+    max-width: var(--measure);
+    margin-inline: auto;
+  }
+  @media (max-width: 768px) {
+    .band { padding-block: var(--sp-5); }
+  }
+
+  /* ══ Üst etiket ════════════════════════════════════════════════════
+     22 ayrı yerde elle yazılmış küçük etiket tanımının yerine tek sınıf.
+     Tracking EKLENEN tek yer burası; gövdeye harf aralığı yazılmaz.     */
+  .eyebrow {
+    display: inline-block;
+    font-size: var(--fs-eyebrow);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--green-bright);
+    margin-bottom: var(--sp-2);
+  }
+
+  /* ══ Hareket azaltma ═══════════════════════════════════════════════
+     Bugün bu koruma yalnızca tek tek bileşenlerin içinde var (IntroLoader,
+     NumberTicker, Navbar, RainBackground). Faz B'de o bileşenler silinince
+     koruma da onlarla birlikte giderdi. Global blok, hangi bileşen
+     silinirse silinsin sözün ayakta kalmasını sağlıyor.                  */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 
   /* ── İçeriğe geç ──────────────────────────────────────────────────────
      Ekranda yer kaplamasın diye görüntü alanının dışında durur; yalnızca
