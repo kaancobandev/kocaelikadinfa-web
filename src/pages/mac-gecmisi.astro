@@ -5,6 +5,7 @@ import Footer from '../components/Footer.astro';
 import PageHero from '../components/PageHero.astro';
 import NumberTicker from '../components/NumberTicker.astro';
 import { supabase, type Match } from '../lib/supabase';
+import { sonuc, ozet } from '../lib/match';
 
 const { data } = await supabase
   .from('matches')
@@ -22,13 +23,10 @@ for (const m of matches) {
 }
 const matchGroups: [string, Match[]][] = [...groupMap.entries()];
 
-function result(m: Match): 'win' | 'draw' | 'loss' | null {
-  // KKFK'nın ev sahibi veya deplasman olduğunu home_name ile anlıyoruz
-  const homeIsKKFK = m.home_name.toLowerCase().includes('kkfk');
-  if (m.score_home === m.score_away) return 'draw';
-  if (homeIsKKFK) return m.score_home > m.score_away ? 'win' : 'loss';
-  return m.score_away > m.score_home ? 'win' : 'loss';
-}
+// Kulüp tespiti src/lib/match.ts'te — eskiden burada `includes('kkfk')`
+// vardı ve veritabanındaki ad "Kocaeli Kadın Futbol Kulübü" olduğu için
+// hiç eşleşmiyordu; her ev maçı deplasman sayılıp sonuç ters basılıyordu.
+const result = sonuc;
 
 const resultLabel = { win: 'G', draw: 'B', loss: 'M', null: '–' } as const;
 const resultClass = { win: 'win', draw: 'draw', loss: 'loss', null: '' } as const;
@@ -44,19 +42,8 @@ function formatDate(d: string) {
   return `${parseInt(m[3])} ${TR_MONTHS[parseInt(m[2]) - 1]} ${m[1]}`;
 }
 
-// Özet istatistik
-function stats(list: Match[]) {
-  const w = list.filter(m => result(m) === 'win').length;
-  const d = list.filter(m => result(m) === 'draw').length;
-  const l = list.filter(m => result(m) === 'loss').length;
-  const gf = list.reduce((s, m) => {
-    return s + (m.home_name.toLowerCase().includes('kkfk') ? m.score_home : m.score_away);
-  }, 0);
-  const ga = list.reduce((s, m) => {
-    return s + (m.home_name.toLowerCase().includes('kkfk') ? m.score_away : m.score_home);
-  }, 0);
-  return { w, d, l, gf, ga };
-}
+// Özet istatistik — hesap src/lib/match.ts'te (aynı kulüp tespitini kullanır)
+const stats = ozet;
 ---
 
 <Layout
