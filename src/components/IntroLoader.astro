@@ -55,8 +55,9 @@
   /* Görüldüyse / reduced-motion → hiç boyanmasın (flash yok) */
   :global(html.kkfk-skip) #kkfk-intro { display: none !important; }
   /* Oynarken sayfa kaymasın */
-  :global(html.kkfk-playing),
-  :global(html.kkfk-playing body) { overflow: hidden; }
+  /* Kaydırma kilidi kaldırıldı. Perde tam ekran ve zaten üstte duruyor;
+     kilidin tek etkisi, animasyon biterken aşağı inmek isteyen ziyaretçiyi
+     engellemekti. Artık perde kalkarken sayfa kaydırılabilir durumda. */
 
   /* ---------- PERDE ---------- */
   #kkfk-intro {
@@ -113,7 +114,7 @@
     opacity: 0;   /* sahne başlayana kadar görünmez */
   }
   #kkfk-intro.hazir .arma {
-    animation: kkfk-armaGir 1.15s .15s cubic-bezier(.2,.7,.25,1) forwards;
+    animation: kkfk-armaGir .75s .1s cubic-bezier(.2,.7,.25,1) forwards;
   }
   @keyframes kkfk-armaGir {
     from { opacity: 0; transform: scale(.9); }
@@ -136,7 +137,7 @@
     font: inherit; font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
     padding: 10px 4px; opacity: 0; transition: color .25s;
   }
-  #kkfk-intro.hazir .gec { animation: kkfk-fadeIn .5s 1s forwards; }
+  #kkfk-intro.hazir .gec { animation: kkfk-fadeIn .3s .25s forwards; }
   .gec:hover, .gec:focus-visible { color: var(--kkfk-cim-parlak); }
   @keyframes kkfk-fadeIn { to { opacity: 1; } }
 
@@ -158,8 +159,14 @@
     var video = perde.querySelector('.plate');
     var logo  = perde.querySelector('.arma img');
     var gec   = perde.querySelector('.gec');
-    var KILIT = 2400;   // ms — armanın parladığı an
-    var ACILIS = 3100;  // ms — perdenin kalkması
+    // Süreler kısaltıldı. Eskiden ACILIS 3100 ms'ti ve sayfa 1,2 saniyede
+    // hazır olmasına rağmen perde en az 3,1 saniye duruyordu; ağ yavaşsa
+    // yedek yollar bunu 10 saniyeye kadar çıkarabiliyordu. Bekleme varlık
+    // boyutundan değil bu sabitlerden geliyordu.
+    // Alt sınır armanın giriş animasyonu: .1s gecikme + .75s = .85s.
+    var KILIT = 850;    // ms — armanın parladığı an (arma tam yerleşince)
+    var ACILIS = 1400;  // ms — perdenin kalkması
+    var MAKS_SAHNE = 1800;  // ms — sahne başladıktan sonra mutlak tavan
     var zam = [], bitti = false;
 
     // ── HER ŞEY HAZIR OLMADAN SAHNE BAŞLAMAZ ────────────────────────
@@ -175,14 +182,34 @@
       if (--kalanParca <= 0) sahneyiBaslat();
     }
 
-    // Kapanış sayaçlarını "şu andan itibaren" kurar.
+    // Kapanış sayaçlarını kurar.
+    //
+    // ÖNEMLİ: plateAc() video geç yetiştiğinde buraya yeniden geliyor ve
+    // eskiden sayacı sıfırdan başlatıyordu. Sahne 67 ms'de hazır olsa bile
+    // video 1,9 sn'de yetiştiyse perde 3,3 sn duruyordu — yani süreyi
+    // ACILIS değil videonun gecikmesi belirliyordu. Artık sahne başından
+    // itibaren mutlak bir tavan var: geç gelen videoya kısa bir pay verilir,
+    // perdenin toplam ömrü MAKS_SAHNE'yi aşamaz.
+    var kilitKuruldu = false;
     function zamanlamaKur() {
-      if (kilitT) clearTimeout(kilitT);
       if (bitirT) clearTimeout(bitirT);
-      perde.classList.remove('kilit');
-      kilitT = setTimeout(function () { perde.classList.add('kilit'); }, KILIT);
-      bitirT = setTimeout(bitir, ACILIS);
-      zam.push(kilitT, bitirT);
+
+      var gecen = sahneT0 ? Date.now() - sahneT0 : 0;
+      var kalan = Math.max(350, Math.min(ACILIS, MAKS_SAHNE - gecen));
+
+      // Parlama yalnızca BİR kez kurulur. Eskiden geç gelen video bunu da
+      // sıfırlıyordu ve parlama ile perdenin kalkışı aynı ana düşüyordu —
+      // yani vuruş tamamen kayboluyordu.
+      if (!kilitKuruldu) {
+        kilitKuruldu = true;
+        perde.classList.remove('kilit');
+        kilitT = setTimeout(function () { perde.classList.add('kilit'); },
+                            Math.min(KILIT, Math.round(kalan * 0.6)));
+        zam.push(kilitT);
+      }
+
+      bitirT = setTimeout(bitir, kalan);
+      zam.push(bitirT);
     }
 
     function oynat() {
@@ -279,18 +306,18 @@
           })
           .catch(function () {
             video.src = '/intro/kkfk-plate.mp4';
-            zam.push(setTimeout(videoHazir, 2500));
+            zam.push(setTimeout(videoHazir, 1200));
           });
       } else {
         video.src = '/intro/kkfk-plate.mp4';
-        zam.push(setTimeout(videoHazir, 2500));
+        zam.push(setTimeout(videoHazir, 1200));
       }
     }
 
     // Mutlak güvence: ağ çok kötüyse bile ekran sonsuza kadar siyah
     // kalmasın, perde de asılı kalmasın.
-    zam.push(setTimeout(sahneyiBaslat, 5000));
-    zam.push(setTimeout(bitir, 9000));
+    zam.push(setTimeout(sahneyiBaslat, 1500));
+    zam.push(setTimeout(bitir, 3200));
 
     function bitir() {
       if (bitti) return;
