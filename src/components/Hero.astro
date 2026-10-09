@@ -148,32 +148,32 @@ const heroSrcSet = imgSet(heroSrc, [640, 1024, 1600, 2000], 70);
   .hero-badge {
     display: inline-block;
     background: var(--green);
-    color: #fff;
-    font-size: .72rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
+    color: var(--text);
+    font-size: var(--fs-eyebrow);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-eyebrow);
     text-transform: uppercase;
     padding: .35rem .8rem;
-    border-radius: 4px;
+    border-radius: var(--r-sm);
     margin-bottom: 1rem;
     width: fit-content;
   }
 
   .hero-title {
-    font-size: clamp(1.8rem, 3.8vw, 3.2rem);
-    font-weight: 900;
-    line-height: 1.1;
-    letter-spacing: -.5px;
-    color: #fff;
+    font-size: var(--fs-display);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--ls-display);
+    color: var(--text);
     text-transform: uppercase;
     margin-bottom: 1rem;
     white-space: pre-line;
   }
 
   .hero-desc {
-    font-size: .95rem;
+    font-size: var(--fs-base);
     color: rgba(255, 255, 255, 0.70);
-    line-height: 1.65;
+    line-height: var(--lh-body);
     max-width: 460px;
     margin-bottom: 1.8rem;
   }
@@ -183,13 +183,12 @@ const heroSrcSet = imgSet(heroSrc, [640, 1024, 1600, 2000], 70);
     align-items: center;
     gap: .5rem;
     background: var(--green);
-    color: #fff;
-    font-size: .85rem;
-    font-weight: 700;
-    letter-spacing: .3px;
+    color: var(--text);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
     text-decoration: none;
     padding: .7rem 1.4rem;
-    border-radius: 5px;
+    border-radius: var(--r-sm);
     width: fit-content;
     transition: background .2s, gap .2s;
   }
@@ -231,9 +230,9 @@ const heroSrcSet = imgSet(heroSrc, [640, 1024, 1600, 2000], 70);
   }
 
   .side-label {
-    font-size: .65rem;
-    font-weight: 700;
-    letter-spacing: 3px;
+    font-size: var(--fs-eyebrow);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-eyebrow);
     text-transform: uppercase;
     color: var(--green-bright);
     margin-bottom: 1.2rem;
@@ -254,7 +253,7 @@ const heroSrcSet = imgSet(heroSrc, [640, 1024, 1600, 2000], 70);
     gap: .9rem;
     align-items: flex-start;
     padding: .9rem .6rem;
-    border-radius: 8px;
+    border-radius: var(--r-md);
     text-decoration: none;
     border-bottom: 1px solid rgba(255,255,255,0.05);
     transition: background .2s;
@@ -267,7 +266,7 @@ const heroSrcSet = imgSet(heroSrc, [640, 1024, 1600, 2000], 70);
     width: 110px;
     height: 80px;
     flex-shrink: 0;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     object-fit: cover;
     background-color: #1a1a1a;
   }
@@ -276,7 +275,7 @@ const heroSrcSet = imgSet(heroSrc, [640, 1024, 1600, 2000], 70);
     width: 110px;
     height: 80px;
     flex-shrink: 0;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     background-color: #1a1a1a;
   }
 
@@ -290,17 +289,17 @@ const heroSrcSet = imgSet(heroSrc, [640, 1024, 1600, 2000], 70);
   }
 
   .side-title {
-    font-size: .95rem;
-    font-weight: 700;
+    font-size: var(--fs-base);
+    font-weight: var(--fw-bold);
     color: #d0d0d0;
-    line-height: 1.45;
+    line-height: var(--lh-snug);
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
   .side-item:hover .side-title { color: var(--green-bright); }
-  .side-title-muted { color: var(--text-dim) !important; font-style: italic; font-weight: 500 !important; }
+  .side-title-muted { color: var(--text-dim) !important; font-style: italic; font-weight: var(--fw-medium) !important; }
 
   /* ───────────────────────────────────────────────
      Responsive — tablet & mobil
@@ -380,13 +379,13 @@ const heroSrcSet = imgSet(heroSrc, [640, 1024, 1600, 2000], 70);
     }
 
     .side-title {
-      font-size: .9rem;
+      font-size: var(--fs-base);
       -webkit-line-clamp: 2;
     }
   }
 
   @media (max-width: 400px) {
-    .hero-title { font-size: 1.55rem; }
+    .hero-title { font-size: var(--fs-lg); }
     .hero-content { padding: 1.25rem 1rem 1.6rem; }
 
     .side-thumb,
@@ -394,6 +393,6 @@ const heroSrcSet = imgSet(heroSrc, [640, 1024, 1600, 2000], 70);
       width: 90px;
       height: 64px;
     }
-    .side-title { font-size: .85rem; }
+    .side-title { font-size: var(--fs-sm); }
   }
 </style>

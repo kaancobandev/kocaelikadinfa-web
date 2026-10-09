@@ -93,8 +93,8 @@ function isYoutube(url: string): boolean {
   }
   .video-section-inner .section-tag { color: var(--green-bright); }
   .video-section-inner h2 {
-    font-size: clamp(1.8rem, 4vw, 2.6rem);
-    font-weight: 900;
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
     margin-top: .6rem;
     color: var(--text);
   }
@@ -102,8 +102,8 @@ function isYoutube(url: string): boolean {
   .btn-all {
     display: inline-block;
     margin-top: 1rem;
-    font-size: .8rem;
-    font-weight: 700;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
     color: var(--green);
     text-decoration: none;
     letter-spacing: .5px;
@@ -155,7 +155,7 @@ function isYoutube(url: string): boolean {
     padding: 1rem 1.2rem;
   }
   .video-info p {
-    font-size: .85rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
     line-height: 1.5;
   }
@@ -197,7 +197,7 @@ function isYoutube(url: string): boolean {
   .img-caption {
     display: block;
     padding: .6rem .9rem;
-    font-size: .82rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
     background: var(--card-bg);
     text-align: left;
@@ -239,12 +239,12 @@ function isYoutube(url: string): boolean {
     max-width: 90vw;
     max-height: 80vh;
     object-fit: contain;
-    border-radius: 8px;
+    border-radius: var(--r-md);
     box-shadow: 0 8px 48px rgba(0,0,0,.6);
   }
   .ag-lb-caption {
     color: rgba(255,255,255,.65);
-    font-size: .85rem;
+    font-size: var(--fs-sm);
     text-align: center;
     max-width: 640px;
   }
@@ -254,7 +254,7 @@ function isYoutube(url: string): boolean {
     background: rgba(255,255,255,.1);
     border: 1px solid rgba(255,255,255,.15);
     color: #fff;
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     width: 40px; height: 40px;
     border-radius: 50%;
     cursor: pointer;

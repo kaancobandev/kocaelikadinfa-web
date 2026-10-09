@@ -72,7 +72,7 @@ const links = [
     .logo-img { height: 38px; width: 38px; }
   }
   .logo-text {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: var(--fw-bold);
     letter-spacing: .02em;
     color: var(--text);
@@ -94,13 +94,13 @@ const links = [
     min-height: 44px;
     padding: 0;
     margin-right: -9px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
   }
   .nav-burger span {
     display: block;
     width: 25px; height: 2px;
     background: var(--text);
-    border-radius: 2px;
+    border-radius: var(--r-sm);
     transition: .3s;
   }
   .nav-burger:focus-visible {
@@ -117,9 +117,9 @@ const links = [
   .nav-links a {
     text-decoration: none;
     color: var(--text-muted);
-    font-size: .85rem;
-    font-weight: 600;
-    letter-spacing: 1px;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--ls-eyebrow);
     text-transform: uppercase;
     transition: color .25s;
   }
@@ -130,7 +130,7 @@ const links = [
      O görsel dil indirme butonu / reklam bandı dilidir; potansiyel sporcu
      ailesine güven vermesi gereken buton en ucuz görünen öğe oluyordu.
      Konumu ve rengi zaten yeterli. */
-  .btn-join {
+  .nav-links .btn-join {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -142,9 +142,9 @@ const links = [
     border-radius: var(--r-pill);
     transition: background .2s;
   }
-  .btn-join:hover { background: var(--green-mid); }
+  .nav-links .btn-join:hover { background: var(--green-mid); }
   /* KORUNDU: silinirse sitenin birincil CTA'sı klavye odağını kaybeder */
-  .btn-join:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 2px; }
+  .nav-links .btn-join:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 2px; }
 
   /* ── Dar masaüstü / büyük tablet ────────────────────────────────────
      Kulübün tam adı (1.4rem + 3px harf aralığı) tek başına 384px yer
@@ -197,7 +197,7 @@ const links = [
     .nav-links a {
       display: block;
       padding: 1rem 0;
-      font-size: .9rem;
+      font-size: var(--fs-base);
       border-bottom: 1px solid rgba(255,255,255,0.04);
     }
     .nav-links li:last-child a { border-bottom: none; }

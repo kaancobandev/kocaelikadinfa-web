@@ -492,7 +492,56 @@ düzenlemeye devam eder.
 Sonra: kimlik şeridi bileşeni · ContentCards 3 → 6 · TeamSection tek satıra ·
 bölüm başlıkları `.eyebrow` + "Tümü" kalıbına · NewsPanel'e başlık kuralları.
 
-### Faz D — Sistem göçü (3-5 gün, **en büyük ve en hafife alınan kalem**)
+### Faz D1 ✅ yapıldı — token göçü
+
+17 halka açık dosya, **318 değişiklik**. Dosya başına bir ajan göçü yaptı,
+ardından bağımsız bir ajan her dosyayı spesifikasyona karşı denetledi
+(34 ajan). Sonuç: 0 kritik ihlal, 0 bozuk sözdizimi, 12 orta + 42 düşük bulgu.
+
+**Ham değerlerin azalması:**
+
+| Özellik | Önce | Sonra (ham) | Token |
+|---|---|---|---|
+| font-size | 42 | **8** | 7 |
+| font-weight | 7 | 2 | 3 |
+| letter-spacing | 14 | 5 | 3 |
+| line-height | 16 | 5 | 3 |
+| border-radius | 18 | 4 | 4 |
+
+Kalan 8 ham font-size'ın hepsi bilinçli istisna: intro (kapsam dışı),
+ölçülmüş navbar bantları, skor rakamları, dekoratif ikon.
+
+**Denetçilerin yakaladığı ve düzelttiğim 5 gerçek sorun:**
+
+1. **`.btn-join` ağırlığı 600 → 500'e düşmüştü.** `.nav-links a` (özgüllük
+   0,1,1) `.btn-join`'i (0,1,0) eziyordu, yani butonun kendi `--fw-bold`'u
+   hiç uygulanmıyordu. Sitenin birincil CTA'sı inceliyordu. Özgüllük
+   `.nav-links .btn-join`'e yükseltildi → ölçüldü, artık 700.
+2. **Skor rakamları 900 → 700 inmişti.** "Dokunma" maddesi lafzen yalnızca
+   font-size'ı koruyordu. Plan 900'ü *tek yere* (skorlara) emekli ediyor —
+   geri alındı.
+3. **"Son Maç Sonuçları" 11px olmuştu**, kardeş h2'ler 40px. Faz C hepsini
+   birlikte `.eyebrow`'a çevirecek; o zamana kadar kardeşleriyle eşitlendi.
+4. **`.btn-primary` ham kalmıştı** (Layout global, göç kapsamı dışındaydı)
+   ama kardeşi `.btn-outline` tokenlanmıştı — aynı satırdaki iki buton farklı
+   puntoda render ediliyordu. `.btn-primary` de bağlandı, ikisi de 16px.
+5. **Footer telifi** en küçük (11px) *ve* en soluk (5,2:1) metin olmuştu —
+   Faz A'nın kontrast amacıyla çelişiyordu. `--fs-sm`'ye çekildi.
+
+**Çürütülen iddia:** denetçi, navbar harf aralığının 1500px üstünde taşmaya
+yol açabileceğini söyledi. 1550 ve 1600px'te ölçtüm — taşma yok, dokunulmadı.
+
+Doğrulama: 9 sayfa × 4 genişlik = **36 kombinasyon temiz** (yatay kaydırma
+yok, çözümlenmemiş token yok, düşük kontrastlı gövde metni yok).
+
+### Faz D2 — `.band` göçü (bekliyor)
+
+Padding/max-width'lerin global `.band`e bağlanması bilinçli olarak D1'in
+dışında bırakıldı: düzeni değiştirir ve sayfa sayfa görsel doğrulama ister.
+`aramiza-katil.astro`'daki scoped `.section` da bu adımda `.ak-section`e
+yeniden adlandırılacak.
+
+### Faz D (özgün plan notları)
 23 halka açık `.astro` dosyasında ~2.268 CSS bildirimi var; 42 font-size'ı 7'ye
 indirmek ~35 değerin fiilen **boyut değiştirmesi** demek.
 

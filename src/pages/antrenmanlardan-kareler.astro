@@ -209,7 +209,7 @@ function isYoutube(url: string): boolean {
   .card-caption {
     display: block;
     padding: .65rem .9rem;
-    font-size: .8rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
     background: var(--card-bg);
   }
@@ -218,7 +218,7 @@ function isYoutube(url: string): boolean {
   .empty-state {
     padding: 6rem 8%;
     text-align: center;
-    color: var(--text-muted);
+    color: var(--text-body);
   }
 
   /* Lightbox */
@@ -238,12 +238,12 @@ function isYoutube(url: string): boolean {
     max-width: 90vw;
     max-height: 80vh;
     object-fit: contain;
-    border-radius: 8px;
+    border-radius: var(--r-md);
     box-shadow: 0 8px 48px rgba(0,0,0,.6);
   }
   .lb-caption {
     color: rgba(255,255,255,.65);
-    font-size: .85rem;
+    font-size: var(--fs-sm);
     text-align: center;
     max-width: 640px;
   }
@@ -253,7 +253,7 @@ function isYoutube(url: string): boolean {
     background: rgba(255,255,255,.1);
     border: 1px solid rgba(255,255,255,.15);
     color: #fff;
-    font-size: 1.2rem;
+    font-size: var(--fs-md);
     width: 40px; height: 40px;
     border-radius: 50%;
     cursor: pointer;

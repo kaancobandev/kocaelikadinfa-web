@@ -204,24 +204,24 @@
     gap: 1px;
   }
   .footer-logo-name {
-    font-size: 1.25rem;
+    font-size: var(--fs-md);
     font-weight: var(--fw-bold);
     letter-spacing: .02em;
     color: var(--text);
-    line-height: 1;
+    line-height: var(--lh-tight);
   }
   .footer-logo-sub {
-    font-size: .65rem;
-    font-weight: 600;
-    letter-spacing: 1.5px;
+    font-size: var(--fs-eyebrow);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--ls-eyebrow);
     text-transform: uppercase;
     color: var(--text-muted);
   }
 
   .footer-desc {
-    font-size: .875rem;
-    color: var(--text-muted);
-    line-height: 1.7;
+    font-size: var(--fs-sm);
+    color: var(--text-body);
+    line-height: var(--lh-body);
     max-width: 280px;
     margin-bottom: 1.8rem;
   }
@@ -232,7 +232,7 @@
   }
   .social-btn {
     width: 40px; height: 40px;
-    border-radius: 10px;
+    border-radius: var(--r-md);
     border: 1px solid rgba(255,255,255,0.07);
     background: rgba(255,255,255,0.03);
     display: flex;
@@ -251,9 +251,9 @@
 
   /* ── Kolon ── */
   .footer-col h4 {
-    font-size: .65rem;
-    font-weight: 700;
-    letter-spacing: 3.5px;
+    font-size: var(--fs-eyebrow);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-eyebrow);
     text-transform: uppercase;
     color: var(--green-bright);
     margin-bottom: 1.4rem;
@@ -266,7 +266,7 @@
     bottom: 0; left: 0;
     width: 24px; height: 2px;
     background: var(--green);
-    border-radius: 2px;
+    border-radius: var(--r-sm);
   }
 
   .footer-col ul {
@@ -282,8 +282,8 @@
     gap: .6rem;
     text-decoration: none;
     color: var(--text-muted);
-    font-size: .875rem;
-    font-weight: 500;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
     transition: color .2s, gap .2s;
   }
   .footer-col ul a:hover {
@@ -305,9 +305,9 @@
 
   /* ── Reklam & İş Birliği ── */
   .collab-desc {
-    font-size: .82rem;
-    color: var(--text-muted);
-    line-height: 1.65;
+    font-size: var(--fs-sm);
+    color: var(--text-body);
+    line-height: var(--lh-body);
     margin-bottom: 1.2rem;
   }
 
@@ -315,8 +315,8 @@
     display: inline-flex;
     align-items: center;
     gap: .6rem;
-    font-size: .88rem;
-    font-weight: 700;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
     color: var(--green-bright);
     text-decoration: none;
     transition: color .2s;
@@ -336,13 +336,13 @@
     align-items: center;
     gap: .75rem;
     color: var(--text-muted);
-    font-size: .875rem;
-    font-weight: 500;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
   }
 
   .contact-icon {
     width: 28px; height: 28px;
-    border-radius: 8px;
+    border-radius: var(--r-md);
     background: rgba(44,184,74,0.08);
     border: 1px solid rgba(44,184,74,0.15);
     display: flex;
@@ -356,15 +356,15 @@
     display: inline-flex;
     align-items: center;
     gap: .5rem;
-    font-size: .8rem;
-    font-weight: 700;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
     letter-spacing: .5px;
     color: var(--green-bright);
     text-decoration: none;
     background: rgba(44,184,74,0.08);
     border: 1px solid rgba(44,184,74,0.25);
     padding: .6rem 1.2rem;
-    border-radius: 50px;
+    border-radius: var(--r-pill);
     transition: background .25s, border-color .25s, gap .2s, transform .2s;
   }
   .footer-cta:hover {
@@ -390,15 +390,15 @@
   }
 
   .copy {
-    font-size: .75rem;
+    font-size: var(--fs-sm);
     color: var(--text-dim);
-    font-weight: 500;
+    font-weight: var(--fw-medium);
   }
 
   .admin-link {
-    font-size: .68rem;
-    font-weight: 700;
-    letter-spacing: 2.5px;
+    font-size: var(--fs-eyebrow);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-eyebrow);
     text-transform: uppercase;
     color: var(--text-dim);
     text-decoration: none;

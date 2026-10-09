@@ -98,8 +98,8 @@ const photos: GalleryItem[] = galleryData ?? [];
   .story-inner { max-width: 820px; }
 
   .story-section h2 {
-    font-size: clamp(1.6rem, 3vw, 2.2rem);
-    font-weight: 900;
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
     margin-bottom: 2rem;
     position: relative;
     display: inline-block;
@@ -110,7 +110,7 @@ const photos: GalleryItem[] = galleryData ?? [];
     width: 50px; height: 3px;
     background: var(--green-bright);
     margin-top: .4rem;
-    border-radius: 2px;
+    border-radius: var(--r-sm);
   }
 
   .story-text {
@@ -120,9 +120,9 @@ const photos: GalleryItem[] = galleryData ?? [];
     margin-bottom: 3rem;
   }
   .story-text p {
-    font-size: 1rem;
-    color: var(--text-muted);
-    line-height: 1.85;
+    font-size: var(--fs-base);
+    color: var(--text-body);
+    line-height: var(--lh-body);
   }
 
   /* ── Partner logo ── */
@@ -148,8 +148,8 @@ const photos: GalleryItem[] = galleryData ?? [];
   }
 
   .photos-title {
-    font-size: clamp(1.4rem, 3vw, 2rem);
-    font-weight: 900;
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
     margin-bottom: 2.5rem;
     position: relative;
     display: inline-block;
@@ -160,7 +160,7 @@ const photos: GalleryItem[] = galleryData ?? [];
     width: 50px; height: 3px;
     background: var(--green-bright);
     margin-top: .4rem;
-    border-radius: 2px;
+    border-radius: var(--r-sm);
   }
 
   /* Kolon bazlı masonry: fotoğraflar kendi oranlarında, bulanık dolgu yok */
@@ -217,9 +217,9 @@ const photos: GalleryItem[] = galleryData ?? [];
     /* Görselin hemen altında; artan yükseklik kartın dibinde kalır */
     background: var(--card-bg);
     padding: .8rem 1rem;
-    font-size: .8rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
-    font-weight: 600;
+    font-weight: var(--fw-medium);
   }
 
   /* ── CTA ── */
@@ -229,6 +229,6 @@ const photos: GalleryItem[] = galleryData ?? [];
     border-top: 1px solid var(--border);
     text-align: center;
   }
-  .cta-section h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 900; margin-bottom: .8rem; }
-  .cta-section p  { color: var(--text-muted); margin-bottom: 2rem; }
+  .cta-section h2 { font-size: var(--fs-xl); font-weight: var(--fw-bold); margin-bottom: .8rem; }
+  .cta-section p  { color: var(--text-body); margin-bottom: 2rem; }
 </style>
