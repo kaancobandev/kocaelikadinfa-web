@@ -1,7 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
-import RainBackground from '../components/RainBackground.astro';
 import Hero from '../components/Hero.astro';
 import Scores from '../components/Scores.astro';
 import ContentCards from '../components/ContentCards.astro';
@@ -15,7 +14,6 @@ import Footer from '../components/Footer.astro';
   description="Kocaeli Kadın Futbol Kulübü resmi sitesi. A Takım, Pilot Takım ve akademi, güncel maç sonuçları, haberler ve videolar. Kocaeli'de kadın futbolunun adresi."
   intro
 >
-  <RainBackground />
   <Navbar />
   <main id="icerik" tabindex="-1">
     <Hero />
@@ -26,17 +24,3 @@ import Footer from '../components/Footer.astro';
   </main>
   <Footer />
 </Layout>
-
-<script>
-  const revealEls = document.querySelectorAll('.reveal');
-  const observer = new IntersectionObserver(
-    entries => entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        observer.unobserve(e.target);
-      }
-    }),
-    { threshold: 0.12 }
-  );
-  revealEls.forEach(el => observer.observe(el));
-</script>

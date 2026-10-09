@@ -31,12 +31,7 @@ const links = [
       <li><a href={l.href}>{l.label}</a></li>
     ))}
     <li>
-      <a href="/aramiza-katil" class="btn-join">
-        <!-- Shimmer: dönen konik degrade, kenar payında görünür -->
-        <span class="sb-spark-wrap" aria-hidden="true"><span class="sb-spark"></span></span>
-        <span class="sb-text">Aramıza Katıl</span>
-        <span class="sb-backdrop" aria-hidden="true"></span>
-      </a>
+      <a href="/aramiza-katil" class="btn-join">Aramıza Katıl</a>
     </li>
   </ul>
 </nav>
@@ -77,12 +72,10 @@ const links = [
     .logo-img { height: 38px; width: 38px; }
   }
   .logo-text {
-    font-size: 1.4rem;
-    font-weight: 900;
-    letter-spacing: 3px;
-    background: linear-gradient(135deg, #fff 0%, var(--green-bright) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-size: 1rem;
+    font-weight: var(--fw-bold);
+    letter-spacing: .02em;
+    color: var(--text);
   }
 
   .nav-burger {
@@ -132,99 +125,26 @@ const links = [
   }
   .nav-links a:hover { color: var(--green-bright); }
 
-  /* ── Aramıza Katıl — Shimmer Button (Magic UI portu) ──────────────────
-     Çim yeşili zemin, beyaz shimmer. Dönen konik degrade tüm butonu
-     kaplar; ortasını backdrop kapatır, geriye yalnızca --cut kadar bir
-     kenar payı kalır ve shimmer orada dolaşır. */
+  /* ── Aramıza Katıl ──────────────────────────────────────────────────
+     Sitenin en önemli tek butonu sonsuz dönen beyaz bir ışıkla sarılıydı.
+     O görsel dil indirme butonu / reklam bandı dilidir; potansiyel sporcu
+     ailesine güven vermesi gereken buton en ucuz görünen öğe oluyordu.
+     Konumu ve rengi zaten yeterli. */
   .btn-join {
-    --sb-spread: 90deg;
-    --sb-shimmer: #ffffff;          /* beyaz */
-    --sb-radius: 50px;
-    --sb-speed: 3s;
-    --sb-cut: 2px;                  /* kenar shimmer kalınlığı */
-    --sb-bg: var(--green);          /* çim yeşili */
-
-    position: relative;
-    z-index: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-    text-align: center;
-    padding: .5rem 1.2rem;
-    background: var(--sb-bg);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: var(--sb-radius);
-    transition: transform .2s, box-shadow .25s;
-  }
-  .btn-join:hover {
-    --sb-bg: var(--green-mid);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(13,77,30,.45);
-  }
-  .btn-join:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 2px; }
-
-  /* Metin: her koşulda beyaz (üstteki .nav-links a:hover'ı etkilemesin) */
-  .sb-text {
-    position: relative;
-    z-index: 1;
+    padding: .55rem 1.25rem;
+    background: var(--green);
     color: #fff !important;
-    font-weight: 700;
+    font-weight: var(--fw-bold);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-pill);
+    transition: background .2s;
   }
-
-  /* Dönen ışık huzmesi */
-  .sb-spark-wrap {
-    position: absolute;
-    inset: 0;
-    z-index: -30;
-    overflow: visible;
-    container-type: size;
-    filter: blur(1.5px);
-  }
-  .sb-spark {
-    position: absolute;
-    inset: 0;
-    height: 100cqh;
-    aspect-ratio: 1;
-    animation: sb-slide var(--sb-speed) ease-in-out infinite alternate;
-  }
-  .sb-spark::before {
-    content: '';
-    position: absolute;
-    inset: -100%;
-    background: conic-gradient(
-      from calc(270deg - (var(--sb-spread) * 0.5)),
-      transparent 0,
-      var(--sb-shimmer) var(--sb-spread),
-      transparent var(--sb-spread)
-    );
-    animation: sb-spin calc(var(--sb-speed) * 2) infinite linear;
-  }
-
-  /* Ortayı kapatan katman: shimmer sadece kenarda kalsın */
-  .sb-backdrop {
-    position: absolute;
-    z-index: -20;
-    inset: var(--sb-cut);
-    background: var(--sb-bg);
-    border-radius: var(--sb-radius);
-    transition: background .25s;
-  }
-
-  @keyframes sb-spin {
-    0%        { transform: rotate(0deg); }
-    15%, 35%  { transform: rotate(90deg); }
-    65%, 85%  { transform: rotate(270deg); }
-    100%      { transform: rotate(360deg); }
-  }
-  @keyframes sb-slide {
-    to { transform: translate(calc(100cqw - 100%), 0); }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .sb-spark, .sb-spark::before { animation: none; }
-    .sb-spark-wrap { display: none; }   /* düz yeşil buton kalır */
-  }
+  .btn-join:hover { background: var(--green-mid); }
+  /* KORUNDU: silinirse sitenin birincil CTA'sı klavye odağını kaybeder */
+  .btn-join:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 2px; }
 
   /* ── Dar masaüstü / büyük tablet ────────────────────────────────────
      Kulübün tam adı (1.4rem + 3px harf aralığı) tek başına 384px yer

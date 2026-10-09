@@ -2,7 +2,6 @@
 import { supabase, type Match } from '../lib/supabase';
 import { img } from '../lib/img';
 import { shortTeamName } from '../lib/news';
-import NumberTicker from './NumberTicker.astro';
 
 // Tüm maçları çek, her kategoriden (badge) en son eklenen maçı göster
 const { data } = await supabase
@@ -39,7 +38,7 @@ function formatDate(d: string) {
 
   <div class="scores-grid">
     {latestMatches.map(m => (
-      <div class="score-card reveal">
+      <div class="score-card">
         <div class="score-badge">{m.badge}</div>
         <div class="match-row">
 
@@ -60,9 +59,9 @@ function formatDate(d: string) {
           </div>
 
           <div class="score-box">
-            <span class="score-num"><NumberTicker value={m.score_home} /></span>
+            <span class="score-num">{m.score_home}</span>
             <span class="score-sep">–</span>
-            <span class="score-num"><NumberTicker value={m.score_away} /></span>
+            <span class="score-num">{m.score_away}</span>
           </div>
 
           <div class="team away">
@@ -94,8 +93,7 @@ function formatDate(d: string) {
 
 <style>
   .scores-section {
-    /* Yarı saydam: arkadaki yağmur, opak skor kartlarının çevresinde akar */
-    background: rgba(0, 0, 0, 0.45);
+    background: var(--surface);
     padding: 5rem 5% 4rem;
   }
 
@@ -226,13 +224,13 @@ function formatDate(d: string) {
     gap: .4rem;
     flex-shrink: 0;
   }
-  .score-num {
+  .score-num { font-variant-numeric: tabular-nums;
     font-size: 2.4rem;
     font-weight: 900;
     color: var(--green-bright);
     line-height: 1;
   }
-  .score-sep { font-size: 1.6rem; color: var(--text-muted); font-weight: 300; }
+  .score-sep { font-size: 1.6rem; color: var(--text-muted); font-weight: var(--fw-normal); }
 
   .match-meta { font-size: .75rem; color: #888; margin-top: 1rem; }
   /* Lig adı boşken ayraç da basılmıyor */

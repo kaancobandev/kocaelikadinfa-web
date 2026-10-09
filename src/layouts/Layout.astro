@@ -255,8 +255,6 @@ const jsonLd = {
     margin-bottom: 1rem;
   }
 
-  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
-  .reveal.visible { opacity: 1; transform: none; }
 
   /* ══ Bölüm kabı ════════════════════════════════════════════════════
      Bugün her bölüm kendi `padding: Xrem Y%` değerini yazıyor — ölçülen
@@ -293,10 +291,11 @@ const jsonLd = {
   }
 
   /* ══ Hareket azaltma ═══════════════════════════════════════════════
-     Bugün bu koruma yalnızca tek tek bileşenlerin içinde var (IntroLoader,
-     NumberTicker, Navbar, RainBackground). Faz B'de o bileşenler silinince
-     koruma da onlarla birlikte giderdi. Global blok, hangi bileşen
-     silinirse silinsin sözün ayakta kalmasını sağlıyor.                  */
+     Bu koruma eskiden yalnızca tek tek bileşenlerin içindeydi (IntroLoader,
+     NumberTicker, Navbar, RainBackground). Faz B'de NumberTicker ve
+     RainBackground silindi, Navbar'ın shimmer'ı kalktı — korumaları da
+     onlarla birlikte giderdi. Bu global blok, hangi bileşen silinirse
+     silinsin sözün ayakta kalmasını sağlıyor.                            */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: .01ms !important;

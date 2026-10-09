@@ -453,13 +453,32 @@ büyük harfli metni cümle düzenine çevir. Önerilen yeni metin:
 **"Kadromuzun tamamı kendi altyapımızdan."** Metin değişince
 `Hero.astro:168`'deki `text-transform: uppercase` silinecek.
 
-### Faz B — Silmeler (1,5 gün, 4 commit, **atomik olmak zorunda**)
-- **B1** RainBackground sil + 4 zemini **aynı commit'te** opaklaştır
-- **B2** NumberTicker sil + düz skor + `.score-sep` 300 → 400
-- **B3** Shimmer + 3 degrade wordmark sil (focus-visible ve max-width koru)
-- **B4** `.reveal` tamamen sil; hiçbir yere yeniden ekleme
-- **B5** `JoinSection.astro` sil
-- **B6** Intro — bkz. bölüm 6, seçenek A
+### Faz B — Silmeler ✅ yapıldı
+
+| | Ne | Sonuç |
+|---|---|---|
+| **B1** | `RainBackground.astro` (157 satır, 37 radial-gradient) silindi; bağlı 4 yarı saydam zemin **aynı commit'te** opaklaştırıldı | ✅ |
+| **B2** | `NumberTicker.astro` silindi, skorlar düz basılıyor + `tabular-nums` | ✅ |
+| **B3** | Navbar shimmer (2 keyframe, 6 değişken, 4 kural) + 3 degrade wordmark silindi | ✅ |
+| **B4** | `.reveal` kuralı, 7 sınıf ve gözlemci script'i silindi | ✅ |
+| **B5** | `JoinSection.astro` silindi (hiçbir yerde import edilmiyordu) | ✅ |
+| **B6** | Intro — **kapsam dışı**, kullanıcı kararıyla korunuyor | ⏸ |
+
+**Korunanlar (planın uyardığı regresyonlar):** `.btn-join:focus-visible`
+(silinirse birincil CTA klavye odağını kaybederdi) ve ≤1160px'teki
+`.logo-text { max-width: 180px }` (silinirse `ad90af4` ile düzeltilen navbar
+taşması geri gelirdi). İkisi de yerinde, doğrulandı.
+
+**Yakalanan hata:** `sed` ile zemin değiştirirken `.scores-section` ve
+`.team-section` selector satırları yinelendi, blok iç içe geçti ve iki bölümün
+zemini saydam kaldı. Regresyon taraması yakaladı, düzeltildi.
+
+**Yan etki kontrolü:** navbar logosu 1.4rem → 1rem küçüldü, hamburger eşiği
+düşürülebilir mi diye ölçüldü — linkler tek başına 851px kapladığı için
+eşikler (1160/1500) hâlâ doğru, dokunulmadı.
+
+Doğrulama: 9 sayfa × 3 genişlik = 27 kombinasyon temiz; tüm bölüm zeminleri
+opak; görünmez (opacity 0) içerik kalmadı.
 
 ### Faz C — Ana sayfa yeniden kurgusu (2 gün, tek sürüm)
 Silme ile yoğunlaştırma **aynı deploy'da** gitmeli, yoksa arada sayfa daha boş
