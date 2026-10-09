@@ -7,9 +7,17 @@ interface Props {
   hero: HeroSettings | null;
   /** Hero'nun sağ panelindeki 4 sabit manşet slotu. */
   newsSlots: (NewsItem | null)[];
+  /** Kimlik şeridi (hero_settings id=4) — üç olgu "değer|etiket" biçiminde. */
+  serit: HeroSettings | null;
 }
 
-const { hero, newsSlots } = Astro.props;
+const { hero, newsSlots, serit } = Astro.props;
+
+const seritAlanlari = [
+  { ad: 'serit_1', deger: serit?.badge ?? '',       ornek: '2016|Kuruluş' },
+  { ad: 'serit_2', deger: serit?.title ?? '',       ornek: '0|Yabancı oyuncu' },
+  { ad: 'serit_3', deger: serit?.description ?? '', ornek: '4–16|Akademi yaşı' },
+];
 ---
 
 <Panel id="hero" title="Ana Sayfa Hero">
@@ -80,4 +88,30 @@ const { hero, newsSlots } = Astro.props;
       );
     })}
   </div>
+
+  <div class="section-divider">
+    <span class="slot-label">Kimlik Şeridi (Hero'nun Altı)</span>
+    <p class="section-note">
+      Ana sayfada hero'nun hemen altındaki ince bant. Her alan
+      <strong>değer|etiket</strong> biçiminde yazılır — araya dik çizgi koyun.
+      Boş bıraktığınız alan sitede görünmez; üçü de boşsa şerit hiç çıkmaz.
+    </p>
+  </div>
+
+  <form method="POST" enctype="application/x-www-form-urlencoded" class="match-form flush">
+    <input type="hidden" name="_action" value="kimlik_serit_save" />
+
+    <div class="form-row">
+      {seritAlanlari.map((a, i) => (
+        <label>Olgu {i + 1}
+          <input name={a.ad} value={a.deger} placeholder={a.ornek} />
+          <span class="section-note">örn. {a.ornek}</span>
+        </label>
+      ))}
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-save">Kaydet</button>
+    </div>
+  </form>
 </Panel>

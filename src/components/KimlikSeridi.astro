@@ -1,0 +1,153 @@
+---
+/**
+ * Kimlik şeridi — hero'nun hemen altında duran ince bilgi bandı.
+ *
+ * Kulübün kendi doğrulayabileceği birkaç olgu (kuruluş yılı, kadro yapısı,
+ * akademi yaş aralığı) tek satırda durur. Amaç süs değil bilgi: ziyaretçi
+ * daha ilk ekranda kulübün ne olduğunu anlasın.
+ *
+ * İÇERİK KODA GÖMÜLÜ DEĞİL. hero_settings tablosunun id=4 satırından
+ * okunuyor; kulüp çalışanı panelden düzenleyebiliyor. Satır yoksa ya da
+ * üç alan da boşsa şerit HİÇ BASILMAZ — yarı dolu bir bant, hiç olmayandan
+ * kötüdür.
+ *
+ * Alan biçimi: "değer|etiket"  →  ör. "2016|Kuruluş"
+ * Ayraç yoksa ya da değer boşsa o öğe atlanır.
+ *
+ * Neden id=4 ve neden mevcut sütunlar: hero_settings artık id ile
+ * anahtarlanan çok satırlı bir ayar tablosu (1 = ana sayfa, 2 = pilot,
+ * 3 = A takım). id=4'te badge/title/description sütunları boşta; şeridi
+ * oraya bağlamak migration gerektirmiyor. Panel bu alanları kendi
+ * etiketleriyle gösteriyor, yani kullanıcı sütun adlarını hiç görmüyor.
+ */
+import { supabase } from '../lib/supabase';
+
+const { data } = await supabase
+  .from('hero_settings')
+  .select('badge,title,description')
+  .eq('id', 4)
+  .maybeSingle();
+
+interface Oge { deger: string; etiket: string }
+
+function ayristir(ham: string | null | undefined): Oge | null {
+  if (!ham) return null;
+  const [deger, etiket] = ham.split('|').map(p => p.trim());
+  if (!deger) return null;
+  return { deger, etiket: etiket ?? '' };
+}
+
+const ogeler = [
+  ayristir(data?.badge),
+  ayristir(data?.title),
+  ayristir(data?.description),
+].filter((o): o is Oge => o !== null);
+---
+
+{ogeler.length > 0 && (
+  <section class="kimlik-serit" aria-label="Kulüp künyesi">
+    <div class="kimlik-inner">
+      <div class="kimlik-marka">
+        <img src="/logo_transparent.png" alt="" width="28" height="28" class="kimlik-arma" />
+        <span class="kimlik-ad">Kocaeli Kadın Futbol Kulübü</span>
+      </div>
+
+      <ul class="kimlik-veri">
+        {ogeler.map(o => (
+          <li>
+            <span class="kimlik-deger">{o.deger}</span>
+            {o.etiket && <span class="kimlik-etiket">{o.etiket}</span>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}
+
+<style>
+  .kimlik-serit {
+    background: var(--black);
+    border-block: 1px solid var(--border);
+    padding-inline: var(--gutter);
+  }
+
+  .kimlik-inner {
+    max-width: var(--measure);
+    margin-inline: auto;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    flex-wrap: wrap;
+    padding-block: var(--sp-2);
+  }
+
+  .kimlik-marka {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+  .kimlik-arma {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+  .kimlik-ad {
+    font-size: var(--fs-eyebrow);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .kimlik-veri {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin: 0;
+    padding: 0;
+  }
+  /* Öğeler arasında ince ayraç — kart ya da kutu değil, tek bir çizgi */
+  .kimlik-veri li + li {
+    border-left: 1px solid var(--border);
+    padding-left: var(--sp-3);
+  }
+  .kimlik-veri li {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-1);
+  }
+
+  .kimlik-deger {
+    font-size: var(--fs-md);
+    font-weight: var(--fw-bold);
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .kimlik-etiket {
+    font-size: var(--fs-eyebrow);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* Dar ekranda marka satırı üstte, veriler altta tam genişlikte */
+  @media (max-width: 640px) {
+    .kimlik-inner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--sp-2);
+    }
+    .kimlik-veri {
+      width: 100%;
+      justify-content: space-between;
+      gap: var(--sp-2);
+    }
+    .kimlik-veri li + li { padding-left: var(--sp-2); }
+    .kimlik-veri li { flex-direction: column; gap: 0; }
+  }
+</style>

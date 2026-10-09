@@ -379,6 +379,26 @@ export const adminActions: Record<string, ActionDef> = {
     },
   },
 
+  // ── Ana sayfa kimlik şeridi ──
+  // hero_settings id=4: üç olgu "değer|etiket" biçiminde badge/title/
+  // description sütunlarında tutuluyor. Boş bırakılan alan sitede hiç
+  // basılmaz; üçü de boşsa şerit tamamen görünmez olur.
+  kimlik_serit_save: {
+    panel: 'hero',
+    run: async (ctx) => {
+      return upsertHero(
+        ctx,
+        4,
+        {
+          badge: str(ctx.form, 'serit_1'),
+          title: str(ctx.form, 'serit_2'),
+          description: str(ctx.form, 'serit_3'),
+        },
+        'Kimlik şeridi güncellendi!'
+      );
+    },
+  },
+
   // ── A Takım hero görseli ──
   // hero_settings satırları: 1 = ana sayfa, 2 = pilot takım, 3 = A takım
   a_takim_hero_save: {

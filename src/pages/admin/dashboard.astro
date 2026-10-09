@@ -67,7 +67,7 @@ const errorMsg   = Astro.url.searchParams.get('err') ?? '';
 // ── Veriler — hepsi paralel ───────────────────────────────────────────
 const [
   matchesRes, newsRes, heroRes, akademiRes,
-  pilotHeroRes, aTakimHeroRes, pilotRes, aTakimRes, antrenmanRes, videoRes,
+  pilotHeroRes, aTakimHeroRes, seritRes, pilotRes, aTakimRes, antrenmanRes, videoRes,
 ] = await Promise.all([
   supabase.from('matches').select('*').order('id', { ascending: false }),
   supabase.from('news').select('*').order('id', { ascending: false }),
@@ -75,6 +75,7 @@ const [
   supabase.from('gallery').select('*').order('sort_order'),
   supabase.from('hero_settings').select('image_url').eq('id', 2).maybeSingle(),
   supabase.from('hero_settings').select('image_url').eq('id', 3).maybeSingle(),
+  supabase.from('hero_settings').select('*').eq('id', 4).maybeSingle(),
   supabase.from('pilot_gallery').select('*').order('sort_order'),
   supabase.from('a_takim_gallery').select('*').order('sort_order'),
   supabase.from('antrenman_galeri').select('*').order('sort_order'),
@@ -91,6 +92,7 @@ const antrenmanItems: AntrenmanGaleriItem[] = antrenmanRes.data ?? [];
 const videos:       VideoItem[]           = videoRes.data     ?? [];
 const pilotHeroImage: string | null       = pilotHeroRes.data?.image_url ?? null;
 const aTakimHeroImage: string | null      = aTakimHeroRes.data?.image_url ?? null;
+const serit: HeroSettings | null          = seritRes.data ?? null;
 
 // Maçları kategori (badge) başlığına göre grupla
 const matchGroupMap = new Map<string, Match[]>();
@@ -164,7 +166,7 @@ const panels = [
       {successMsg && <div class="alert success" role="status">{successMsg}</div>}
       {errorMsg   && <div class="alert error"   role="alert">{errorMsg}</div>}
 
-      <HeroPanel hero={hero} newsSlots={newsSlots} />
+      <HeroPanel hero={hero} newsSlots={newsSlots} serit={serit} />
 
       <MatchesPanel groups={matchGroups} categories={matchGroups.map(([t]) => t)} />
 

@@ -34,7 +34,17 @@ function formatDate(d: string) {
 ---
 
 <section class="scores-section">
-  <h2 class="section-label">Son Maç Sonuçları</h2>
+  <div class="scores-head">
+    <h2 class="section-label">Son Maç Sonuçları</h2>
+    {/* Ana sayfadan /mac-gecmisi'ye başka hiçbir yol yoktu; bölüm sonuç
+        gösteriyordu ama tamamına götürmüyordu. */}
+    <a href="/mac-gecmisi" class="scores-tumu">
+      Tüm sonuçlar
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+      </svg>
+    </a>
+  </div>
 
   <div class="scores-grid">
     {latestMatches.map(m => (
@@ -96,6 +106,32 @@ function formatDate(d: string) {
     background: var(--surface);
     padding: 5rem 5% 4rem;
   }
+
+  /* Başlık solda, "Tüm sonuçlar" sağda — aynı taban çizgisinde */
+  .scores-head {
+    max-width: var(--measure);
+    margin: 0 auto 2.5rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    flex-wrap: wrap;
+  }
+  .scores-head .section-label { margin-bottom: 0; text-align: left; }
+
+  .scores-tumu {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
+    color: var(--green-bright);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: gap .2s;
+  }
+  .scores-tumu:hover { gap: .7rem; }
+  .scores-tumu:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; border-radius: var(--r-sm); }
 
   .section-label {
     position: relative;
