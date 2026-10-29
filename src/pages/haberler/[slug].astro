@@ -272,8 +272,9 @@ const jsonLd = {
   .article-body p:last-of-type { margin-bottom: 0; }
   .article-empty { color: var(--text-muted); font-style: italic; }
 
+  /* --link'in sitedeki TEK kullanım yeri: haber gövdesine gömülü bağlantılar */
   .article-body :global(.news-link) {
-    color: #4da6ff;
+    color: var(--link);
     text-decoration: none;
     word-break: break-word;
   }

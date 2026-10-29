@@ -171,6 +171,15 @@ const jsonLd = {
     --green-wash:    rgba(44,184,74,.08);
     --scrim:         rgba(0,0,0,.80);
 
+    /* ── Rol renkleri — her biri TEK işli. Kontrast: siyah / --surface ── */
+    --kemik:   #f2efe9;   /* kırık beyaz: TÜM h1 ve h2.         18,30:1 */
+    --amber:   #d4a052;   /* nötr dikkat: ne iyi ne kötü.  8,95:1 / 8,27:1 */
+    --kirmizi: #e05555;   /* hata ve kayıp.                5,60:1 / 5,18:1 */
+    --link:    #4da6ff;   /* YALNIZ haber gövdesi içi bağlantı. 8,21:1 / 7,59:1 */
+
+    --amber-wash:   rgba(212,160,82,.14);   /* yalnız beraberlik rozeti zemini */
+    --kirmizi-wash: rgba(224,85,85,.14);    /* yalnız mağlubiyet rozeti zemini */
+
     /* ── Boşluk (4px ızgara) ── */
     --sp-1: .5rem;     /*  8px */
     --sp-2: .75rem;    /* 12px */
@@ -220,6 +229,11 @@ const jsonLd = {
     color: var(--text);
     line-height: 1.6;
   }
+
+  /* Tüm h1/h2 kırık beyaz: saf beyaz (--text) arayüz metninde kalır.
+     DİKKAT: scoped bir `color` kuralı (0,2,0+) bu global'i (0,0,1) ezer;
+     bir başlık beyaz çıkıyorsa nedeni bileşendeki yerel renk kuralıdır. */
+  h1, h2 { color: var(--kemik); }
 
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: var(--dark); }

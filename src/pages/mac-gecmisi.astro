@@ -172,9 +172,11 @@ const stats = ozet(matches);
   .summary-item { display: flex; flex-direction: column; align-items: center; gap: .2rem; }
   .s-num { font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--text); line-height: var(--lh-tight); }
   .s-lbl { font-size: var(--fs-eyebrow); font-weight: var(--fw-medium); letter-spacing: var(--ls-eyebrow); text-transform: uppercase; color: var(--text-muted); }
-  .win-color  { color: var(--green-bright) !important; }
-  .draw-color { color: #d4d452 !important; }
-  .loss-color { color: #e05555 !important; }
+  /* .s-num'dan sonra tanımlı, aynı özgüllükte: !important gerekmez.
+     Galibiyet sayısı yeşil değil — --green-bright --fs-lg ölçeğinde kullanılmaz. */
+  .win-color  { color: var(--text); }
+  .draw-color { color: var(--amber); }
+  .loss-color { color: var(--kirmizi); }
 
   /* ── Maç kartları ── */
   .matches-list { display: flex; flex-direction: column; gap: .8rem; }
@@ -249,9 +251,12 @@ const stats = ozet(matches);
     display: flex; align-items: center; justify-content: center;
     font-size: var(--fs-eyebrow); font-weight: var(--fw-bold);
   }
-  .result-badge.win  { background: rgba(34,150,58,.2);  color: var(--green-bright); }
-  .result-badge.draw { background: rgba(200,200,0,.15); color: #d4d452; }
-  .result-badge.loss { background: rgba(200,40,40,.15); color: #e05555; }
+  /* Sonuç ayrımı görsel YAPI ile: galibiyet dolgu, beraberlik/mağlubiyet
+     wash zemin + 1px çerçeve. Harf (G/B/M) her zaman kalır; renk tek
+     ayrım aracı olmaz. Kırmızı 36px rozetin içinde kalır, karta taşmaz. */
+  .result-badge.win  { background: var(--green);        color: var(--text); }
+  .result-badge.draw { background: var(--amber-wash);   color: var(--amber);   border: 1px solid var(--amber); }
+  .result-badge.loss { background: var(--kirmizi-wash); color: var(--kirmizi); border: 1px solid var(--kirmizi); }
 
   /* Boş durum */
   .empty-state {
