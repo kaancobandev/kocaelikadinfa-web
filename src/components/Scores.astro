@@ -166,7 +166,7 @@ function formatDate(d: string) {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    padding: 6px;
+    padding: calc(var(--sp-2) / 2);
   }
   .team-logo-fallback {
     font-size: var(--fs-eyebrow);
@@ -185,7 +185,7 @@ function formatDate(d: string) {
   }
   /* Dar ekranda kısa ad — "Kocaeli Kadın Futbol Kulübü" 4 satıra bölünmesin */
   .tn-short { display: none; }
-  @media (max-width: 640px) {
+  @media (max-width: 767px) {
     .tn-full  { display: none; }
     .tn-short { display: inline; }
   }

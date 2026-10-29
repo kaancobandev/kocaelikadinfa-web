@@ -213,7 +213,7 @@ const stats = ozet(matches);
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
   }
-  .team-logo { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+  .team-logo { width: 100%; height: 100%; object-fit: contain; padding: calc(var(--sp-1) / 2); }
   .team-logo-fallback {
     font-size: var(--fs-eyebrow); font-weight: var(--fw-medium);
     color: var(--text-muted); letter-spacing: var(--ls-eyebrow);
@@ -257,7 +257,7 @@ const stats = ozet(matches);
      NOT: medya sorguları taban stillerden SONRA gelmeli,
      yoksa eşit özgüllükteki taban kurallar bunları eziyor.
   ─────────────────────────────────────────────── */
-  @media (max-width: 640px) {
+  @media (max-width: 767px) {
     .match-card {
       grid-template-columns: 1fr auto;
       gap: var(--sp-2);

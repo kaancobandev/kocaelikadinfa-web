@@ -295,12 +295,13 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
 </Layout>
 
 <style>
-  .hero-actions { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 2rem; }
+  /* Üst boşluk global .band-inner ritminden (--sp-4) gelir */
+  .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
   /* İkincil biçim: zeminsiz, çerçevesiz metin bağlantı */
   .btn-ghost {
     display: inline-flex;
     align-items: center;
-    gap: .55rem;
+    gap: var(--sp-1);
     color: var(--green-bright);
     font-size: var(--fs-sm);
     font-weight: var(--fw-medium);
@@ -319,12 +320,12 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
   }
 
   .note {
-    margin-top: 1.5rem;
+    margin-top: var(--sp-3);
     font-size: var(--fs-sm);
     color: var(--text-body);
     border: 1px solid var(--border);
     border-radius: var(--r-md);
-    padding: .9rem 1.1rem;
+    padding: var(--sp-2) var(--sp-3);
   }
   .note a { color: var(--green-bright); font-weight: var(--fw-bold); text-decoration: none; }
   .note a:hover { text-decoration: underline; }
@@ -340,10 +341,10 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 1.6rem 1.5rem 1.8rem;
+    padding: var(--sp-3);
     display: flex;
     flex-direction: column;
-    gap: .6rem;
+    gap: var(--sp-2);
     transition: border-color .15s ease;
   }
   .group-card:hover { border-color: var(--border-strong); }
@@ -374,8 +375,8 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
   .field-card {
     display: flex;
     flex-direction: column;
-    gap: .7rem;
-    padding: 1.5rem;
+    gap: var(--sp-2);
+    padding: var(--sp-3);
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -393,10 +394,10 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     display: flex; align-items: center; justify-content: center;
     color: var(--text-muted);
   }
-  .field-body { display: flex; flex-direction: column; gap: .25rem; }
+  .field-body { display: flex; flex-direction: column; gap: var(--sp-1); }
   .field-body h3 { font-size: var(--fs-base); font-weight: var(--fw-bold); }
   .field-ilce { font-size: var(--fs-eyebrow); color: var(--text-muted); font-weight: var(--fw-medium); letter-spacing: .5px; }
-  .field-adres { font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.5; }
+  .field-adres { font-size: var(--fs-sm); color: var(--text-muted); line-height: var(--lh-snug); }
   .field-map {
     margin-top: auto;
     font-size: var(--fs-eyebrow); font-weight: var(--fw-medium);
@@ -411,7 +412,7 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     gap: var(--sp-3);
   }
 
-  .step { display: flex; gap: 1rem; align-items: flex-start; }
+  .step { display: flex; gap: var(--sp-2); align-items: flex-start; }
   /* Adım numarası: yeşil daire değil, büyük soluk rakam (sayfada tek dolgu butondur) */
   .step-no {
     flex-shrink: 0;
@@ -447,8 +448,8 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    padding: 1.1rem 1.3rem;
+    gap: var(--sp-2);
+    padding: var(--sp-3);
     cursor: pointer;
     font-size: var(--fs-base);
     font-weight: var(--fw-bold);
@@ -462,14 +463,14 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
   .faq-item[open] .faq-chevron { transform: rotate(180deg); }
 
   .faq-item p {
-    padding: 0 1.3rem 1.3rem;
+    padding: 0 var(--sp-3) var(--sp-3);
     font-size: var(--fs-base);
     color: var(--text-body);
     line-height: var(--lh-body);
   }
   .faq-liste {
-    margin: calc(-1 * var(--sp-2)) 1.3rem 1.3rem;
-    padding-left: 1.2em;
+    margin: calc(-1 * var(--sp-2)) var(--sp-3) var(--sp-3);
+    padding-left: var(--sp-3);
     font-size: var(--fs-base);
     color: var(--text-body);
     line-height: var(--lh-body);
@@ -483,11 +484,11 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
   .option-card {
     display: flex;
     align-items: center;
-    gap: 1.6rem;
+    gap: var(--sp-3);
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 2rem;
+    padding: var(--sp-3);
     text-decoration: none;
     color: var(--text);
     transition: border-color .15s ease;
@@ -505,11 +506,11 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
   }
 
   .option-body { flex: 1; min-width: 0; }
-  .option-body h3 { font-size: var(--fs-md); font-weight: var(--fw-bold); margin-bottom: .5rem; }
+  .option-body h3 { font-size: var(--fs-md); font-weight: var(--fw-bold); margin-bottom: var(--sp-1); }
   .option-body p  { font-size: var(--fs-sm); color: var(--text-body); line-height: var(--lh-body); }
   .phone-num {
     display: inline-block;
-    margin-top: .5rem;
+    margin-top: var(--sp-1);
     font-size: var(--fs-base); font-weight: var(--fw-medium);
     color: var(--green-bright);
     font-variant-numeric: tabular-nums;
@@ -517,17 +518,16 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
 
   .option-arrow { flex-shrink: 0; color: var(--text-muted); }
 
+  /* Üst boşluk global .band-inner ritminden (--sp-4) gelir */
   .contact-alt {
-    margin-top: 1.8rem;
     font-size: var(--fs-sm);
     color: var(--text-muted);
   }
-  .contact-alt a { color: var(--green-bright); font-weight: var(--fw-bold); text-decoration: none; }
-  .contact-alt a:hover { text-decoration: underline; }
-  .contact-alt .dot { margin: 0 .6rem; opacity: .5; }
+  .contact-alt a { color: var(--green-bright); font-weight: var(--fw-medium); text-decoration: none; }
+  .contact-alt a:hover { text-decoration: underline; text-underline-offset: 2px; }
+  .contact-alt .dot { margin: 0 var(--sp-1); opacity: .5; }
 
-  @media (max-width: 640px) {
-    .option-card { padding: 1.4rem 1.2rem; gap: 1rem; }
+  @media (max-width: 767px) {
     .option-icon { width: 52px; height: 52px; border-radius: var(--r-md); }
     .option-icon svg { width: 24px; height: 24px; }
     .option-body h3 { font-size: var(--fs-base); }
