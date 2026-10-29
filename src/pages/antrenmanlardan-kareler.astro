@@ -3,15 +3,56 @@ import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 import PageHero from '../components/PageHero.astro';
+import Lightbox from '../components/Lightbox.astro';
 import { supabase, type AntrenmanGaleriItem } from '../lib/supabase';
 import { img, imgSet } from '../lib/img';
 
-const { data } = await supabase
-  .from('antrenman_galeri')
-  .select('*')
-  .order('sort_order', { ascending: true });
+/* ── Sayfalama (§7.2) ───────────────────────────────────────────────────
+   Sıralama id'ye göre azalan: sort_order'da aynı değere sahip kayıt yığını
+   yapısal (actions.ts çoklu yüklemede 99 + i yazar) ve PostgreSQL eşit
+   değerler için kararlı sıra garanti etmez — sort_order ile sayfalansa bir
+   fotoğraf iki sayfada çıkar, bir diğeri hiç görünmezdi. id tekil ve
+   kronolojik.
+   .range() iki ucu da kapsayıcıdır; toplam sayı aynı sorgudan gelir.
+   Aralık dışı her değer (0, abc, -5, 9999) 1. sayfaya kırpılır.          */
+const SAYFA_BOYU = 24;
+const ham = Number(Astro.url.searchParams.get('sayfa'));
+const istenen = Number.isFinite(ham) && ham >= 1 ? Math.floor(ham) : 1;
 
-const items: AntrenmanGaleriItem[] = data ?? [];
+function sayfaGetir(sayfa: number) {
+  const bas = (sayfa - 1) * SAYFA_BOYU;
+  return supabase
+    .from('antrenman_galeri')
+    .select('*', { count: 'exact' })
+    .order('id', { ascending: false })
+    .range(bas, bas + SAYFA_BOYU - 1);
+}
+
+const sayfaSayisi = (count: number | null) => Math.max(1, Math.ceil((count ?? 0) / SAYFA_BOYU));
+
+let sayfa = istenen;
+let sonuc = await sayfaGetir(sayfa);
+let toplamSayfa = sayfaSayisi(sonuc.count);
+// Aralık dışı: PostgREST ya boş döner ya 416 (error) — iki durumda da 1. sayfa
+if (sonuc.error || sayfa > toplamSayfa) {
+  sayfa = 1;
+  sonuc = await sayfaGetir(1);
+  toplamSayfa = sayfaSayisi(sonuc.count);
+}
+const items: AntrenmanGaleriItem[] = sonuc.data ?? [];
+const sayfalar = Array.from({ length: toplamSayfa }, (_, i) => i + 1);
+
+/* ── Kardeş albümler (§7.5): sayılar sorgudan, elle yazılmaz ─────────── */
+const [aTakim, akademi, pilot] = await Promise.all([
+  supabase.from('a_takim_gallery').select('*', { count: 'exact', head: true }),
+  supabase.from('gallery').select('*', { count: 'exact', head: true }),
+  supabase.from('pilot_gallery').select('*', { count: 'exact', head: true }),
+]);
+const kardesler = [
+  { ad: "A Takım'dan Kareler",     sayi: aTakim.count ?? 0,  href: '/a-takim#kareler' },
+  { ad: "Akademi'den Kareler",     sayi: akademi.count ?? 0, href: '/akademi#kareler' },
+  { ad: "Pilot Takım'dan Kareler", sayi: pilot.count ?? 0,   href: '/pilot-takim#kareler' },
+].filter(k => k.sayi > 0);
 
 function youtubeId(url: string): string | null {
   const m = url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);
@@ -38,226 +79,147 @@ function isYoutube(url: string): boolean {
       maxTitle="4.5rem"
     />
 
-    <!-- İçerik -->
+    <!-- Izgara: veri yoksa bölüm hiç basılmaz. Yalnız 1. sayfada lead hücre. -->
     {items.length > 0 && (
       <section class="band galeri-section" aria-label="Antrenmanlardan kareler">
         <div class="band-inner">
-        <h2>Antrenmanlardan Kareler</h2>
-        <div class="galeri-grid">
-          {items.map((item, i) => (
-            <div class="galeri-card">
-              {isYoutube(item.media_url) ? (
-                <div class="yt-wrap">
-                  <div class="yt-frame-wrap">
+          <h2>Antrenmanlardan Kareler</h2>
+
+          <div class={`galeri-grid${sayfa === 1 ? ' lead-var' : ''}`}>
+            {items.map((item, i) => (
+              isYoutube(item.media_url) ? (
+                /* YouTube satırının kendi görseli yok (media_url videonun adresi);
+                   dış alan adından poster çekmek yasak — iframe olduğu gibi kalır (§7.6). */
+                <div class="card">
+                  <span class="card-media">
                     <iframe
                       src={`https://www.youtube.com/embed/${youtubeId(item.media_url)}`}
-                      title={item.caption ?? ''}
-                      frameborder="0"
+                      title={item.caption ?? 'Antrenmanlardan kareler'}
+                      loading="lazy"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowfullscreen
                     ></iframe>
-                  </div>
+                  </span>
                   <span class="card-meta">{item.caption ?? ''}</span>
                 </div>
               ) : (
-                <button class="img-btn" data-src={img(item.media_url, 1600)} data-caption={item.caption ?? ''} aria-label={item.caption ?? 'Fotoğraf'}>
-                  <span class="galeri-media">
+                <button
+                  type="button"
+                  class="card"
+                  data-lb-src={img(item.media_url, 1600)}
+                  data-lb-altyazi={item.caption ?? ''}
+                >
+                  <span class="card-media">
                     <img
-                      src={img(item.media_url, 800)}
-                      srcset={imgSet(item.media_url)}
-                      sizes="(max-width: 640px) 100vw, (max-width: 960px) 50vw, 33vw"
-                      alt={item.caption ?? ''}
+                      src={img(item.media_url, 400)}
+                      srcset={imgSet(item.media_url, [400, 800])}
+                      sizes="(max-width: 767px) 100vw, (max-width: 1119px) 50vw, 33vw"
+                      alt={item.caption ?? 'Antrenmanlardan kareler'}
                       {/* İlk satır zaten ekranda; ertelemek yerine hemen insin */}
                       loading={i < 3 ? 'eager' : 'lazy'}
                       fetchpriority={i < 3 ? 'high' : undefined}
                       decoding="async"
                     />
-                    <span class="img-overlay">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-                    </span>
                   </span>
+                  {/* Altyazı şeridi her zaman basılır; boşsa yüksekliğini korur */}
                   <span class="card-meta">{item.caption ?? ''}</span>
                 </button>
-              )}
-            </div>
-          ))}
-        </div>
+              )
+            ))}
+          </div>
+
+          <!-- Sayfalama ve kardeş albümler -->
+          <div class="galeri-alt">
+            {toplamSayfa > 1 && (
+              <nav class="sayfalama" aria-label="Sayfalar">
+                {sayfalar.map(n => (
+                  n === sayfa
+                    ? <span class="sayfa aktif" aria-current="page">{n}</span>
+                    : <a class="sayfa" href={`?sayfa=${n}`}>{n}</a>
+                ))}
+              </nav>
+            )}
+
+            {kardesler.length > 0 && (
+              <ul class="kardesler" aria-label="Diğer albümler">
+                {kardesler.map(k => (
+                  <li><a href={k.href}>{k.ad} ({k.sayi}) →</a></li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <Lightbox />
         </div>
       </section>
     )}
 
   </main>
 
-  <!-- Lightbox -->
-  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true">
-    <button id="lb-close" class="lb-close" aria-label="Kapat">✕</button>
-    <img id="lb-img" src="" alt="" />
-    <p id="lb-caption" class="lb-caption"></p>
-  </div>
-
   <Footer />
 </Layout>
 
 <style>
-  /* ── Grid ── */
   .galeri-section {
     background: var(--black);
     border-top: 1px solid var(--border);
   }
 
-  /* Izgara — satır satır soldan sağa (§2.3 formülü).
-     Önceden kolon bazlı masonry (column-count) kullanılıyordu; orada içerik
-     önce 1. kolonu baştan sona doldurup 2. kolona geçtiği için belge sırası
-     ekrandaki sırayla örtüşmüyordu. Izgarada sıra soldan sağa aktığı için
-     tarayıcı da önce üstü yüklüyor. Satırdaki kartlar eşit yükseklikte. */
+  /* Izgara — satır satır soldan sağa (§2.3 formülü). Kolon bazlı masonry'de
+     belge sırası ekrandaki sırayla örtüşmüyordu; ızgarada tarayıcı önce üstü
+     yükler. Satırdaki kartlar eşit yükseklikte. */
   .galeri-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
     gap: var(--sp-3);
   }
+  /* Lead hücre (yalnız 1. sayfa): eşit karo duvarının kontakt baskısı hissini
+     kırar, sayfaya tek odak verir (§7.3). Dar ekranda tek kolona düşer. */
+  @media (min-width: 768px) {
+    .galeri-grid.lead-var > :first-child { grid-column: span 2; grid-row: span 2; }
+  }
 
-  .galeri-card {
-    border-radius: var(--radius);
-    overflow: hidden;
+  /* ── Sayfalama + kardeş albümler ── */
+  .galeri-alt {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--sp-3);
+  }
+  .sayfalama { display: flex; gap: var(--sp-2); font-variant-numeric: tabular-nums; }
+  .sayfa {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
     border: 1px solid var(--border);
-    background: var(--card-bg);
+    border-radius: var(--r-sm);
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+    text-decoration: none;
     transition: border-color .15s ease;
   }
-  /* Galeri renksiz kalır: hover yalnız kenarlık, yeşil yok */
-  .galeri-card:hover { border-color: var(--border-strong); }
+  a.sayfa:hover { border-color: var(--border-strong); color: var(--text); }
+  a.sayfa:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 2px; }
+  /* Yeşil yalnız aktif sayfa numarasında (§5.11) */
+  .sayfa.aktif { color: var(--green-bright); border-color: var(--border-strong); }
 
-  /* YouTube */
-  .yt-wrap { display: flex; flex-direction: column; }
-  .yt-frame-wrap {
-    position: relative;
-    padding-bottom: 56.25%;
-    height: 0;
-    overflow: hidden;
-  }
-  .yt-frame-wrap iframe {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    border: none;
-  }
-
-  /* Fotoğraf */
-  .img-btn {
-    position: relative;
-    display: block;
-    width: 100%;
-    border: none;
-    background: none;
-    cursor: pointer;
-    overflow: hidden;
-    padding: 0;
-  }
-  /* Fotoğraf kendi en-boy oranında */
-  .galeri-media {
-    position: relative;
-    display: block;
-    overflow: hidden;
-  }
-  /* Izgarada satırlar hizalı dursun diye ortak oran; yükseklik baştan belli
-     olduğu için görsel inerken sayfa da kaymıyor. */
-  .img-btn img {
-    display: block;
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    height: auto;
-    object-fit: cover;
-    object-position: center 40%;
-  }
-
-  @media (max-width: 640px) {
-    .img-btn img { max-height: var(--media-max-h-sm); }
-  }
-
-  .img-overlay {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    background: rgba(0,0,0,0);
+  /* Üçüncül bağlantılar: soluk metin, kart/buton değil */
+  .kardesler {
+    list-style: none;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background .25s;
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-3);
   }
-  .img-overlay svg {
-    width: 44px; height: 44px;
-    color: var(--text); opacity: 0;
-    transition: opacity .25s;
-  }
-  .img-btn:hover .img-overlay { background: rgba(0,0,0,.35); }
-  .img-btn:hover .img-overlay svg { opacity: 1; }
-
-  /* Altyazı şeridi görselin altında, her zaman görünür */
-  .galeri-card .card-meta { padding: var(--sp-2); }
-
-  /* Lightbox */
-  .lightbox {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,.92);
-    z-index: 9000;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 1rem;
-    padding: 2rem;
-  }
-  .lightbox.open { display: flex; }
-  .lightbox img {
-    max-width: 90vw;
-    max-height: 80vh;
-    object-fit: contain;
-    border-radius: var(--r-md);
-    box-shadow: 0 8px 48px rgba(0,0,0,.6);
-  }
-  .lb-caption {
-    color: rgba(255,255,255,.65);
+  .kardesler a {
     font-size: var(--fs-sm);
-    text-align: center;
-    max-width: 640px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-variant-numeric: tabular-nums;
+    transition: color .2s;
   }
-  .lb-close {
-    position: fixed;
-    top: 1.2rem; right: 1.4rem;
-    background: rgba(255,255,255,.1);
-    border: 1px solid rgba(255,255,255,.15);
-    color: var(--text);
-    font-size: var(--fs-md);
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background .2s;
-    z-index: 9100;
-  }
-  .lb-close:hover { background: rgba(255,255,255,.2); }
+  .kardesler a:hover { color: var(--text); }
+  .kardesler a:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 </style>
-
-<script>
-  const lightbox  = document.getElementById('lightbox')!;
-  const lbImg     = document.getElementById('lb-img')      as HTMLImageElement;
-  const lbCaption = document.getElementById('lb-caption')!;
-  const lbClose   = document.getElementById('lb-close')!;
-
-  document.querySelectorAll<HTMLButtonElement>('.img-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      lbImg.src             = btn.dataset.src ?? '';
-      lbImg.alt             = btn.dataset.caption ?? '';
-      lbCaption.textContent = btn.dataset.caption ?? '';
-      lightbox.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    });
-  });
-
-  function close() {
-    lightbox.classList.remove('open');
-    document.body.style.overflow = '';
-  }
-  lbClose.addEventListener('click', close);
-  lightbox.addEventListener('click', e => { if (e.target === lightbox) close(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
-</script>

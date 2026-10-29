@@ -7,15 +7,39 @@ import { supabase, type NewsItem } from '../lib/supabase';
 import { img, imgSet } from '../lib/img';
 import { newsPath, formatDate, isoDate } from '../lib/news';
 
-const { data } = await supabase
-  .from('news')
-  .select('*')
-  .order('id', { ascending: false });
+/* ── Sayfalama (§7.2): 12 haber/sayfa, sunucu taraflı ?sayfa=N ──────────
+   .range() iki ucu da kapsayıcıdır; toplam sayı aynı sorgudan gelir.
+   Aralık dışı her değer 1. sayfaya kırpılır.                               */
+const SAYFA_BOYU = 12;
+const ham = Number(Astro.url.searchParams.get('sayfa'));
+const istenen = Number.isFinite(ham) && ham >= 1 ? Math.floor(ham) : 1;
 
-const news: NewsItem[] = data ?? [];
+function sayfaGetir(sayfa: number) {
+  const bas = (sayfa - 1) * SAYFA_BOYU;
+  return supabase
+    .from('news')
+    .select('*', { count: 'exact' })
+    .order('id', { ascending: false })
+    .range(bas, bas + SAYFA_BOYU - 1);
+}
 
-// En yeni haber tek başına, tam genişlikte; kalanlar ızgarada (§4.5.8)
-const [oneCikan, ...kalanlar] = news;
+const sayfaSayisi = (count: number | null) => Math.max(1, Math.ceil((count ?? 0) / SAYFA_BOYU));
+
+let sayfa = istenen;
+let sonuc = await sayfaGetir(sayfa);
+let toplamSayfa = sayfaSayisi(sonuc.count);
+// Aralık dışı: PostgREST ya boş döner ya 416 (error) — iki durumda da 1. sayfa
+if (sonuc.error || sayfa > toplamSayfa) {
+  sayfa = 1;
+  sonuc = await sayfaGetir(1);
+  toplamSayfa = sayfaSayisi(sonuc.count);
+}
+const news: NewsItem[] = sonuc.data ?? [];
+const sayfalar = Array.from({ length: toplamSayfa }, (_, i) => i + 1);
+
+// Yalnız 1. sayfada en yeni haber tek başına, tam genişlikte (§4.5.8)
+const oneCikan = sayfa === 1 ? news[0] : undefined;
+const kalanlar = sayfa === 1 ? news.slice(1) : news;
 ---
 
 <Layout
@@ -63,7 +87,7 @@ const [oneCikan, ...kalanlar] = news;
 
     <!-- Kalan haberler: veri yoksa bölüm hiç basılmaz -->
     {kalanlar.length > 0 && (
-      <section class="band news-section" aria-label="Diğer haberler">
+      <section class="band news-section" aria-label="Haberler">
         <div class="band-inner">
           <div class="news-grid">
             {kalanlar.map(n => (
@@ -92,6 +116,16 @@ const [oneCikan, ...kalanlar] = news;
               </a>
             ))}
           </div>
+
+          {toplamSayfa > 1 && (
+            <nav class="sayfalama" aria-label="Sayfalar">
+              {sayfalar.map(n => (
+                n === sayfa
+                  ? <span class="sayfa aktif" aria-current="page">{n}</span>
+                  : <a class="sayfa" href={`?sayfa=${n}`}>{n}</a>
+              ))}
+            </nav>
+          )}
         </div>
       </section>
     )}
@@ -136,4 +170,23 @@ const [oneCikan, ...kalanlar] = news;
     grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
     gap: var(--sp-3);
   }
+
+  /* ── Sayfalama: yalnız aktif numara yeşil ── */
+  .sayfalama { display: flex; gap: var(--sp-2); font-variant-numeric: tabular-nums; }
+  .sayfa {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: border-color .15s ease;
+  }
+  a.sayfa:hover { border-color: var(--border-strong); color: var(--text); }
+  a.sayfa:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 2px; }
+  .sayfa.aktif { color: var(--green-bright); border-color: var(--border-strong); }
 </style>

@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 import PageHero from '../components/PageHero.astro';
+import Lightbox from '../components/Lightbox.astro';
 import { supabase, type GalleryItem } from '../lib/supabase';
 import { img, imgSet } from '../lib/img';
 
@@ -109,7 +110,7 @@ const adimlar = [
           <h2>Akademiden Kareler</h2>
           <div class="gallery-grid">
             {photos.map((p, i) => (
-              <div class="card">
+              <button type="button" class="card" data-lb-src={img(p.image_url, 1600)} data-lb-altyazi={p.caption ?? ''}>
                 <span class="card-media">
                   <img
                     src={img(p.image_url, 400)}
@@ -124,9 +125,10 @@ const adimlar = [
                 </span>
                 {/* Altyazı şeridi her zaman basılır; boşsa yüksekliğini korur, içine hiçbir şey yazılmaz */}
                 <span class="card-meta">{p.caption ?? ''}</span>
-              </div>
+              </button>
             ))}
           </div>
+          <Lightbox />
         </div>
       </section>
     )}

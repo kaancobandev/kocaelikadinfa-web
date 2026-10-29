@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 import PageHero from '../components/PageHero.astro';
 import { supabase, type Match } from '../lib/supabase';
+import { img } from '../lib/img';
 import { sonuc, ozet } from '../lib/match';
 
 const { data } = await supabase
@@ -102,7 +103,7 @@ const stats = ozet(matches);
                     <div class="team-side home">
                       <div class="team-logo-wrap">
                         {m.home_logo
-                          ? <img src={m.home_logo} alt={m.home_name} class="team-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                          ? <img src={img(m.home_logo, 120)} alt={m.home_name} class="team-logo" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
                           : null
                         }
                         <span class="team-logo-fallback" style={m.home_logo ? 'display:none' : 'display:flex'}>
@@ -121,7 +122,7 @@ const stats = ozet(matches);
                     <div class="team-side away">
                       <div class="team-logo-wrap">
                         {m.away_logo
-                          ? <img src={m.away_logo} alt={m.away_name} class="team-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                          ? <img src={img(m.away_logo, 120)} alt={m.away_name} class="team-logo" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
                           : null
                         }
                         <span class="team-logo-fallback" style={m.away_logo ? 'display:none' : 'display:flex'}>

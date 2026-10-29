@@ -1,0 +1,105 @@
+---
+/**
+ * Tek lightbox — beş galeri yüzeyi (antrenmanlardan-kareler, VideoSection,
+ * akademi, a-takim, pilot-takim) bunu import eder. Eskiden aynı kod iki
+ * dosyada birebir kopyaydı (lb-* / ag-lb-*).
+ *
+ * Kullanım: galeri bölümünün .band-inner'ı içine, ızgaradan sonra konur.
+ * Fotoğraf düğmeleri <button class="card" data-lb-src="…" data-lb-altyazi="…">
+ * olur; script her lightbox'ı yalnız KENDİ üst elemanı içindeki düğmelere
+ * bağlar — aynı sayfada iki örnek buluşursa dinleyiciler çakışmaz.
+ * Esc kapatır, odak açan düğmeye döner.
+ */
+---
+
+<div class="lightbox" data-lightbox hidden role="dialog" aria-modal="true" aria-label="Fotoğraf">
+  <button type="button" class="lb-kapat" data-lb-kapat aria-label="Kapat">✕</button>
+  <figure class="lb-figur">
+    <img data-lb-img src="" alt="" />
+    <figcaption class="card-meta" data-lb-altyazi></figcaption>
+  </figure>
+</div>
+
+<style>
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    margin: 0;
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--sp-4);
+    background: var(--scrim);
+  }
+  .lightbox[hidden] { display: none; }
+
+  .lb-figur {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-2);
+    max-width: 90vw;
+  }
+  .lb-figur img {
+    display: block;
+    max-width: 90vw;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: var(--r-md);
+  }
+  .lb-figur figcaption { min-height: 0; }
+
+  .lb-kapat {
+    position: fixed;
+    top: var(--sp-3);
+    right: var(--sp-3);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border-strong);
+    background: var(--black);
+    color: var(--text);
+    font: inherit;
+    font-size: var(--fs-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 9100;
+  }
+  .lb-kapat:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 2px; }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-lightbox]').forEach(lb => {
+    const kok      = lb.parentElement ?? document.body;
+    const img      = lb.querySelector<HTMLImageElement>('[data-lb-img]')!;
+    const altyazi  = lb.querySelector<HTMLElement>('[data-lb-altyazi]')!;
+    const kapatBtn = lb.querySelector<HTMLButtonElement>('[data-lb-kapat]')!;
+    let acan: HTMLElement | null = null;
+
+    const kapat = () => {
+      lb.hidden = true;
+      document.body.style.overflow = '';
+      acan?.focus();
+    };
+    const ac = (btn: HTMLElement) => {
+      acan = btn;
+      img.src = btn.dataset.lbSrc ?? '';
+      img.alt = btn.dataset.lbAltyazi ?? '';
+      altyazi.textContent = btn.dataset.lbAltyazi ?? '';
+      lb.hidden = false;
+      document.body.style.overflow = 'hidden';
+      kapatBtn.focus();
+    };
+
+    // Seçim kök elemanla sınırlı: yalnız bu galerinin düğmeleri
+    kok.querySelectorAll<HTMLElement>('[data-lb-src]').forEach(btn => {
+      btn.addEventListener('click', () => ac(btn));
+    });
+    kapatBtn.addEventListener('click', kapat);
+    lb.addEventListener('click', e => { if (e.target === lb) kapat(); });
+    lb.addEventListener('keydown', e => { if (e.key === 'Escape') kapat(); });
+  });
+</script>
