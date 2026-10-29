@@ -5,7 +5,7 @@
  * h1 artık haber manşeti değil, kulübün adı; altında tek satır künye.
  * hero_settings.title ölmedi: hemen altındaki h2 manşetini besler ve en
  * yeni habere bağlanır — panelin başlık alanı çalışmaya devam eder.
- * hero_settings.badge manşetin eyebrow'udur. "Diğer Manşetler" cam paneli
+ * hero_settings.badge ve description halka açık tarafta basılmaz. "Diğer Manşetler" cam paneli
  * kalktı; kompozisyon ≥1120px'de 7/5: solda metin, sağda tek tam
  * yükseklik fotoğraf (§2.3). <768px'de fotoğraf üstte 4/3, metin altta.
  */
@@ -54,9 +54,10 @@ const heroSrcSet = imgSet(heroSrc, [640, 1024, 1600, 2000], 70);
 
     <a href="/aramiza-katil" class="btn-primary">Akademi Ön Kaydı</a>
 
+    {/* hero_settings.badge artık basılmıyor: ilk ekranda dördüncü yeşil leke oluyordu
+        ve manşetin üstünde bilgi taşımıyordu; panelin başlık alanı çalışmaya devam eder. */}
     {manset && mansetHref && (
       <div class="hero-manset">
-        {hero.badge?.trim() && <span class="eyebrow">{hero.badge}</span>}
         <h2><a href={mansetHref}>{manset} →</a></h2>
       </div>
     )}
