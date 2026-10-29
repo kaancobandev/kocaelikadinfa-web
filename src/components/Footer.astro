@@ -1,16 +1,14 @@
 ---
 ---
 
-<footer class="footer">
+<footer class="footer band">
 
-  <div class="footer-inner">
+  <div class="band-inner footer-inner">
 
     <!-- Sol: Logo + açıklama -->
     <div class="footer-brand">
       <a href="/" class="footer-logo">
-        <div class="footer-logo-ring">
-          <img src="/logo.jpeg" alt="Kocaeli Kadın FA Logo" class="footer-logo-img" />
-        </div>
+        <img src="/logo.jpeg" alt="Kocaeli Kadın FA Logo" class="footer-logo-img" />
         <div class="footer-logo-texts">
           <span class="footer-logo-name">Kocaeli Kadın Futbol Kulübü</span>
           <span class="footer-logo-sub">Kocaeli, Türkiye</span>
@@ -106,20 +104,14 @@
         </li>
       </ul>
 
-      <a href="/aramiza-katil" class="footer-cta">
-        Bize Katıl
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="5" y1="12" x2="19" y2="12"/>
-          <polyline points="12 5 19 12 12 19"/>
-        </svg>
-      </a>
+      <a href="/aramiza-katil" class="footer-cta">Bize Katıl →</a>
     </div>
 
   </div>
 
   <!-- Alt bar -->
   <div class="footer-bottom">
-    <div class="footer-bottom-inner">
+    <div class="band-inner footer-bottom-inner">
       <p class="copy">© 2026 Kocaeli Kadın Futbol Kulübü. Tüm hakları saklıdır.</p>
     </div>
   </div>
@@ -127,84 +119,65 @@
 </footer>
 
 <style>
+  /* Dolgu global .band'den (--sp-6 / --sp-5), iç genişlik .band-inner'dan.
+     Alt barı footer'ın tam genişliğinde çizmek için footer'ın alt dolgusu 0. */
   .footer {
     background: var(--black);
     border-top: 1px solid var(--border);
-    position: relative;
-    overflow: hidden;
+    padding-bottom: 0;
   }
 
-  /* İçerik grid */
+  /* İçerik ızgarası: dört kolon → iki → bir (§2.3 kırılma noktaları) */
   .footer-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 4.5rem 5% 3.5rem;
     display: grid;
     grid-template-columns: 1.6fr 1fr 1fr 1.1fr;
-    gap: 2.5rem;
+    gap: var(--sp-4);
+    padding-bottom: var(--sp-6);
   }
+  .footer-inner > * + * { margin-top: 0; }
 
-  @media (max-width: 960px) {
-    .footer-inner {
-      grid-template-columns: 1fr 1fr;
-    }
+  @media (max-width: 1119px) {
+    .footer-inner { grid-template-columns: 1fr 1fr; }
     .footer-brand { grid-column: 1 / -1; }
   }
-  @media (max-width: 640px) {
-    .footer-inner { grid-template-columns: 1fr; }
+  @media (max-width: 767px) {
+    .footer-inner { grid-template-columns: 1fr; padding-bottom: var(--sp-5); }
   }
 
   /* ── Brand ── */
   .footer-logo {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--sp-2);
     text-decoration: none;
-    margin-bottom: 1.3rem;
+    margin-bottom: var(--sp-3);
     width: fit-content;
   }
-
-  .footer-logo-ring {
-    position: relative;
-    width: 52px; height: 52px;
-    border-radius: 50%;
-    padding: 2px;
-    background: var(--green);
-    flex-shrink: 0;
-  }
-  .footer-logo-ring::after {
-    content: '';
-    position: absolute;
-    inset: 2px;
-    border-radius: 50%;
-    background: var(--black);
-  }
+  /* Düz yeşil halka: degrade yok */
   .footer-logo-img {
-    position: relative;
-    z-index: 1;
-    width: 100%; height: 100%;
+    width: 52px; height: 52px;
+    flex-shrink: 0;
     object-fit: contain;
     border-radius: 50%;
+    border: 2px solid var(--green);
+    background: var(--black);
   }
 
-  .footer-logo-texts {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-  }
+  .footer-logo-texts { display: flex; flex-direction: column; }
   .footer-logo-name {
     font-size: var(--fs-md);
     font-weight: var(--fw-bold);
-    letter-spacing: .02em;
     color: var(--text);
     line-height: var(--lh-tight);
   }
   .footer-logo-sub {
     font-size: var(--fs-eyebrow);
     font-weight: var(--fw-medium);
+    line-height: 1;
     letter-spacing: var(--ls-eyebrow);
     text-transform: uppercase;
     color: var(--text-muted);
+    margin-top: var(--sp-1);
   }
 
   .footer-desc {
@@ -212,12 +185,12 @@
     color: var(--text-body);
     line-height: var(--lh-body);
     max-width: 280px;
-    margin-bottom: 1.8rem;
+    margin-bottom: var(--sp-4);
   }
 
   .social-links {
     display: flex;
-    gap: .55rem;
+    gap: var(--sp-1);
   }
   .social-btn {
     width: 40px; height: 40px;
@@ -234,16 +207,18 @@
     border-color: var(--border-strong);
     color: var(--text);
   }
+  .social-btn:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 2px; }
 
   /* ── Kolon ── */
   .footer-col h4 {
     font-size: var(--fs-eyebrow);
-    font-weight: var(--fw-bold);
+    font-weight: var(--fw-medium);
+    line-height: 1;
     letter-spacing: var(--ls-eyebrow);
     text-transform: uppercase;
     color: var(--text-muted);
-    margin-bottom: 1.4rem;
-    padding-bottom: .8rem;
+    margin-bottom: var(--sp-3);
+    padding-bottom: var(--sp-2);
     border-bottom: 1px solid var(--border);
   }
 
@@ -251,7 +226,7 @@
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: .55rem;
+    gap: var(--sp-1);
   }
 
   .footer-col ul a {
@@ -269,38 +244,38 @@
     font-size: var(--fs-sm);
     color: var(--text-body);
     line-height: var(--lh-body);
-    margin-bottom: 1.2rem;
+    margin-bottom: var(--sp-3);
   }
 
   .collab-phone {
     display: inline-flex;
     align-items: center;
-    gap: .6rem;
+    gap: var(--sp-1);
     font-size: var(--fs-sm);
-    font-weight: var(--fw-bold);
+    font-weight: var(--fw-medium);
     color: var(--green-bright);
     text-decoration: none;
+    font-variant-numeric: tabular-nums;
     transition: color .2s;
   }
   .collab-phone:hover { color: var(--text); }
 
   /* ── İletişim ── */
-  .contact-list {
-    margin-bottom: 1.6rem;
-    display: flex;
-    flex-direction: column;
-    gap: .9rem !important;
+  /* .footer-col ul (0,3,0) ile aynı özgüllük, sonra geldiği için kazanır: önem bayrağı gerekmez */
+  .footer-col .contact-list {
+    margin-bottom: var(--sp-3);
+    gap: var(--sp-2);
   }
 
   .contact-list li {
     display: flex;
     align-items: center;
-    gap: .75rem;
+    gap: var(--sp-2);
     color: var(--text-muted);
     font-size: var(--fs-sm);
     font-weight: var(--fw-medium);
   }
-  /* E-posta artık mailto: bağlantısı; satırdaki düz metinle aynı görünür */
+  /* E-posta mailto: bağlantısı; satırdaki düz metinle aynı görünür */
   .contact-list a {
     color: inherit;
     text-decoration: none;
@@ -321,9 +296,7 @@
 
   /* İkincil biçim: zeminsiz, çerçevesiz metin bağlantı */
   .footer-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: .5rem;
+    display: inline-block;
     font-size: var(--fs-sm);
     font-weight: var(--fw-medium);
     color: var(--green-bright);
@@ -331,26 +304,27 @@
     transition: color .2s;
   }
   .footer-cta:hover { color: var(--text); }
+  .footer-cta:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 
-  /* ── Alt bar ── */
+  /* ── Alt bar: footer'ın tam genişliğinde ince çizgi ── */
   .footer-bottom {
     border-top: 1px solid var(--border);
+    margin-inline: calc(-1 * var(--gutter));
+    padding-inline: var(--gutter);
   }
   .footer-bottom-inner {
-    max-width: 1160px;
-    margin: 0 auto;
-    padding: 1.1rem 5%;
+    padding-block: var(--sp-3);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: var(--sp-2);
     flex-wrap: wrap;
   }
 
   .copy {
     font-size: var(--fs-sm);
     color: var(--text-dim);
-    font-weight: var(--fw-medium);
+    max-width: none;
   }
 
   /* ── Dokunmatik cihazlarda basılabilir alan ───────────────────────────
@@ -361,7 +335,7 @@
      kural hiç çalışmaz. */
   @media (pointer: coarse) {
     .footer-col ul { gap: 0; }
-    .footer-col ul a { padding: .7rem 0; }
-    .collab-phone { padding: .5rem 0; }
+    .footer-col ul a { padding: var(--sp-2) 0; }
+    .collab-phone { padding: var(--sp-1) 0; }
   }
 </style>
