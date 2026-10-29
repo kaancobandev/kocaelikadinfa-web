@@ -24,9 +24,8 @@ const photos: GalleryItem[] = galleryData ?? [];
   <main id="icerik" tabindex="-1">
 
     <PageHero
-      tag="Pilot Takım"
-      title="Kocaeli'nin"
-      accent="Şampiyonları"
+      tag="Takımlar"
+      title="Pilot Takım — Kadınlar 3. Ligi"
       description="Tutkuyla çalışan, disiplinle oynayan ve sahada hiçbir zaman pes etmeyen bir kadro."
       image={img(heroImage, 1600, 70)}
       imageSet={imgSet(heroImage, [800, 1200, 1600], 70)}
@@ -80,7 +79,8 @@ const photos: GalleryItem[] = galleryData ?? [];
       <div class="band-inner">
         <h2>Sen de Aramıza Katıl</h2>
         <p>Pilot takımımıza seçmelere katılmak ya da destek vermek istiyorsan bize ulaş.</p>
-        <a href="/aramiza-katil" class="btn-primary">Başvuru Yap</a>
+        <!-- Dolgulu buton yok: bu sayfa bilgilendirir, /aramiza-katil'e üçüncül bağlantıyla yollar (§4.4) -->
+        <a href="/aramiza-katil" class="link-tertiary">Bize ulaş →</a>
       </div>
     </section>
 

@@ -16,6 +16,13 @@ const links = [
   { href: "/haberler",                label: "Haberler" },
   { href: "/antrenmanlardan-kareler", label: "Galeri" },
 ];
+
+/* Tek odak kuralı (§4.2): <main> içinde dolgulu birincil buton olan üç
+   sayfada navbar butonu dolgulu değil ÇERÇEVELİ basılır; böylece bir
+   ekranda aynı hedefe giden iki dolgulu yeşil buton bulunmaz. */
+const dolguluSayfalar = ['/', '/akademi', '/aramiza-katil'];
+const yol = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const cerceveli = dolguluSayfalar.includes(yol);
 ---
 
 <nav class="navbar" id="navbar">
@@ -40,7 +47,7 @@ const links = [
       <li><a href={l.href}>{l.label}</a></li>
     ))}
     <li>
-      <a href="/aramiza-katil" class="btn-join">Aramıza Katıl</a>
+      <a href="/aramiza-katil" class:list={['btn-join', { 'btn-join--cerceveli': cerceveli }]}>Aramıza Katıl</a>
     </li>
   </ul>
 </nav>
@@ -152,6 +159,13 @@ const links = [
   /* :hover'da da beyaz kalsın — .nav-links a:hover (0,5,0) yeşile çeviriyordu,
      eskiden !important ile bastırılıyordu. */
   .nav-links .btn-join:hover { background: var(--green-mid); color: var(--text); }
+  /* Çerçeveli varyant: zemin yok, 1px yeşil çerçeve, yeşil metin */
+  .nav-links .btn-join--cerceveli {
+    background: transparent;
+    border-color: var(--green-bright);
+    color: var(--green-bright);
+  }
+  .nav-links .btn-join--cerceveli:hover { background: transparent; color: var(--text); }
   /* KORUNDU: silinirse sitenin birincil CTA'sı klavye odağını kaybeder */
   .nav-links .btn-join:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 2px; }
 

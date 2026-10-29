@@ -26,9 +26,8 @@ const photos: GalleryItem[] = galleryData ?? [];
   <main id="icerik" tabindex="-1">
 
     <PageHero
-      tag="A Takım"
-      title="Kocaeli'nin"
-      accent="Gururu"
+      tag="Takımlar"
+      title="A Takım — Kadınlar 1. Ligi"
       description="Altyapıya verdiğimiz önem ve genç oyuncularımıza duyduğumuz güvenle, kadın futbolunda sürdürülebilir başarı hedefliyoruz."
       image={img(heroImage, 1600, 70)}
       imageSet={imgSet(heroImage, [800, 1200, 1600], 70)}
@@ -81,7 +80,8 @@ const photos: GalleryItem[] = galleryData ?? [];
       <div class="band-inner">
         <h2>A Takımımıza Katıl</h2>
         <p>Kadromuzda yer almak istiyorsan seçmelerimizi takip et ve başvurunu yap.</p>
-        <a href="/aramiza-katil" class="btn-primary">Başvuru Yap</a>
+        <!-- Dolgulu buton yok: bu sayfa bilgilendirir, /aramiza-katil'e üçüncül bağlantıyla yollar (§4.4) -->
+        <a href="/aramiza-katil" class="link-tertiary">Seçmeler için bize ulaşın →</a>
       </div>
     </section>
 

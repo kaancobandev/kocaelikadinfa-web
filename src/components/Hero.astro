@@ -1,24 +1,42 @@
 ---
+/**
+ * Ana sayfa hero'su — sitenin tek --fs-display başlığı.
+ *
+ * h1 artık haber manşeti değil, kulübün adı; altında tek satır künye.
+ * hero_settings.title ölmedi: hemen altındaki h2 manşetini besler ve en
+ * yeni habere bağlanır — panelin başlık alanı çalışmaya devam eder.
+ * hero_settings.badge manşetin eyebrow'udur. "Diğer Manşetler" cam paneli
+ * kalktı; kompozisyon ≥1120px'de 7/5: solda metin, sağda tek tam
+ * yükseklik fotoğraf (§2.3). <768px'de fotoğraf üstte 4/3, metin altta.
+ */
 import { supabase, type HeroSettings, type NewsItem } from '../lib/supabase';
 import { img, imgSet } from '../lib/img';
 import { newsPath } from '../lib/news';
 
-// İki sorgu birbirinden bağımsız — sırayla değil paralel çalışsınlar.
-const [heroRes, newsRes] = await Promise.all([
-  supabase.from('hero_settings').select('*').eq('id', 1).maybeSingle(),
-  supabase.from('news').select('*').order('id', { ascending: false }).limit(4),
-]);
+interface Props {
+  /** En yeni haber — manşet bağlantısının hedefi (index.astro'daki tek sorgudan) */
+  enYeni?: NewsItem;
+}
+const { enYeni } = Astro.props;
 
-const hero: HeroSettings = heroRes.data ?? {
+const { data } = await supabase
+  .from('hero_settings')
+  .select('*')
+  .eq('id', 1)
+  .maybeSingle();
+
+const hero: HeroSettings = data ?? {
   id: 1,
-  badge: 'Son Dakika',
-  title: 'Süper Lig\'e en fazla oyuncu gönderen altyapılardan biri olmanın gururunu yaşıyoruz.',
-  description: 'Tutkuyla, kararlılıkla ve takım ruhuyla her maçta sahaya çıkıyoruz.',
+  badge: '',
+  title: '',
+  description: '',
   image_url: '/hero_section.jpeg',
 };
 
-const sideNews: NewsItem[] = newsRes.data ?? [];
-const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=400&q=80';
+// Manşet: panelden girilen başlık; boşsa en yeni haberin kendi başlığı.
+// Habersiz sitede manşet hiç basılmaz (yer tutucu yok).
+const manset = (hero.title?.trim() || enYeni?.title || '').trim();
+const mansetHref = enYeni ? newsPath(enYeni) : '';
 
 // Hero görseli sayfanın LCP'si. CSS background olarak dururken tarayıcı onu
 // ancak stil işlendikten sonra keşfedebiliyordu; gerçek <img> olarak preload
@@ -29,339 +47,97 @@ const heroImg    = img(heroSrc, 1600, 70) || heroSrc;
 const heroSrcSet = imgSet(heroSrc, [640, 1024, 1600, 2000], 70);
 ---
 
-<div class="hero-wrap">
+<section class="hero-wrap" aria-label="Kulüp tanıtımı">
+  <div class="hero-text">
+    <h1>Kocaeli Kadın Futbol Kulübü</h1>
+    <p class="hero-alt">Kadınlar 1. Ligi, Kadınlar 3. Ligi ve 4-16 yaş akademisi.</p>
+
+    <a href="/aramiza-katil" class="btn-primary">Akademi Ön Kaydı</a>
+
+    {manset && mansetHref && (
+      <div class="hero-manset">
+        {hero.badge?.trim() && <span class="eyebrow">{hero.badge}</span>}
+        <h2><a href={mansetHref}>{manset} →</a></h2>
+      </div>
+    )}
+  </div>
+
   <img
-    class="hero-bg"
+    class="hero-foto"
     src={heroImg}
     srcset={heroSrcSet}
-    sizes="100vw"
+    sizes="(max-width: 767px) 100vw, 42vw"
     alt=""
     fetchpriority="high"
     decoding="async"
   />
-
-  <!-- SOL: Ana manşet -->
-  <div class="hero-main">
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-      {hero.badge && <span class="hero-badge">{hero.badge}</span>}
-      <h1 class="hero-title">{hero.title}</h1>
-      <p class="hero-desc">{hero.description}</p>
-      <a href="#haberler" class="hero-btn">
-        Haberi Oku
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="5" y1="12" x2="19" y2="12"/>
-          <polyline points="12 5 19 12 12 19"/>
-        </svg>
-      </a>
-    </div>
-  </div>
-
-  <!-- SAĞ: Diğer manşetler -->
-  <div class="hero-side">
-    <p class="side-label">Diğer Manşetler</p>
-    <div class="side-list">
-      {sideNews.length > 0
-        ? sideNews.map(n => (
-            <a href={newsPath(n)} class="side-item">
-              <img
-                src={img(n.image_url, 240) || fallbackImg}
-                srcset={imgSet(n.image_url, [240, 480])}
-                sizes="110px"
-                alt={n.title}
-                class="side-thumb"
-                width="110"
-                height="80"
-                decoding="async"
-              />
-              <div class="side-body">
-                <p class="side-title">{n.title}</p>
-              </div>
-            </a>
-          ))
-        : [1, 2, 3, 4].map(() => (
-            <div class="side-item side-empty">
-              <div class="side-thumb-empty"></div>
-              <div class="side-body">
-                <p class="side-title side-title-muted">Haber yakında eklenecek...</p>
-              </div>
-            </div>
-          ))
-      }
-    </div>
-  </div>
-
-</div>
+</section>
 
 <style>
   .hero-wrap {
-    position: relative;
     display: grid;
-    grid-template-columns: 1fr 360px;
-    height: calc(100vh - var(--nav-h));
-    min-height: 560px;
-    max-height: 920px;
-    overflow: hidden;
+    grid-template-columns: 7fr 5fr;
+    min-height: calc(100vh - var(--nav-h));
+    background: var(--black);
   }
 
-  /* Arka plan görseli — iki sütunun da altını kaplar ki sağdaki cam panel
-     (backdrop-filter) bulanıklaştıracak bir şey bulsun. */
-  .hero-bg {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-  }
-
-  /* ── Sol panel ── */
-  .hero-main {
-    position: relative;
-    z-index: 1;
-    overflow: hidden;
-  }
-
-  /* Düz karartma — degrade yok (okunabilirlik katmanı, süs değil) */
-  .hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: var(--scrim);
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 1;
-    height: 100%;
+  /* Birincil öğe: üst/alt boşluk komşu bölümlerin (--sp-6) iki katı */
+  .hero-text {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    padding: 3rem 3rem 3.5rem;
-    max-width: 700px;
+    justify-content: center;
+    align-items: flex-start;
+    padding: calc(var(--sp-6) * 2) var(--gutter);
   }
 
-  .hero-badge {
-    display: inline-block;
-    background: var(--green);
-    color: var(--text);
-    font-size: var(--fs-eyebrow);
-    font-weight: var(--fw-bold);
-    letter-spacing: var(--ls-eyebrow);
-    text-transform: uppercase;
-    padding: .35rem .8rem;
-    border-radius: var(--r-sm);
-    margin-bottom: 1rem;
-    width: fit-content;
-  }
-
-  .hero-title {
+  .hero-text h1 {
     font-size: var(--fs-display);
     font-weight: var(--fw-bold);
     line-height: var(--lh-tight);
     letter-spacing: var(--ls-display);
-    color: var(--text);
-    text-transform: uppercase;
-    margin-bottom: 1rem;
-    white-space: pre-line;
+    max-width: 18ch;
   }
-
-  .hero-desc {
-    font-size: var(--fs-base);
-    color: var(--text-body);
-    line-height: var(--lh-body);
-    max-width: 460px;
-    margin-bottom: 1.8rem;
-  }
-
-  .hero-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: .5rem;
-    background: var(--green);
-    color: var(--text);
-    font-size: var(--fs-sm);
-    font-weight: var(--fw-bold);
-    text-decoration: none;
-    padding: .7rem 1.4rem;
-    border-radius: var(--r-sm);
-    width: fit-content;
-    transition: background .2s, gap .2s;
-  }
-  .hero-btn:hover {
-    background: var(--green-mid);
-    gap: .8rem;
-  }
-
-  /* ── Sağ panel — Glassmorphism ── */
-  .hero-side {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 2rem 1.6rem;
-    overflow: hidden;
-    background: var(--scrim);
-    border-left: 1px solid var(--border);
-  }
-
-  .side-label,
-  .side-list {
-    position: relative;
-    z-index: 1;
-  }
-
-  .side-label {
-    font-size: var(--fs-eyebrow);
-    font-weight: var(--fw-bold);
-    letter-spacing: var(--ls-eyebrow);
-    text-transform: uppercase;
-    color: var(--green-bright);
-    margin-bottom: 1.2rem;
-    padding-bottom: .9rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .side-list {
-    display: flex;
-    flex-direction: column;
-    gap: .2rem;
-    flex: 1;
-    overflow: hidden;
-  }
-
-  .side-item {
-    display: flex;
-    gap: .9rem;
-    align-items: flex-start;
-    padding: .9rem .6rem;
-    border-radius: var(--r-md);
-    text-decoration: none;
-    border-bottom: 1px solid var(--border);
-    transition: background .2s;
-    cursor: pointer;
-  }
-  .side-item:last-child { border-bottom: none; }
-  .side-item:hover { background: var(--surface-hover); }
-
-  .side-thumb {
-    width: 110px;
-    height: 80px;
-    flex-shrink: 0;
-    border-radius: var(--r-sm);
-    object-fit: cover;
-    background-color: var(--surface);
-  }
-
-  .side-thumb-empty {
-    width: 110px;
-    height: 80px;
-    flex-shrink: 0;
-    border-radius: var(--r-sm);
-    background-color: var(--surface);
-  }
-
-  .side-body {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: .4rem;
-    min-width: 0;
-  }
-
-  .side-title {
-    font-size: var(--fs-base);
-    font-weight: var(--fw-bold);
-    color: var(--text-body);
+  .hero-alt {
+    font-size: var(--fs-md);
     line-height: var(--lh-snug);
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    color: var(--text-body);
+    margin-top: var(--sp-3);
   }
-  .side-item:hover .side-title { color: var(--green-bright); }
-  .side-title-muted { color: var(--text-dim) !important; font-style: italic; font-weight: var(--fw-medium) !important; }
+  .hero-text .btn-primary { margin-top: var(--sp-4); }
 
-  /* ───────────────────────────────────────────────
-     Responsive — tablet & mobil
-     NOT: medya sorguları taban stillerden SONRA gelir
-     ki mobil override'lar (eşit özgüllükte) kazansın.
-  ─────────────────────────────────────────────── */
-  @media (max-width: 768px) {
-    /* Tek sütun: görsel üstte, manşetler altında */
-    .hero-wrap {
-      grid-template-columns: 1fr;
-      height: auto;
-      min-height: 0;
-      max-height: none;
-    }
+  /* Manşet: ikinci en büyük metin en çok --fs-md (§2.1.1) */
+  .hero-manset {
+    margin-top: calc(var(--sp-6) * 1);
+    padding-top: var(--sp-3);
+    border-top: 1px solid var(--border);
+    max-width: var(--measure-text);
+  }
+  .hero-manset h2 {
+    font-size: var(--fs-md);
+    line-height: var(--lh-snug);
+    letter-spacing: normal;
+    max-width: 30ch;
+  }
+  /* İkincil biçim: metin bağlantı + ok */
+  .hero-manset a {
+    color: var(--green-bright);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .hero-manset a:hover { color: var(--text); }
+  .hero-manset a:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 
-    .hero-main {
-      height: 56vh;
-      min-height: 300px;
-    }
-
-    /* Görsel yalnızca üstteki manşet alanını kaplasın; altındaki haber
-       listesinin arkasına taşmasın. Ölçüler .hero-main ile aynı. */
-    .hero-bg {
-      inset: 0 0 auto 0;
-      height: 56vh;
-      min-height: 300px;
-    }
-
-    .hero-content {
-      position: absolute;
-      inset: auto 0 0 0;
-      height: auto;
-      max-width: none;
-      padding: 1.5rem 1.25rem 2rem;
-    }
-
-    /* Diğer Manşetler — hero altında tam genişlik haber listesi */
-    .hero-side {
-      padding: 1.5rem 1.25rem 1.75rem;
-      background: var(--dark);
-      border-left: none;
-      border-top: 1px solid var(--border);
-      overflow: visible;
-    }
-    .side-label {
-      margin-bottom: .9rem;
-      padding-bottom: .8rem;
-    }
-
-    .side-list {
-      gap: 0;
-      overflow: visible;
-    }
-
-    .side-item {
-      align-items: center;
-      padding: .85rem .25rem;
-    }
-
-    .side-thumb,
-    .side-thumb-empty {
-      width: 104px;
-      height: 72px;
-    }
-
-    .side-title {
-      font-size: var(--fs-base);
-      -webkit-line-clamp: 2;
-    }
+  .hero-foto {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 35%;
   }
 
-  @media (max-width: 400px) {
-    .hero-title { font-size: var(--fs-lg); }
-    .hero-content { padding: 1.25rem 1rem 1.6rem; }
-
-    .side-thumb,
-    .side-thumb-empty {
-      width: 90px;
-      height: 64px;
-    }
-    .side-title { font-size: var(--fs-sm); }
+  @media (max-width: 767px) {
+    .hero-wrap { grid-template-columns: 1fr; min-height: 0; }
+    .hero-foto { order: -1; aspect-ratio: 4 / 3; height: auto; }
+    .hero-text { padding: calc(var(--sp-5) * 2) var(--gutter); }
   }
 </style>

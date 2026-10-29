@@ -8,6 +8,20 @@ import ContentCards from '../components/ContentCards.astro';
 import TeamSection from '../components/TeamSection.astro';
 import VideoSection from '../components/VideoSection.astro';
 import Footer from '../components/Footer.astro';
+import { supabase, type NewsItem } from '../lib/supabase';
+
+/* Haber sorgusu TEK yerde: eskiden Hero (limit 4) ve ContentCards (limit 3)
+   aynı sıralamayla ayrı ayrı çekiyor, ilk üç haber sayfada iki kez
+   basılıyordu. Hero en yeni kaydı manşet bağlantısı olarak kullanır,
+   kalan üçü kart olarak ContentCards'a geçer. */
+const { data } = await supabase
+  .from('news')
+  .select('*')
+  .order('id', { ascending: false })
+  .limit(4);
+
+const haberler: NewsItem[] = data ?? [];
+const [enYeni, ...kalanlar] = haberler;
 ---
 
 <Layout
@@ -17,10 +31,10 @@ import Footer from '../components/Footer.astro';
 >
   <Navbar />
   <main id="icerik" tabindex="-1">
-    <Hero />
+    <Hero enYeni={enYeni} />
     <KimlikSeridi />
     <Scores />
-    <ContentCards />
+    <ContentCards items={kalanlar} />
     <TeamSection />
     <VideoSection />
   </main>

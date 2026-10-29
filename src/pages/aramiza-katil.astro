@@ -68,7 +68,9 @@ const getirilecekler = [
   'Havlu ve yedek tişört',
 ];
 
-const sss = [
+/* SSS. "Ne getirmeli" listesi ayrı bir bölüm değil, buradaki bir soru
+   (bölüm sayısı ≤4, §4.5.14); içerik aynen duruyor. */
+const sss: { s: string; c: string; liste?: string[] }[] = [
   {
     s: 'Hiç futbol oynamamış biri katılabilir mi?',
     c: 'Evet. Akademimiz futbola yeni başlayan sporcuları temel seviyeden alıyor; önceden deneyim şartı yok. Antrenörlerimiz her sporcunun seviyesine göre program uyguluyor.',
@@ -93,6 +95,11 @@ const sss = [
   {
     s: 'Velim antrenmanları izleyebilir mi?',
     c: 'Antrenman ziyaretleri ve veli bilgilendirmesi için bizimle iletişime geçebilirsin; sahaya göre uygulama değişebiliyor.',
+  },
+  {
+    s: 'İlk antrenmana ne getirmeli?',
+    c: 'Deneme antrenmanına gelirken yanında bulunması gerekenler. Eksiğin varsa sorun değil, bize haber ver.',
+    liste: getirilecekler,
   },
 ];
 
@@ -138,10 +145,8 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
               <span class="group-yas">{g.yas}</span>
               <h3>{g.ad}</h3>
               <p>{g.aciklama}</p>
-              {g.gunler
-                ? <p class="group-gun"><strong>Antrenman:</strong> {g.gunler}</p>
-                : <p class="group-gun muted">Gün ve saat bilgisi için bize ulaşın</p>
-              }
+              {/* Gün-saat bilgisi boşsa satır hiç basılmaz; tek not bölümün altında (§4.5.13) */}
+              {g.gunler && <p class="group-gun"><strong>Antrenman:</strong> {g.gunler}</p>}
             </div>
           ))}
         </div>
@@ -205,59 +210,7 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
           ))}
         </ol>
 
-        <a href={ON_KAYIT_URL} target="_blank" rel="noopener noreferrer" class="btn-primary steps-cta">Ön Kayıt Formunu Doldur</a>
-      </div>
-    </section>
-
-    <!-- ── Ne getirmeli ── -->
-    <section class="band bring-section">
-      <div class="band-inner bring-inner">
-        <div class="bring-text">
-          <span class="eyebrow">Hazırlık</span>
-          <h2>İlk Antrenmana Ne Getirmeli?</h2>
-          <p>Deneme antrenmanına gelirken yanında bulunması gerekenler. Eksiğin varsa sorun değil, bize haber ver.</p>
-        </div>
-        <ul class="bring-list">
-          {getirilecekler.map(item => (
-            <li>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-              {item}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-
-    <!-- ── SSS ── -->
-    <section class="band faq-section">
-      <div class="band-inner">
-        <span class="eyebrow">Merak Edilenler</span>
-        <h2>Sık Sorulan Sorular</h2>
-
-        <div class="faq-list">
-          {sss.map(item => (
-            <details class="faq-item">
-              <summary>
-                {item.s}
-                <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </summary>
-              <p>{item.c}</p>
-            </details>
-          ))}
-        </div>
-      </div>
-    </section>
-
-    <!-- ── İletişim ── -->
-    <section class="band contact-section">
-      <div class="band-inner">
-        <span class="eyebrow">İletişim</span>
-        <h2>Sorularını Bize Sor</h2>
-
+        <!-- Başvuru kanalları aynı bölümde: ikinci dolgulu buton yok (§4.5.12) -->
         <div class="options-grid">
           <a href={ON_KAYIT_URL} target="_blank" rel="noopener noreferrer" class="option-card">
             <div class="option-icon">
@@ -309,6 +262,33 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
       </div>
     </section>
 
+    <!-- ── SSS ── -->
+    <section class="band faq-section">
+      <div class="band-inner">
+        <span class="eyebrow">Merak Edilenler</span>
+        <h2>Sık Sorulan Sorular</h2>
+
+        <div class="faq-list">
+          {sss.map(item => (
+            <details class="faq-item">
+              <summary>
+                {item.s}
+                <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </summary>
+              <p>{item.c}</p>
+              {item.liste && (
+                <ul class="faq-liste">
+                  {item.liste.map(x => <li>{x}</li>)}
+                </ul>
+              )}
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <Footer />
@@ -333,8 +313,7 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
 
   /* ── Ortak bölüm: kap ve ritim global .band/.band-inner'dan gelir;
      burada yalnız bölümleri ayıran ince çizgi ── */
-  .groups-section, .fields-section, .steps-section,
-  .bring-section, .faq-section, .contact-section {
+  .groups-section, .fields-section, .steps-section, .faq-section {
     background: var(--black);
     border-top: 1px solid var(--border);
   }
@@ -377,14 +356,13 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
   }
   .group-card h3 { font-size: var(--fs-md); font-weight: var(--fw-bold); }
   .group-card p  { font-size: var(--fs-sm); color: var(--text-body); line-height: var(--lh-body); }
-  .group-gun {
+  .group-card .group-gun {
     margin-top: auto;
-    padding-top: .8rem;
+    padding-top: var(--sp-2);
     border-top: 1px solid var(--border);
-    font-size: var(--fs-sm) !important;
+    font-size: var(--fs-sm);
   }
   .group-gun strong { color: var(--text); }
-  .group-gun.muted { font-style: italic; opacity: .8; }
 
   /* ── Sahalar ── */
   .fields-grid {
@@ -443,34 +421,8 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     line-height: var(--lh-tight);
     font-variant-numeric: tabular-nums;
   }
-  .step h3 { font-size: var(--fs-base); font-weight: var(--fw-bold); margin-bottom: .35rem; }
+  .step h3 { margin-bottom: var(--sp-1); }
   .step p  { font-size: var(--fs-sm); color: var(--text-body); line-height: var(--lh-body); }
-  .steps-cta { display: inline-block; }
-
-  /* ── Ne getirmeli ── */
-  .bring-inner {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--sp-4);
-    align-items: start;
-  }
-  .bring-inner > * + * { margin-top: 0; }
-  @media (max-width: 767px) { .bring-inner { grid-template-columns: 1fr; } }
-  .bring-text h2 { margin-bottom: var(--sp-3); }
-
-  .bring-list { list-style: none; display: flex; flex-direction: column; gap: .8rem; }
-  .bring-list li {
-    display: flex;
-    align-items: center;
-    gap: .8rem;
-    padding: .9rem 1.1rem;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: var(--r-md);
-    font-size: var(--fs-base);
-    font-weight: var(--fw-medium);
-  }
-  .bring-list svg { color: var(--text-muted); flex-shrink: 0; }
 
   /* ── SSS ── */
   /* SSS iki kolon — tek kolonda sağ yarı boş kalıyordu */
@@ -515,8 +467,15 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     color: var(--text-body);
     line-height: var(--lh-body);
   }
+  .faq-liste {
+    margin: calc(-1 * var(--sp-2)) 1.3rem 1.3rem;
+    padding-left: 1.2em;
+    font-size: var(--fs-base);
+    color: var(--text-body);
+    line-height: var(--lh-body);
+  }
 
-  /* ── İletişim ── */
+  /* ── Başvuru kanalları ── */
   /* İki kart yan yana — 1280px'te sağ taraf boş kalmıyor */
   .options-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
   @media (max-width: 767px) { .options-grid { grid-template-columns: 1fr; } }

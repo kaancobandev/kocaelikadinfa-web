@@ -13,6 +13,9 @@ const { data } = await supabase
   .order('id', { ascending: false });
 
 const news: NewsItem[] = data ?? [];
+
+// En yeni haber tek başına, tam genişlikte; kalanlar ızgarada (§4.5.8)
+const [oneCikan, ...kalanlar] = news;
 ---
 
 <Layout
@@ -28,14 +31,42 @@ const news: NewsItem[] = data ?? [];
       title="Haber"
       accent="Merkezi"
       description="Kulübümüzden son gelişmeler, maç haberleri ve duyurular."
-    />
+    >
+      {oneCikan && (
+        <a href={newsPath(oneCikan)} class="card one-cikan">
+          {oneCikan.image_url
+            ? (
+              <span class="card-media">
+                <img
+                  src={img(oneCikan.image_url, 800)}
+                  srcset={imgSet(oneCikan.image_url, [400, 800, 1200])}
+                  sizes="(max-width: 767px) 100vw, 50vw"
+                  alt=""
+                  fetchpriority="high"
+                  decoding="async"
+                />
+              </span>
+            )
+            : <span class="card-media foto-yok"></span>
+          }
+          <span class="one-cikan-body">
+            <span class="one-cikan-title">{oneCikan.title}</span>
+            <span class="card-meta">
+              {formatDate(oneCikan.published_at) && (
+                <time datetime={isoDate(oneCikan.published_at)}>{formatDate(oneCikan.published_at)}</time>
+              )}
+            </span>
+          </span>
+        </a>
+      )}
+    </PageHero>
 
-    <!-- Haber ızgarası: veri yoksa bölüm hiç basılmaz -->
-    {news.length > 0 && (
-      <section class="band news-section" aria-label="Haberler">
+    <!-- Kalan haberler: veri yoksa bölüm hiç basılmaz -->
+    {kalanlar.length > 0 && (
+      <section class="band news-section" aria-label="Diğer haberler">
         <div class="band-inner">
           <div class="news-grid">
-            {news.map(n => (
+            {kalanlar.map(n => (
               <a href={newsPath(n)} class="card">
                 {n.image_url
                   ? (
@@ -71,6 +102,32 @@ const news: NewsItem[] = data ?? [];
 </Layout>
 
 <style>
+  /* Öne çıkan kart: görsel solda, başlık sağda, ölçek --fs-lg (§6.1 rolü) */
+  .one-cikan {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-3);
+    margin-top: var(--sp-5);
+  }
+  .one-cikan-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: var(--sp-2);
+  }
+  .one-cikan-title {
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--ls-tight);
+    color: var(--text);
+    max-width: 24ch;
+    text-wrap: balance;
+  }
+  @media (max-width: 767px) {
+    .one-cikan { grid-template-columns: 1fr; }
+  }
+
   .news-section { border-top: 1px solid var(--border); }
 
   /* Izgara formülü (§2.3) */
