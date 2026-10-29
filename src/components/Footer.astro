@@ -57,7 +57,6 @@
         <li><a href="/a-takim"><span class="link-dot"></span>A Takım</a></li>
         <li><a href="/mac-gecmisi"><span class="link-dot"></span>Maç Geçmişi</a></li>
         <li><a href="/haberler"><span class="link-dot"></span>Haberler</a></li>
-        <li><a href="#videolar"><span class="link-dot"></span>Videolar</a></li>
         <li><a href="/aramiza-katil"><span class="link-dot"></span>Aramıza Katıl</a></li>
       </ul>
     </div>
@@ -96,7 +95,7 @@
               <polyline points="22,6 12,13 2,6"/>
             </svg>
           </span>
-          <span>kocaelikadinfa@gmail.com</span>
+          <a href="mailto:kocaelikadinfa@gmail.com">kocaelikadinfa@gmail.com</a>
         </li>
         <li>
           <span class="contact-icon">
@@ -123,7 +122,6 @@
   <div class="footer-bottom">
     <div class="footer-bottom-inner">
       <p class="copy">© 2026 Kocaeli Kadın Futbol Kulübü. Tüm hakları saklıdır.</p>
-      <a href="/admin/dashboard" class="admin-link">Admin Paneli</a>
     </div>
   </div>
 
@@ -339,6 +337,13 @@
     font-size: var(--fs-sm);
     font-weight: var(--fw-medium);
   }
+  /* E-posta artık mailto: bağlantısı; satırdaki düz metinle aynı görünür */
+  .contact-list a {
+    color: inherit;
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .contact-list a:hover { color: var(--text); }
 
   .contact-icon {
     width: 28px; height: 28px;
@@ -395,17 +400,6 @@
     font-weight: var(--fw-medium);
   }
 
-  .admin-link {
-    font-size: var(--fs-eyebrow);
-    font-weight: var(--fw-bold);
-    letter-spacing: var(--ls-eyebrow);
-    text-transform: uppercase;
-    color: var(--text-dim);
-    text-decoration: none;
-    transition: color .2s;
-  }
-  .admin-link:hover { color: var(--green-bright); }
-
   /* ── Dokunmatik cihazlarda basılabilir alan ───────────────────────────
      Linkler geniş ama inceydi: menü bağlantıları 22px yükseklikte ve
      aralarında yalnızca 9px boşlukla duruyordu, parmakla yanlış linke
@@ -416,6 +410,5 @@
     .footer-col ul { gap: 0; }
     .footer-col ul a { padding: .7rem 0; }
     .collab-phone { padding: .5rem 0; }
-    .admin-link { display: inline-block; padding: .85rem .25rem; }
   }
 </style>

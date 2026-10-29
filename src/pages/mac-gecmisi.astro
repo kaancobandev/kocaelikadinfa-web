@@ -41,8 +41,9 @@ function formatDate(d: string) {
   return `${parseInt(m[3])} ${TR_MONTHS[parseInt(m[2]) - 1]} ${m[1]}`;
 }
 
-// Özet istatistik — hesap src/lib/match.ts'te (aynı kulüp tespitini kullanır)
-const stats = ozet;
+// Özet istatistik — hesap src/lib/match.ts'te (aynı kulüp tespitini kullanır).
+// Eskiden `ozet` fonksiyonun kendisine atanıyor, hiç çağrılmıyordu.
+const stats = ozet(matches);
 ---
 
 <Layout

@@ -157,7 +157,9 @@ const links = [
     .logo-text { font-size: 1rem; letter-spacing: .5px; }
     .nav-links { gap: 1.2rem; }
     .nav-links a { font-size: .8rem; letter-spacing: .5px; }
-    .btn-join { padding: .5rem 1rem; }
+    /* Taban kural .nav-links .btn-join (0,4,0); medya sorgusu özgüllük
+       eklemediği için tek sınıflı .btn-join (0,2,0) onu ezemiyordu. */
+    .nav-links .btn-join { padding: .5rem 1rem; }
   }
 
   @media (max-width: 1160px) {
