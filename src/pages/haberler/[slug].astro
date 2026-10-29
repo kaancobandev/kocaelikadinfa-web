@@ -178,9 +178,7 @@ const jsonLd = {
 
   /* ── Başlık ── */
   .article-hero {
-    background:
-      radial-gradient(ellipse 60% 80% at 50% 50%, rgba(26,122,46,0.18) 0%, transparent 65%),
-      linear-gradient(160deg, #0d1a0f 0%, var(--black) 60%);
+    background: var(--black);
     padding: 3.5rem 5% 3rem;
     border-bottom: 1px solid var(--border);
   }
@@ -199,7 +197,7 @@ const jsonLd = {
     margin-bottom: 1.6rem;
     transition: color .2s, gap .2s;
   }
-  .back-link:hover { color: var(--green-bright); gap: .7rem; }
+  .back-link:hover { color: var(--text); }
   .back-link:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; border-radius: 4px; }
 
   /* Dokunmatik cihazlarda basılabilir alan ~44px'e çıkar; yazı yerinde kalır. */
@@ -237,12 +235,12 @@ const jsonLd = {
     border-radius: var(--radius);
     overflow: hidden;
     border: 1px solid var(--border);
-    background: #0a0a0a;
+    background: var(--surface);
   }
   .article-media-bg {
     position: absolute;
     inset: 0;
-    background: linear-gradient(160deg, #141814 0%, #0a0d0a 100%);
+    background: var(--surface);
   }
   /* Haber görseli tam görünsün ama ekranı ele geçirmesin */
   .article-media img {
@@ -268,7 +266,7 @@ const jsonLd = {
   .article-body p {
     font-size: var(--fs-base);
     line-height: var(--lh-body);
-    color: #c8c8c8;
+    color: var(--text-body);
     margin-bottom: 1.4rem;
   }
   .article-body p:last-of-type { margin-bottom: 0; }
@@ -276,10 +274,15 @@ const jsonLd = {
 
   .article-body :global(.news-link) {
     color: #4da6ff;
-    text-decoration: underline;
+    text-decoration: none;
     word-break: break-word;
   }
-  .article-body :global(.news-link:hover) { color: #80c1ff; }
+  .article-body :global(.news-link:hover),
+  .article-body :global(.news-link:focus-visible) {
+    color: var(--text);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
 
   /* ── Paylaş ── */
   .share {
@@ -304,20 +307,18 @@ const jsonLd = {
     width: 38px; height: 38px;
     border-radius: var(--r-md);
     border: 1px solid var(--border);
-    background: rgba(255,255,255,0.03);
+    background: none;
     color: var(--text-muted);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     text-decoration: none;
-    transition: color .25s, border-color .25s, background .25s, transform .2s;
+    transition: color .15s ease, border-color .15s ease;
   }
   .share-btn:hover {
-    color: var(--green-bright);
-    border-color: var(--green-bright);
-    background: rgba(44,184,74,0.08);
-    transform: translateY(-2px);
+    color: var(--text);
+    border-color: var(--border-strong);
   }
   .share-btn:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 2px; }
 
@@ -362,13 +363,9 @@ const jsonLd = {
     border-radius: var(--radius);
     overflow: hidden;
     text-decoration: none;
-    transition: border-color .25s, transform .2s, box-shadow .25s;
+    transition: border-color .15s ease;
   }
-  .more-card:hover {
-    border-color: var(--green);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 32px rgba(13,77,30,0.18);
-  }
+  .more-card:hover { border-color: var(--border-strong); }
   .more-card:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 
   .more-img {
@@ -376,11 +373,11 @@ const jsonLd = {
     aspect-ratio: 16 / 10;
     max-height: 260px;
     overflow: hidden;
-    background: #0a0a0a;
+    background: var(--surface);
   }
   .more-img-bg {
     position: absolute; inset: 0;
-    background: linear-gradient(160deg, #141814 0%, #0a0d0a 100%);
+    background: var(--surface);
   }
   .more-img img {
     position: relative;
@@ -390,7 +387,7 @@ const jsonLd = {
   }
 
   .more-body { padding: 1.1rem 1.2rem 1.4rem; display: flex; flex-direction: column; gap: .5rem; }
-  .more-date { font-size: var(--fs-eyebrow); font-weight: var(--fw-bold); color: var(--green-bright); }
+  .more-date { font-size: var(--fs-eyebrow); font-weight: var(--fw-medium); color: var(--text-muted); }
   .more-body h3 {
     font-size: var(--fs-base);
     font-weight: var(--fw-bold);

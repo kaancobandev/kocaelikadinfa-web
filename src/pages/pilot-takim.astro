@@ -102,16 +102,6 @@ const photos: GalleryItem[] = galleryData ?? [];
     font-size: var(--fs-xl);
     font-weight: var(--fw-bold);
     margin-bottom: 2rem;
-    position: relative;
-    display: inline-block;
-  }
-  .story-section h2::after {
-    content: '';
-    display: block;
-    width: 50px; height: 3px;
-    background: var(--green-bright);
-    margin-top: .4rem;
-    border-radius: var(--r-sm);
   }
 
   .story-text {
@@ -148,8 +138,7 @@ const photos: GalleryItem[] = galleryData ?? [];
     height: clamp(130px, 26vw, 200px);
     object-fit: contain;
     border-radius: 50%;
-    border: 2px solid var(--border);
-    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
     padding: 6px;
   }
 
@@ -163,16 +152,6 @@ const photos: GalleryItem[] = galleryData ?? [];
     font-size: var(--fs-xl);
     font-weight: var(--fw-bold);
     margin-bottom: 2.5rem;
-    position: relative;
-    display: inline-block;
-  }
-  .photos-title::after {
-    content: '';
-    display: block;
-    width: 50px; height: 3px;
-    background: var(--green-bright);
-    margin-top: .4rem;
-    border-radius: var(--r-sm);
   }
 
   /* Kolon bazlı masonry: fotoğraflar kendi oranlarında, bulanık dolgu yok */
@@ -202,12 +181,9 @@ const photos: GalleryItem[] = galleryData ?? [];
     background: var(--card-bg);
     display: flex;
     flex-direction: column;
-    transition: transform .3s, box-shadow .3s;
+    transition: border-color .15s ease;
   }
-  .photo-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(0,0,0,.5);
-  }
+  .photo-card:hover { border-color: var(--border-strong); }
 
   /* Tanımlı yükseklik + kolon genişliği → tüm kutular birebir aynı boyutta */
   .photo-media {
@@ -221,9 +197,7 @@ const photos: GalleryItem[] = galleryData ?? [];
     height: 100%;
     object-fit: cover;
     object-position: center 40%;
-    transition: transform .4s;
   }
-  .photo-card:hover img { transform: scale(1.03); }
 
   figcaption {
     /* Görselin hemen altında; artan yükseklik kartın dibinde kalır */

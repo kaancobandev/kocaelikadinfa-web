@@ -317,26 +317,20 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
 
 <style>
   .hero-actions { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 2rem; }
+  /* İkincil biçim: zeminsiz, çerçevesiz metin bağlantı */
   .btn-ghost {
     display: inline-flex;
     align-items: center;
     gap: .55rem;
-    padding: .8rem 1.6rem;
-    border-radius: var(--r-pill);
-    border: 1px solid rgba(44,184,74,0.3);
-    background: rgba(44,184,74,0.06);
     color: var(--green-bright);
     font-size: var(--fs-sm);
-    font-weight: var(--fw-bold);
-    letter-spacing: .5px;
+    font-weight: var(--fw-medium);
     text-decoration: none;
-    transition: background .25s, border-color .25s, transform .2s;
+    font-variant-numeric: tabular-nums;
+    transition: color .2s;
   }
-  .btn-ghost:hover {
-    background: rgba(44,184,74,0.14);
-    border-color: var(--green-bright);
-    transform: translateY(-2px);
-  }
+  .btn-ghost:hover { color: var(--text); }
+  .btn-ghost:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 
   /* ── Ortak bölüm ── */
   .section { padding: 5rem 8%; border-top: 1px solid var(--border); }
@@ -358,8 +352,7 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     margin-top: 1.5rem;
     font-size: var(--fs-sm);
     color: var(--text-body);
-    background: rgba(44,184,74,0.05);
-    border: 1px solid rgba(44,184,74,0.15);
+    border: 1px solid var(--border);
     border-radius: var(--r-md);
     padding: .9rem 1.1rem;
   }
@@ -383,19 +376,15 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     display: flex;
     flex-direction: column;
     gap: .6rem;
-    transition: border-color .25s, transform .2s;
+    transition: border-color .15s ease;
   }
-  .group-card:hover { border-color: var(--green); transform: translateY(-3px); }
+  .group-card:hover { border-color: var(--border-strong); }
 
   .group-yas {
     align-self: flex-start;
-    font-size: var(--fs-eyebrow); font-weight: var(--fw-bold); letter-spacing: var(--ls-eyebrow);
+    font-size: var(--fs-eyebrow); font-weight: var(--fw-medium); letter-spacing: var(--ls-eyebrow);
     text-transform: uppercase;
-    color: var(--green-bright);
-    background: rgba(44,184,74,0.1);
-    border: 1px solid rgba(44,184,74,0.22);
-    border-radius: var(--r-pill);
-    padding: .25rem .75rem;
+    color: var(--text-muted);
   }
   .group-card h3 { font-size: var(--fs-md); font-weight: var(--fw-bold); }
   .group-card p  { font-size: var(--fs-sm); color: var(--text-body); line-height: var(--lh-body); }
@@ -427,30 +416,27 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     border-radius: var(--radius);
     text-decoration: none;
     color: var(--text);
-    transition: border-color .25s, background .25s, transform .2s;
+    transition: border-color .15s ease;
   }
-  .field-card:hover { border-color: var(--green-bright); background: #111; transform: translateY(-3px); }
+  .field-card:hover { border-color: var(--border-strong); }
   .field-card:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 
   .field-icon {
     width: 42px; height: 42px;
     border-radius: var(--r-md);
-    background: rgba(44,184,74,0.1);
-    border: 1px solid rgba(44,184,74,0.2);
+    border: 1px solid var(--border);
     display: flex; align-items: center; justify-content: center;
-    color: var(--green-bright);
+    color: var(--text-muted);
   }
   .field-body { display: flex; flex-direction: column; gap: .25rem; }
   .field-body h3 { font-size: var(--fs-base); font-weight: var(--fw-bold); }
-  .field-ilce { font-size: var(--fs-eyebrow); color: var(--green-bright); font-weight: var(--fw-bold); letter-spacing: .5px; }
+  .field-ilce { font-size: var(--fs-eyebrow); color: var(--text-muted); font-weight: var(--fw-medium); letter-spacing: .5px; }
   .field-adres { font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.5; }
   .field-map {
     margin-top: auto;
-    font-size: var(--fs-eyebrow); font-weight: var(--fw-bold);
+    font-size: var(--fs-eyebrow); font-weight: var(--fw-medium);
     color: var(--text-muted);
-    transition: color .25s;
   }
-  .field-card:hover .field-map { color: var(--green-bright); }
 
   /* ── Adımlar ── */
   .steps-section { background: var(--dark); }
@@ -464,14 +450,14 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
   @media (max-width: 960px) { .steps { grid-template-columns: 1fr; } }
 
   .step { display: flex; gap: 1rem; align-items: flex-start; }
+  /* Adım numarası: yeşil daire değil, büyük soluk rakam (sayfada tek dolgu butondur) */
   .step-no {
     flex-shrink: 0;
-    width: 38px; height: 38px;
-    border-radius: 50%;
-    background: var(--green);
-    color: #fff;
-    font-size: var(--fs-base); font-weight: var(--fw-bold);
-    display: flex; align-items: center; justify-content: center;
+    width: 2.5rem;
+    font-size: var(--fs-lg); font-weight: var(--fw-bold);
+    color: var(--text-muted);
+    line-height: var(--lh-tight);
+    font-variant-numeric: tabular-nums;
   }
   .step h3 { font-size: var(--fs-base); font-weight: var(--fw-bold); margin-bottom: .35rem; }
   .step p  { font-size: var(--fs-sm); color: var(--text-body); line-height: var(--lh-body); }
@@ -500,7 +486,7 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     font-size: var(--fs-base);
     font-weight: var(--fw-medium);
   }
-  .bring-list svg { color: var(--green-bright); flex-shrink: 0; }
+  .bring-list svg { color: var(--text-muted); flex-shrink: 0; }
 
   /* ── SSS ── */
   .faq-section { background: var(--dark); }
@@ -518,9 +504,9 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     overflow: hidden;
-    transition: border-color .25s;
+    transition: border-color .15s ease;
   }
-  .faq-item[open] { border-color: rgba(44,184,74,0.35); }
+  .faq-item[open] { border-color: var(--border-strong); }
 
   .faq-item summary {
     display: flex;
@@ -535,10 +521,9 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     transition: color .2s;
   }
   .faq-item summary::-webkit-details-marker { display: none; }
-  .faq-item summary:hover { color: var(--green-bright); }
   .faq-item summary:focus-visible { outline: 2px solid var(--green-bright); outline-offset: -2px; }
 
-  .faq-chevron { flex-shrink: 0; color: var(--green-bright); transition: transform .25s; }
+  .faq-chevron { flex-shrink: 0; color: var(--text-muted); transition: transform .25s; }
   .faq-item[open] .faq-chevron { transform: rotate(180deg); }
 
   .faq-item p {
@@ -564,29 +549,19 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     padding: 2rem;
     text-decoration: none;
     color: var(--text);
-    transition: border-color .25s, background .25s, transform .2s;
+    transition: border-color .15s ease;
   }
-  .option-card:hover { border-color: var(--green-bright); background: #111; transform: translateY(-3px); }
+  .option-card:hover { border-color: var(--border-strong); }
   .option-card:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 
+  /* İki kart aynı desen; WhatsApp ikonuyla tanınır, kurumsal yeşiliyle değil */
   .option-icon {
     width: 64px; height: 64px; flex-shrink: 0;
     border-radius: var(--r-md);
-    background: rgba(44,184,74,0.1);
-    border: 1px solid rgba(44,184,74,0.2);
+    border: 1px solid var(--border);
     display: flex; align-items: center; justify-content: center;
-    color: var(--green-bright);
-    transition: background .25s;
+    color: var(--text-muted);
   }
-  .option-card:hover .option-icon { background: rgba(44,184,74,0.18); }
-
-  .option-whatsapp .option-icon {
-    background: rgba(37,211,102,0.1);
-    border-color: rgba(37,211,102,0.25);
-    color: #25d366;
-  }
-  .option-card.option-whatsapp:hover { border-color: #25d366; }
-  .option-card.option-whatsapp:hover .option-icon { background: rgba(37,211,102,0.18); }
 
   .option-body { flex: 1; min-width: 0; }
   .option-body h3 { font-size: var(--fs-md); font-weight: var(--fw-bold); margin-bottom: .5rem; }
@@ -594,13 +569,12 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
   .phone-num {
     display: inline-block;
     margin-top: .5rem;
-    font-size: var(--fs-base); font-weight: var(--fw-bold);
-    color: #25d366; letter-spacing: .5px;
+    font-size: var(--fs-base); font-weight: var(--fw-medium);
+    color: var(--green-bright);
+    font-variant-numeric: tabular-nums;
   }
 
-  .option-arrow { flex-shrink: 0; color: var(--text-muted); transition: color .25s, transform .25s; }
-  .option-card:hover .option-arrow { color: var(--green-bright); transform: translateX(4px); }
-  .option-card.option-whatsapp:hover .option-arrow { color: #25d366; }
+  .option-arrow { flex-shrink: 0; color: var(--text-muted); }
 
   .contact-alt {
     margin-top: 1.8rem;

@@ -117,11 +117,12 @@ const jsonLd = {
 
   :root {
     /* ══ TASARIM SİSTEMİ ══════════════════════════════════════════════
-       Ölçüldü: site 42 font-size, 7 ağırlık, 14 harf aralığı, 57 hex renk,
-       ~100 padding ve 18 köşe yarıçapı kullanıyordu. Karşılaştırma için
-       Venezia FC ana sayfası 1274 öğeyi 9 boyut, 3 ağırlık ve TEK harf
-       aralığıyla yönetiyor. "Amatör" hissi tek tek efektlerden değil, her
-       bölümün kendi kararını vermiş olmasından geliyor.
+       Ölçüm (2026-10-29, halka açık .astro kapsamı, IntroLoader ve admin
+       hariç): 29 ayrı hex 62 yerde, 20 degrade, --green-bright 82 çağrı,
+       296 ham padding/margin/gap değeri. Karşılaştırma için Venezia FC ana
+       sayfası 1274 öğeyi 9 boyut, 3 ağırlık ve TEK harf aralığıyla
+       yönetiyor. "Amatör" hissi tek tek efektlerden değil, her bölümün
+       kendi kararını vermiş olmasından geliyor.
 
        Bu blok hedef sistemi tanımlar. Bileşenler henüz çoğunlukla kendi
        ham değerlerini kullanıyor; göç dosya dosya yapılacak (bkz.
@@ -151,10 +152,10 @@ const jsonLd = {
 
     /* ── Renk ──
        Kontrast oranları siyah zemine göre ölçüldü; hepsi WCAG AA üstü. */
-    --text:       #ffffff;   /* başlık            21:1  */
-    --text-body:  #d6d6d6;   /* gövde paragrafı   13,4:1 */
-    --text-muted: #9a9a9a;   /* meta, footer menü  6,4:1 */
-    --text-dim:   #8a8a8a;   /* telif, admin       5,2:1 — en soluk sınır */
+    --text:       #ffffff;   /* başlık            21:1    */
+    --text-body:  #d6d6d6;   /* gövde paragrafı   14,45:1 */
+    --text-muted: #9a9a9a;   /* meta, footer menü  7,46:1 */
+    --text-dim:   #8a8a8a;   /* telif              6,08:1 — en soluk sınır */
 
     --black:     #000000;
     --surface:   #0b0e0b;
@@ -197,7 +198,6 @@ const jsonLd = {
     --dark:       var(--surface);
     --card-bg:    var(--surface);
     --radius:     var(--r-md);
-    --green-glow: rgba(13,77,30,0.35);
 
     /* ── Görsel boyut sistemi ──────────────────────────────────────────
        Fotoğraflar kendi en-boy oranını korur; yalnızca bu sınırların
@@ -228,22 +228,18 @@ const jsonLd = {
   .btn-primary {
     display: inline-block;
     background: var(--green);
-    color: #fff;
+    color: var(--text);
     padding: .8rem 2rem;
     border-radius: var(--r-pill);
     font-weight: var(--fw-bold);
     font-size: var(--fs-base);
-    
     text-decoration: none;
     border: none;
     cursor: pointer;
-    transition: background .25s, transform .2s, box-shadow .2s;
+    transition: background .25s;
   }
-  .btn-primary:hover {
-    background: var(--green-mid);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px var(--green-glow);
-  }
+  /* Hover yalnız zemin tonu: glow ve zıplama yok (dekoratif hareket değil, durum bildirimi) */
+  .btn-primary:hover { background: var(--green-mid); }
 
   .section-tag {
     display: inline-block;
@@ -315,7 +311,7 @@ const jsonLd = {
     z-index: 2000;
     transform: translateY(-120%);
     background: var(--green-bright);
-    color: #000;
+    color: var(--black);   /* bilinçli yüksek kontrast istisnası: yeşil dolgu üstünde siyah */
     font-size: var(--fs-sm);
     font-weight: var(--fw-bold);
     

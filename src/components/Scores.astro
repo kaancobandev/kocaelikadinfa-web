@@ -138,8 +138,8 @@ function formatDate(d: string) {
     text-align: center;
     font-size: var(--fs-xl);
     letter-spacing: var(--ls-tight);
-
-    color: var(--green-bright);
+    /* Başlık yeşilden çıktı: altındaki skor rakamlarıyla iki büyük yeşil leke yarışıyordu */
+    color: var(--text);
     margin-bottom: 2.5rem;
     font-weight: var(--fw-bold);
   }
@@ -170,28 +170,22 @@ function formatDate(d: string) {
     border-radius: var(--radius);
     padding: 1.8rem 2rem;
     text-align: center;
-    transition: border-color .25s, box-shadow .25s, transform .2s;
+    transition: border-color .15s ease;
   }
   /* Çok dar ekranda 2rem yan dolgu takım adlarına yer bırakmıyor */
   @media (max-width: 400px) {
     .score-card { padding: 1.5rem 1rem; }
   }
-  .score-card:hover {
-    border-color: var(--green);
-    box-shadow: 0 6px 28px rgba(13,77,30,0.12);
-    transform: translateY(-2px);
-  }
+  .score-card:hover { border-color: var(--border-strong); }
 
+  /* Kategori adı dolgulu pill değil, küçük etiket: kart başına yeşil zemin yok */
   .score-badge {
     display: inline-block;
-    background: var(--green);
-    color: #fff;
     font-size: var(--fs-eyebrow);
-    font-weight: var(--fw-bold);
+    font-weight: var(--fw-medium);
     letter-spacing: var(--ls-eyebrow);
     text-transform: uppercase;
-    padding: .3rem .9rem;
-    border-radius: var(--r-pill);
+    color: var(--text-muted);
     margin-bottom: 1.4rem;
   }
 
@@ -215,14 +209,12 @@ function formatDate(d: string) {
     height: 56px;
     border-radius: 50%;
     border: 1px solid var(--border);
-    background: #0a0d0a;
+    background: var(--black);
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    transition: border-color .25s;
   }
-  .score-card:hover .team-logo-wrap { border-color: var(--green); }
 
   .team-logo {
     width: 100%;
@@ -234,7 +226,7 @@ function formatDate(d: string) {
   .team-logo-fallback {
     font-size: var(--fs-eyebrow);
     font-weight: var(--fw-bold);
-    color: var(--green-bright);
+    color: var(--text-muted);
     letter-spacing: var(--ls-eyebrow);
     align-items: center;
     justify-content: center;
@@ -268,7 +260,7 @@ function formatDate(d: string) {
   }
   .score-sep { font-size: 1.6rem; color: var(--text-muted); font-weight: var(--fw-normal); }
 
-  .match-meta { font-size: var(--fs-eyebrow); color: #888; margin-top: 1rem; }
+  .match-meta { font-size: var(--fs-eyebrow); color: var(--text-dim); margin-top: 1rem; }
   /* Lig adı boşken ayraç da basılmıyor */
-  .meta-sep { margin: 0 .5rem; color: #c4c4c4; }
+  .meta-sep { margin: 0 .5rem; color: var(--text-muted); }
 </style>

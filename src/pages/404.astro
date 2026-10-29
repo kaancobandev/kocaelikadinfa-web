@@ -92,13 +92,9 @@ const links = [
     border: 1px solid var(--border);
     border-radius: var(--radius);
     text-decoration: none;
-    transition: border-color .25s, background .25s, transform .2s;
+    transition: border-color .15s ease;
   }
-  .nf-card:hover {
-    border-color: var(--green-bright);
-    background: #111;
-    transform: translateY(-3px);
-  }
+  .nf-card:hover { border-color: var(--border-strong); }
   .nf-card:focus-visible {
     outline: 2px solid var(--green-bright);
     outline-offset: 3px;
@@ -111,10 +107,5 @@ const links = [
     position: absolute;
     top: 1.3rem; right: 1.2rem;
     color: var(--text-muted);
-    transition: color .25s, transform .25s;
-  }
-  .nf-card:hover .nf-card-arrow {
-    color: var(--green-bright);
-    transform: translateX(3px);
   }
 </style>

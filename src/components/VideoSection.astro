@@ -104,7 +104,7 @@ function isYoutube(url: string): boolean {
     margin-top: 1rem;
     font-size: var(--fs-sm);
     font-weight: var(--fw-bold);
-    /* --green (#0d4d1e) siyah üstünde 2,10:1 — okunmuyordu. --green-bright 8,06:1. */
+    /* --green siyah üstünde 2,10:1 — okunmuyordu. --green-bright 8,06:1. */
     color: var(--green-bright);
     text-decoration: none;
     letter-spacing: .5px;
@@ -131,13 +131,9 @@ function isYoutube(url: string): boolean {
     border: 1px solid var(--border);
     border-radius: var(--radius);
     overflow: hidden;
-    transition: border-color .25s, box-shadow .25s, transform .2s;
+    transition: border-color .15s ease;
   }
-  .video-card:hover {
-    border-color: var(--green);
-    box-shadow: 0 6px 28px rgba(13,77,30,0.12);
-    transform: translateY(-2px);
-  }
+  .video-card:hover { border-color: var(--border-strong); }
 
   /* YouTube embed */
   .video-frame-wrap {
@@ -187,9 +183,7 @@ function isYoutube(url: string): boolean {
     max-height: var(--media-max-h);
     object-fit: cover;
     object-position: center 40%;
-    transition: transform .35s;
   }
-  .img-btn:hover img { transform: scale(1.03); }
 
   @media (max-width: 960px) {
     .img-btn img { max-height: var(--media-max-h-sm); }
@@ -216,7 +210,7 @@ function isYoutube(url: string): boolean {
   }
   .img-overlay svg {
     width: 44px; height: 44px;
-    color: #fff;
+    color: var(--text);
     opacity: 0;
     transition: opacity .25s;
   }
@@ -254,7 +248,7 @@ function isYoutube(url: string): boolean {
     top: 1.2rem; right: 1.4rem;
     background: rgba(255,255,255,.1);
     border: 1px solid rgba(255,255,255,.15);
-    color: #fff;
+    color: var(--text);
     font-size: var(--fs-md);
     width: 40px; height: 40px;
     border-radius: 50%;

@@ -50,9 +50,7 @@ const links = [
     position: sticky;
     top: 0; left: 0; right: 0;
     height: var(--nav-h);
-    background: rgba(0,0,0,0.93);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: var(--black);
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
@@ -145,13 +143,15 @@ const links = [
     justify-content: center;
     padding: .55rem 1.25rem;
     background: var(--green);
-    color: #fff !important;
+    color: var(--text);
     font-weight: var(--fw-bold);
     border: 1px solid var(--border-strong);
     border-radius: var(--r-pill);
     transition: background .2s;
   }
-  .nav-links .btn-join:hover { background: var(--green-mid); }
+  /* :hover'da da beyaz kalsın — .nav-links a:hover (0,5,0) yeşile çeviriyordu,
+     eskiden !important ile bastırılıyordu. */
+  .nav-links .btn-join:hover { background: var(--green-mid); color: var(--text); }
   /* KORUNDU: silinirse sitenin birincil CTA'sı klavye odağını kaybeder */
   .nav-links .btn-join:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 2px; }
 
@@ -185,9 +185,7 @@ const links = [
     .nav-links {
       position: fixed;
       top: var(--nav-h); left: 0; right: 0;
-      background: rgba(6,8,6,0.98);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: var(--black);
       flex-direction: column;
       gap: 0;
       padding: 0.5rem 0 2rem;
@@ -209,7 +207,7 @@ const links = [
       display: block;
       padding: 1rem 0;
       font-size: var(--fs-base);
-      border-bottom: 1px solid rgba(255,255,255,0.04);
+      border-bottom: 1px solid var(--border);
     }
     .nav-links li:last-child a { border-bottom: none; }
 

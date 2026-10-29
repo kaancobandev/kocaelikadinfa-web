@@ -59,28 +59,19 @@ const {
     padding: 5rem 8%;
     position: relative;
     overflow: hidden;
-    background:
-      radial-gradient(ellipse 60% 80% at 50% 50%, rgba(26,122,46,0.20) 0%, transparent 65%),
-      linear-gradient(160deg, #0d1a0f 0%, var(--black) 60%);
+    background: var(--black);
   }
 
-  /* Fotoğraflı varyant: görsel en altta, üstüne koyulaştırma */
+  /* Fotoğraflı varyant: görsel en altta, üstünde düz karartma (degrade yok) */
   .page-hero.has-image {
-    background:
-      radial-gradient(ellipse 70% 80% at 50% 50%, rgba(26,122,46,0.22) 0%, transparent 65%),
-      linear-gradient(160deg, rgba(10,10,10,0.88) 0%, rgba(13,26,15,0.80) 55%),
-      var(--ph-image) center / cover no-repeat;
+    background: var(--ph-image) center / cover no-repeat;
   }
-
-  /* İnce ızgara dokusu */
-  .page-hero::before {
+  .page-hero.has-image::before {
     content: '';
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background-image:
-      repeating-linear-gradient(0deg,  transparent, transparent 80px, rgba(26,122,46,0.05) 80px, rgba(26,122,46,0.05) 81px),
-      repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(26,122,46,0.05) 80px, rgba(26,122,46,0.05) 81px);
+    background: var(--scrim);
   }
 
   .page-hero-inner {
@@ -109,9 +100,7 @@ const {
     letter-spacing: var(--ls-display);
     margin-bottom: 1.2rem;
   }
-  .page-hero h1 span {
-    color: var(--green-bright);
-  }
+  /* İkinci satır artık yeşil değil: --green-bright başlık ölçeğinde kullanılmaz */
 
   .ph-desc {
     font-size: var(--fs-base);
