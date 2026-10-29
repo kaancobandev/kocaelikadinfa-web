@@ -77,14 +77,15 @@ function isYoutube(url: string): boolean {
       title="Galeri"
       description="Sahadan, antrenmandan ve kulübümüzün özel anlarından görüntüler."
       maxTitle="4.5rem"
+      compact
     />
 
-    <!-- Izgara: veri yoksa bölüm hiç basılmaz. Yalnız 1. sayfada lead hücre. -->
+    <!-- Izgara: sayfanın birincil öğesi (lead hücre) ilk ekranda; bölümün
+         kendi h2'si yok ki ilk ekranda h1 tek büyük metin kalsın (§4.3).
+         Veri yoksa bölüm hiç basılmaz. Yalnız 1. sayfada lead hücre. -->
     {items.length > 0 && (
       <section class="band galeri-section" aria-label="Antrenmanlardan kareler">
         <div class="band-inner">
-          <h2>Antrenmanlardan Kareler</h2>
-
           <div class={`galeri-grid${sayfa === 1 ? ' lead-var' : ''}`}>
             {items.map((item, i) => (
               isYoutube(item.media_url) ? (

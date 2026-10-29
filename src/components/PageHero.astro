@@ -24,6 +24,13 @@ interface Props {
   imageSet?: string;
   /** Başlık boyutu için clamp üst sınırı */
   maxTitle?: string;
+  /**
+   * Kısa hero: birincil öğe başlık değil hemen altındaki içerik olan sayfada
+   * (yalnız /antrenmanlardan-kareler, lead hücre ilk ekranda görünmeli).
+   * Diğer sayfalarda hero geniş ekranda ilk ekranı tek başına kaplar:
+   * h1 ekrandaki tek --fs-display/--fs-xl metin olur (§2.1.1, §4.3).
+   */
+  compact?: boolean;
 }
 
 const {
@@ -34,10 +41,11 @@ const {
   image,
   imageSet,
   maxTitle = '5.5rem',
+  compact = false,
 } = Astro.props;
 ---
 
-<section class="page-hero band" style={`--ph-max-title:${maxTitle};`}>
+<section class:list={['page-hero', 'band', { compact }]} style={`--ph-max-title:${maxTitle};`}>
   <div class="band-inner">
     {tag && <span class="eyebrow">{tag}</span>}
     <h1>{accent ? `${title} ${accent}` : title}</h1>
@@ -60,8 +68,19 @@ const {
 <style>
   /* Birincil öğe: üst/alt boşluk komşu bölümlerin (--sp-6) iki katı */
   .page-hero { padding-block: calc(var(--sp-6) * 2); }
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     .page-hero { padding-block: calc(var(--sp-5) * 2); }
+  }
+  /* Geniş ekranda hero ilk ekranı tek başına kaplar: bir sonraki bölümün
+     h2'si ilk ekrana girmez, h1 yalnız kalır. Dikkat çerçeveyle değil
+     yalnızlıkla çekilir (§2.1.2); boş görünüyorsa doğrudur. */
+  @media (min-width: 768px) {
+    .page-hero:not(.compact) {
+      min-height: calc(100vh - var(--nav-h));
+      display: flex;
+      align-items: center;
+    }
+    .page-hero:not(.compact) > .band-inner { width: 100%; }
   }
 
   .page-hero h1 {
