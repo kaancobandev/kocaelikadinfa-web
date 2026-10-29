@@ -44,7 +44,8 @@ const photos: GalleryItem[] = galleryData ?? [];
             Kocaeli Kadın Futbol Akademisi olarak, altyapımızda yetişen sporcularımızın gelişimlerini destekliyor; onları tecrübe kazandırarak Türk kadın futboluna kazandırıyoruz.
           </p>
         </div>
-
+        <!-- /a-takim'daki bağlantının karşılığı (üçüncül) -->
+        <a href="/a-takim" class="link-tertiary">A Takım — Kadınlar 1. Ligi →</a>
       </div>
     </section>
 
@@ -124,6 +125,17 @@ const photos: GalleryItem[] = galleryData ?? [];
     color: var(--text-body);
     line-height: var(--lh-body);
   }
+
+  /* Üçüncül bağlantı: soluk düz metin, vurgu rengi yok */
+  .link-tertiary {
+    display: inline-block;
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .link-tertiary:hover { color: var(--text); }
+  .link-tertiary:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 
   /* ── Partner logo ── */
   .partner-logo-wrap {

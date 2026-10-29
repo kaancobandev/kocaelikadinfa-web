@@ -12,6 +12,26 @@ const { data } = await supabase
   .order('sort_order', { ascending: true });
 
 const photos: GalleryItem[] = data ?? [];
+
+/* ── Veli bilgisi ─────────────────────────────────────────────────────
+   Kaynak: src/pages/aramiza-katil.astro'daki mevcut dizgiler (yaş aralığı,
+   saha adları, üç adım, gün-saat notu). Yeni olgu yazılmadı; ortak modül
+   yasak olduğu için burada tekrar ediliyor — orada değişirse burada da
+   değişmeli. Boş olan alanlar (gün/saat, adres, ücret) hiç basılmıyor. */
+const ON_KAYIT_URL   = 'https://kocaelikadinfk.sporakademik.com/OnKayit';
+const TELEFON        = '+905326944509';
+const TELEFON_GOSTER = '+90 532 694 45 09';
+const yasAraligi     = '4 – 16 yaş';
+const sahalar = [
+  { ad: 'İzmit Seka Halı Saha',           ilce: 'İzmit'  },
+  { ad: 'Gölcük Kavaklı Deniz Halı Saha', ilce: 'Gölcük' },
+  { ad: 'Yahya Kaptan',                   ilce: 'İzmit'  },
+];
+const adimlar = [
+  { no: '1', baslik: 'Ön kayıt formunu doldur', metin: 'Sporcu ön kayıt formunu doldurarak bize ulaş. Birkaç dakika sürüyor.' },
+  { no: '2', baslik: 'Seni arayalım',           metin: 'Yaşına ve seviyene uygun grubu belirleyip antrenman gün ve saatini birlikte planlayalım.' },
+  { no: '3', baslik: 'Deneme antrenmanına gel', metin: 'Sahada bizi tanı, takımla tanış. Beğenirsen kayıt işlemlerini tamamlıyoruz.' },
+];
 ---
 
 <Layout
@@ -29,23 +49,56 @@ const photos: GalleryItem[] = data ?? [];
       minHeight="48vh"
     />
 
-    <!-- Metin bölümü -->
+    <!-- Metin bölümü: tek paragraf + velinin aradığı bilgi -->
     <section class="text-section">
       <div class="text-inner">
-        <div class="paragraphs">
-          <p>
-            Kocaeli Kadın Futbol Akademisi olarak, çocuklarımızın hem eğlenerek geliştiği hem de profesyonel ekipmanlar ve akademik eğitimli antrenörlerimiz eşliğinde geleceğe hazırlandığı bir futbol ortamı sunuyoruz.
-          </p>
-          <p>
-            Kadınlar Süper Ligi'ne altyapısından en çok oyuncu yetiştirip gönderen kulüp olmanın gururunu yaşıyor, geleceğin yıldızlarını yetiştirmeye devam ediyoruz.
-          </p>
-          <div class="quote-block">
-            <p class="quote-text">Hiçbir başarı tesadüf değildir.</p>
-            <p class="quote-sub">Başarı; emek, disiplin, inanç ve vazgeçmeden çalışmanın sonucudur.</p>
-          </div>
-          <p>
-            Kocaeli Kadın Futbol Akademisi olarak geleceğin yıldızlarını sabırla, azimle ve profesyonel bir anlayışla yetiştiriyoruz.
-          </p>
+        <h2>Akademi Hakkında</h2>
+        <p class="lead">
+          Kocaeli Kadın Futbol Akademisi olarak, çocuklarımızın hem eğlenerek geliştiği hem de profesyonel ekipmanlar ve akademik eğitimli antrenörlerimiz eşliğinde geleceğe hazırlandığı bir futbol ortamı sunuyoruz. Kadınlar Süper Ligi'ne altyapısından en çok oyuncu yetiştirip gönderen kulüp olmanın gururunu yaşıyor, geleceğin yıldızlarını yetiştirmeye devam ediyoruz.
+        </p>
+
+        <div class="bilgi">
+          <dl class="kunye">
+            <div class="kunye-satir">
+              <dt>Yaş aralığı</dt>
+              <dd>{yasAraligi}</dd>
+            </div>
+            <div class="kunye-satir">
+              <dt>Antrenman sahaları</dt>
+              <dd>{sahalar.map(s => `${s.ad} (${s.ilce})`).join(' · ')}</dd>
+            </div>
+            <div class="kunye-satir">
+              <dt>Gün ve saat</dt>
+              <dd>
+                Antrenman gün ve saatleri gruba ve sahaya göre değişiyor.
+                <a href={`tel:${TELEFON}`}>{TELEFON_GOSTER}</a> numarasından güncel programı öğrenebilirsin.
+              </dd>
+            </div>
+          </dl>
+
+          <ol class="adimlar">
+            {adimlar.map(a => (
+              <li class="adim">
+                <span class="adim-no">{a.no}</span>
+                <div>
+                  <h3>{a.baslik}</h3>
+                  <p>{a.metin}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- Çağrı: sayfadaki tek dolgulu buton, galeriden ÖNCE -->
+    <section class="cta-section band">
+      <div class="band-inner">
+        <h2>Aramıza Katıl</h2>
+        <p class="lead">Futbola yeni başlıyor ya da kendini geliştirmek istiyorsan doğru yerdesin. 4–16 yaş akademi kayıtlarımız açık.</p>
+        <div class="cta-actions">
+          <a href={ON_KAYIT_URL} target="_blank" rel="noopener noreferrer" class="btn-primary">Ön Kayıt Formunu Doldur</a>
+          <a href={`tel:${TELEFON}`} class="cta-tel">{TELEFON_GOSTER} →</a>
         </div>
       </div>
     </section>
@@ -77,19 +130,6 @@ const photos: GalleryItem[] = data ?? [];
       </section>
     )}
 
-    {photos.length === 0 && (
-      <section class="gallery-section">
-        <div class="gallery-header">
-          <span class="section-tag">Galeri</span>
-          <h2>Akademiden Kareler</h2>
-        </div>
-        <div class="gallery-empty">
-          <span class="empty-icon">📷</span>
-          <p>Fotoğraflar yakında eklenecek.</p>
-        </div>
-      </section>
-    )}
-
   </main>
 
   <Footer />
@@ -103,36 +143,68 @@ const photos: GalleryItem[] = data ?? [];
     border-bottom: 1px solid var(--border);
     padding: 5rem 8%;
   }
-  .text-inner { max-width: 760px; margin: 0 auto; }
+  .text-inner { max-width: var(--measure-text); }
 
-  .paragraphs {
-    display: flex;
-    flex-direction: column;
-    gap: 1.8rem;
+  .text-section h2,
+  .cta-section h2 {
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--ls-tight);
+    max-width: 20ch;
+    margin-bottom: var(--sp-4);
   }
-  .paragraphs p {
+  .lead {
     font-size: var(--fs-base);
     color: var(--text-body);
     line-height: var(--lh-body);
+    max-width: var(--measure-text);
+    margin-bottom: var(--sp-4);
   }
 
-  .quote-block {
-    border-left: 4px solid var(--green-bright);
-    padding: 1.2rem 2rem;
-    background: rgba(13,77,30,0.15);
-    border-radius: 0 var(--r-md) var(--r-md) 0;
+  /* Künye: etiket + değer satırları, ince çizgiyle ayrılmış */
+  .bilgi { display: flex; flex-direction: column; gap: var(--sp-4); }
+  .kunye { display: flex; flex-direction: column; }
+  .kunye-satir {
+    display: grid;
+    grid-template-columns: 10rem 1fr;
+    gap: var(--sp-2);
+    padding-block: var(--sp-2);
+    border-top: 1px solid var(--border);
   }
-  .quote-text {
-    font-size: var(--fs-md) !important;
-    font-weight: var(--fw-bold) !important;
-    color: var(--green-bright) !important;
-    margin-bottom: .4rem;
+  .kunye dt { font-size: var(--fs-sm); color: var(--text-muted); }
+  .kunye dd { font-size: var(--fs-base); color: var(--text-body); line-height: var(--lh-body); }
+  .kunye dd a { color: var(--green-bright); text-decoration: none; }
+  .kunye dd a:hover { text-decoration: underline; text-underline-offset: 2px; }
+  @media (max-width: 640px) {
+    .kunye-satir { grid-template-columns: 1fr; gap: var(--sp-1); }
   }
-  .quote-sub {
-    font-size: var(--fs-base) !important;
-    color: var(--text-body) !important;
-    font-style: italic;
+
+  /* Üç adım: büyük soluk numara + başlık + tek cümle */
+  .adimlar { list-style: none; display: flex; flex-direction: column; gap: var(--sp-3); }
+  .adim { display: grid; grid-template-columns: 2.5rem 1fr; gap: var(--sp-2); align-items: start; }
+  .adim-no {
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-bold);
+    color: var(--text-muted);
+    line-height: var(--lh-tight);
+    font-variant-numeric: tabular-nums;
   }
+  .adim h3 { font-size: var(--fs-md); font-weight: var(--fw-medium); line-height: var(--lh-snug); margin-bottom: var(--sp-1); }
+  .adim p  { font-size: var(--fs-base); color: var(--text-body); line-height: var(--lh-body); }
+
+  /* ── Çağrı ── */
+  .cta-section { border-top: 1px solid var(--border); }
+  .cta-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
+  .cta-tel {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    color: var(--green-bright);
+    text-decoration: none;
+    font-variant-numeric: tabular-nums;
+  }
+  .cta-tel:hover { color: var(--text); }
+  .cta-tel:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 
   /* ── Galeri ── */
   .gallery-section {
@@ -168,7 +240,6 @@ const photos: GalleryItem[] = data ?? [];
     overflow: hidden;
     border: 1px solid var(--border);
     background: var(--card-bg);
-    cursor: pointer;
   }
   /* Izgarada satırlar hizalı dursun diye ortak oran; yükseklik baştan belli
      olduğu için görsel inerken sayfa kaymıyor. */
@@ -196,15 +267,4 @@ const photos: GalleryItem[] = data ?? [];
     transition: transform .3s ease;
   }
   .gallery-item:hover .gallery-caption { transform: translateY(0); }
-
-  .gallery-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    padding: 4rem 0;
-    color: var(--text-muted);
-  }
-  .empty-icon { font-size: 2.5rem; opacity: .4; }
-  .gallery-empty p { font-size: var(--fs-base); }
 </style>

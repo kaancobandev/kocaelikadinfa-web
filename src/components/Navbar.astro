@@ -1,10 +1,19 @@
 ---
+/**
+ * Menü — 5 düğüm + 1 buton. Aynı liste dört yüzeyde elle tutuluyor:
+ * Navbar, Footer "Keşfet", 404.astro ve sitemap.xml.ts; biri değişirse
+ * dördü birlikte değişir.
+ *
+ * "Sonuçlar" ve "Galeri" etiketleri adreslerinden farklı: /mac-gecmisi ve
+ * /antrenmanlardan-kareler dizine girmiş adreslerdir, bu turda bilerek
+ * değiştirilmedi. /pilot-takim menüden çıktı; sayfası duruyor ve /a-takim
+ * gövdesindeki bağlantıdan ulaşılıyor.
+ */
 const links = [
-  { href: "/pilot-takim", label: "Pilot Takım" },
-  { href: "/mac-gecmisi", label: "Maç Geçmişi" },
-  { href: "/a-takim",     label: "A Takım" },
-  { href: "/akademi",     label: "Akademi" },
-  { href: "/haberler",              label: "Haberler" },
+  { href: "/a-takim",                 label: "Takımlar" },
+  { href: "/akademi",                 label: "Akademi" },
+  { href: "/mac-gecmisi",             label: "Sonuçlar" },
+  { href: "/haberler",                label: "Haberler" },
   { href: "/antrenmanlardan-kareler", label: "Galeri" },
 ];
 ---

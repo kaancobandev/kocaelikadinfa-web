@@ -47,7 +47,8 @@ const photos: GalleryItem[] = galleryData ?? [];
             Kocaeli Kadın Futbol Akademisi olarak geleceği kendi sporcularımızla yazıyoruz.
           </p>
         </div>
-
+        <!-- Pilot Takım menüde değil; ona buradan gidiliyor (üçüncül bağlantı) -->
+        <a href="/pilot-takim" class="link-tertiary">Pilot Takım — Kadınlar 3. Ligi →</a>
       </div>
     </section>
 
@@ -116,6 +117,18 @@ const photos: GalleryItem[] = galleryData ?? [];
 
   .story-text { display: flex; flex-direction: column; gap: 1.2rem; }
   .story-text p { font-size: var(--fs-base); color: var(--text-body); line-height: var(--lh-body); }
+
+  /* Üçüncül bağlantı: soluk düz metin, vurgu rengi yok */
+  .link-tertiary {
+    display: inline-block;
+    margin-top: var(--sp-3);
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .link-tertiary:hover { color: var(--text); }
+  .link-tertiary:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 
   /* ── Fotoğraflar ── */
   .photos-section { padding: 5rem 8%; background: var(--black); }

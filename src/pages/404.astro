@@ -4,13 +4,14 @@ import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 import PageHero from '../components/PageHero.astro';
 
+// Menüyle aynı sıra ve etiketler (Navbar.astro); ek olarak / ve /pilot-takim.
 const links = [
   { href: '/',                        label: 'Ana Sayfa',      desc: 'Son haberler ve maç sonuçları' },
-  { href: '/haberler',                label: 'Haberler',       desc: 'Kulüpten son gelişmeler' },
-  { href: '/mac-gecmisi',             label: 'Maç Geçmişi',    desc: 'Tüm maç sonuçlarımız' },
-  { href: '/a-takim',                 label: 'A Takım',        desc: 'Kadromuz ve sahadan kareler' },
+  { href: '/a-takim',                 label: 'Takımlar',       desc: 'Kadromuz ve sahadan kareler' },
   { href: '/pilot-takim',             label: 'Pilot Takım',    desc: 'Geleceğin yıldız adayları' },
   { href: '/akademi',                 label: 'Akademi',        desc: 'Altyapı ve genç yetenekler' },
+  { href: '/mac-gecmisi',             label: 'Sonuçlar',       desc: 'Tüm maç sonuçlarımız' },
+  { href: '/haberler',                label: 'Haberler',       desc: 'Kulüpten son gelişmeler' },
   { href: '/antrenmanlardan-kareler', label: 'Galeri',         desc: 'Fotoğraf ve videolar' },
   { href: '/aramiza-katil',           label: 'Aramıza Katıl',  desc: 'Başvuru ve iletişim' },
 ];
