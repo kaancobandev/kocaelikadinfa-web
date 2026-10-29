@@ -230,10 +230,34 @@ const jsonLd = {
     line-height: 1.6;
   }
 
-  /* Tüm h1/h2 kırık beyaz: saf beyaz (--text) arayüz metninde kalır.
-     DİKKAT: scoped bir `color` kuralı (0,2,0+) bu global'i (0,0,1) ezer;
-     bir başlık beyaz çıkıyorsa nedeni bileşendeki yerel renk kuralıdır. */
-  h1, h2 { color: var(--kemik); }
+  /* ══ Tipografik roller (§6.1) ═══════════════════════════════════════
+     Tüm halka açık sayfalarda aynı. Bileşenler bu rolleri yeniden
+     tanımlamaz; yalnız ana sayfa h1'i (--fs-display) ve PageHero h1'i
+     (sayfa başına clamp) kendi boyutunu verir.
+     DİKKAT: scoped bir kural (0,2,0+) bu global element kurallarını
+     (0,0,1) ezer; bir başlık rolün dışına çıkıyorsa nedeni bileşendeki
+     yerel kuraldır, sıra değil (§8.0/A). */
+  h1, h2 { color: var(--kemik); text-wrap: balance; }
+  h2 {
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--ls-tight);
+    max-width: 20ch;
+  }
+  h3 {
+    font-size: var(--fs-md);
+    font-weight: var(--fw-medium);
+    line-height: var(--lh-snug);
+    color: var(--text);
+  }
+  p {
+    font-size: var(--fs-base);
+    line-height: var(--lh-body);
+    color: var(--text-body);
+    max-width: var(--measure-text);
+    text-wrap: pretty;
+  }
 
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: var(--dark); }
@@ -255,26 +279,15 @@ const jsonLd = {
   /* Hover yalnız zemin tonu: glow ve zıplama yok (dekoratif hareket değil, durum bildirimi) */
   .btn-primary:hover { background: var(--green-mid); }
 
-  .section-tag {
-    display: inline-block;
-    font-size: var(--fs-eyebrow);
-    font-weight: var(--fw-medium);
-    letter-spacing: var(--ls-eyebrow);
-    text-transform: uppercase;
-    color: var(--green-bright);
-    margin-bottom: 1rem;
-  }
+  /* ══ Bölüm kabı (§2.3) ═════════════════════════════════════════════
+     .band > .band-inner — sırası sabit: (eyebrow) · h2 · (tek giriş
+     paragrafı) · içerik · (tek ikincil bağlantı). Sayfalar bu kalıbın
+     dışında düzen CSS'i yazmaz; bölüm dolgusu yalnız burada tanımlıdır.
 
-
-  /* ══ Bölüm kabı ════════════════════════════════════════════════════
-     Bugün her bölüm kendi `padding: Xrem Y%` değerini yazıyor — ölçülen
-     28 farklı padding, 3 farklı oluk, 22 farklı max-width. Bunlar Faz D'de
-     tek tek buraya bağlanacak.
-
-     Sınıf adı bilerek `.section` DEĞİL: aramiza-katil.astro'da zaten scoped
-     bir `.section` var ve Astro onu [data-astro-cid-…] ile 0,2,0 özgüllüğe
-     çıkarıyor; global bir `.section` (0,1,0) sıra ne olursa olsun kaybeder
-     ve sitenin en uzun sayfası yeni oluğu sessizce almazdı.               */
+     Sınıf adı bilerek `.section` DEĞİL: aramiza-katil.astro'da eskiden
+     scoped bir `.section` vardı ve Astro onu [data-astro-cid-…] ile 0,2,0
+     özgüllüğe çıkarıyor; global bir `.section` (0,1,0) sıra ne olursa
+     olsun kaybederdi.                                                   */
   .band {
     padding-block: var(--sp-6);
     padding-inline: var(--gutter);
@@ -286,18 +299,105 @@ const jsonLd = {
   @media (max-width: 768px) {
     .band { padding-block: var(--sp-5); }
   }
+  /* Bölüm içi dikey ritim: başlık → içerik --sp-4, eyebrow → h2 --sp-2
+     (eyebrow'un kendi alt boşluğu), h1/h2 → giriş paragrafı --sp-3. */
+  .band-inner > * + * { margin-top: var(--sp-4); }
+  .band-inner > .eyebrow + h1,
+  .band-inner > .eyebrow + h2 { margin-top: 0; }
+  .band-inner > h1 + p,
+  .band-inner > h2 + p { margin-top: var(--sp-3); }
 
   /* ══ Üst etiket ════════════════════════════════════════════════════
-     22 ayrı yerde elle yazılmış küçük etiket tanımının yerine tek sınıf.
-     Tracking EKLENEN tek yer burası; gövdeye harf aralığı yazılmaz.     */
+     Eski .section-tag ile aynı kural iki kez tanımlanıyordu; tek sınıf.
+     Tracking ve uppercase EKLENEN tek yer burası; gövdeye harf aralığı
+     yazılmaz, başka hiçbir ölçekte uppercase kullanılmaz.               */
   .eyebrow {
     display: inline-block;
     font-size: var(--fs-eyebrow);
     font-weight: var(--fw-medium);
+    line-height: 1;
     letter-spacing: var(--ls-eyebrow);
     text-transform: uppercase;
     color: var(--green-bright);
     margin-bottom: var(--sp-2);
+  }
+
+  /* ══ Kart anatomisi (§2.3) — 10 sayfada aynı dört parça ═══════════
+     1 görsel .card-media (4/3, kırpma odağı üstte: yüzler kadrajın üst
+       yarısında) · 2 başlık .card-title (h3 rolü, ≤3 satır) · 3 meta
+       .card-meta (tarih/altyazı) · 4 dolgu, zemin, 1px kenarlık, köşe.
+     Kartın tamamı tek <a> ya da tek <button>; eyebrow, kategori etiketi
+     ve "Devamını oku" YOK. Hover yalnız kenarlık rengi.                 */
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    padding: var(--sp-3);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+    transition: border-color .15s ease;
+  }
+  button.card { width: 100%; cursor: pointer; }
+  .card:hover { border-color: var(--border-strong); }
+  .card:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
+  .card-media {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--r-sm);
+    background: var(--black);
+  }
+  .card-media img,
+  .card-media iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 35%;
+    border: 0;
+  }
+  .card-title {
+    font-size: var(--fs-md);
+    font-weight: var(--fw-medium);
+    line-height: var(--lh-snug);
+    color: var(--text);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .card-meta {
+    display: block;
+    /* Altyazı şeridi kart yüksekliğini belirlemez ve boşken kaybolmaz:
+       galeri kartlarının çoğunda caption boş (actions.ts yalnız ilk satıra
+       yazar); şerit yüksekliğini korur, içine hiçbir şey basılmaz (§7.3). */
+    min-height: 2.5rem;
+    font-size: var(--fs-sm);
+    line-height: var(--lh-snug);
+    color: var(--text-muted);
+  }
+  /* Fotoğrafı olmayan kayıt (§7.6): stok görsel değil, boş çerçeve ve
+     ortada 48px'lik tek yatay çizgi. İkon, metin, arma yok.            */
+  .foto-yok {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: var(--surface-2);
+  }
+  .foto-yok::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 48px; height: 1px;
+    transform: translate(-50%, -50%);
+    background: var(--text-dim);
   }
 
   /* ══ Hareket azaltma ═══════════════════════════════════════════════

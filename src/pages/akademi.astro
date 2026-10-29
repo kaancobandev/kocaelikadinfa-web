@@ -40,20 +40,19 @@ const adimlar = [
 >
   <Navbar />
 
-  <main id="icerik" tabindex="-1" class="akademi-page">
+  <main id="icerik" tabindex="-1">
 
     <PageHero
       tag="Akademi"
       title="Geleceğin"
       accent="Yıldızları"
-      minHeight="48vh"
     />
 
-    <!-- Metin bölümü: tek paragraf + velinin aradığı bilgi -->
-    <section class="text-section">
-      <div class="text-inner">
+    <!-- Tek paragraf + velinin aradığı bilgi -->
+    <section class="band text-section">
+      <div class="band-inner">
         <h2>Akademi Hakkında</h2>
-        <p class="lead">
+        <p>
           Kocaeli Kadın Futbol Akademisi olarak, çocuklarımızın hem eğlenerek geliştiği hem de profesyonel ekipmanlar ve akademik eğitimli antrenörlerimiz eşliğinde geleceğe hazırlandığı bir futbol ortamı sunuyoruz. Kadınlar Süper Ligi'ne altyapısından en çok oyuncu yetiştirip gönderen kulüp olmanın gururunu yaşıyor, geleceğin yıldızlarını yetiştirmeye devam ediyoruz.
         </p>
 
@@ -92,10 +91,10 @@ const adimlar = [
     </section>
 
     <!-- Çağrı: sayfadaki tek dolgulu buton, galeriden ÖNCE -->
-    <section class="cta-section band">
+    <section class="band cta-section">
       <div class="band-inner">
         <h2>Aramıza Katıl</h2>
-        <p class="lead">Futbola yeni başlıyor ya da kendini geliştirmek istiyorsan doğru yerdesin. 4–16 yaş akademi kayıtlarımız açık.</p>
+        <p>Futbola yeni başlıyor ya da kendini geliştirmek istiyorsan doğru yerdesin. 4–16 yaş akademi kayıtlarımız açık.</p>
         <div class="cta-actions">
           <a href={ON_KAYIT_URL} target="_blank" rel="noopener noreferrer" class="btn-primary">Ön Kayıt Formunu Doldur</a>
           <a href={`tel:${TELEFON}`} class="cta-tel">{TELEFON_GOSTER} →</a>
@@ -103,29 +102,31 @@ const adimlar = [
       </div>
     </section>
 
-    <!-- Galeri -->
+    <!-- Galeri: veri yoksa bölüm hiç basılmaz -->
     {photos.length > 0 && (
-      <section class="gallery-section">
-        <div class="gallery-header">
-          <span class="section-tag">Galeri</span>
+      <section class="band gallery-section" id="kareler" aria-label="Akademiden kareler">
+        <div class="band-inner">
           <h2>Akademiden Kareler</h2>
-        </div>
-        <div class="gallery-grid">
-          {photos.map((p, i) => (
-            <div class="gallery-item">
-              <img
-                src={img(p.image_url, 800)}
-                srcset={imgSet(p.image_url)}
-                sizes="(max-width: 640px) 100vw, (max-width: 960px) 50vw, 33vw"
-                alt={p.caption ?? 'Akademi fotoğrafı'}
-                {/* İlk satır zaten ekranda; ertelemek yerine hemen insin */}
-                loading={i < 3 ? 'eager' : 'lazy'}
-                fetchpriority={i < 3 ? 'high' : undefined}
-                decoding="async"
-              />
-              {p.caption && <div class="gallery-caption">{p.caption}</div>}
-            </div>
-          ))}
+          <div class="gallery-grid">
+            {photos.map((p, i) => (
+              <div class="card">
+                <span class="card-media">
+                  <img
+                    src={img(p.image_url, 400)}
+                    srcset={imgSet(p.image_url, [400, 800])}
+                    sizes="(max-width: 767px) 100vw, (max-width: 1119px) 50vw, 33vw"
+                    alt={p.caption ?? 'Akademiden kareler'}
+                    {/* İlk satır zaten ekranda; ertelemek yerine hemen insin */}
+                    loading={i < 3 ? 'eager' : 'lazy'}
+                    fetchpriority={i < 3 ? 'high' : undefined}
+                    decoding="async"
+                  />
+                </span>
+                {/* Altyazı şeridi her zaman basılır; boşsa yüksekliğini korur, içine hiçbir şey yazılmaz */}
+                <span class="card-meta">{p.caption ?? ''}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     )}
@@ -136,34 +137,17 @@ const adimlar = [
 </Layout>
 
 <style>
-  /* ── Metin bölümü ── */
-  .text-section {
-    background: var(--dark);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    padding: 5rem 8%;
-  }
-  .text-inner { max-width: var(--measure-text); }
+  .text-section,
+  .cta-section,
+  .gallery-section { border-top: 1px solid var(--border); }
 
-  .text-section h2,
-  .cta-section h2 {
-    font-size: var(--fs-xl);
-    font-weight: var(--fw-bold);
-    line-height: var(--lh-tight);
-    letter-spacing: var(--ls-tight);
-    max-width: 20ch;
-    margin-bottom: var(--sp-4);
-  }
-  .lead {
-    font-size: var(--fs-base);
-    color: var(--text-body);
-    line-height: var(--lh-body);
+  /* ── Künye: etiket + değer satırları, ince çizgiyle ayrılmış ── */
+  .bilgi {
     max-width: var(--measure-text);
-    margin-bottom: var(--sp-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
   }
-
-  /* Künye: etiket + değer satırları, ince çizgiyle ayrılmış */
-  .bilgi { display: flex; flex-direction: column; gap: var(--sp-4); }
   .kunye { display: flex; flex-direction: column; }
   .kunye-satir {
     display: grid;
@@ -172,15 +156,15 @@ const adimlar = [
     padding-block: var(--sp-2);
     border-top: 1px solid var(--border);
   }
-  .kunye dt { font-size: var(--fs-sm); color: var(--text-muted); }
-  .kunye dd { font-size: var(--fs-base); color: var(--text-body); line-height: var(--lh-body); }
+  .kunye dt { font-size: var(--fs-sm); line-height: var(--lh-snug); color: var(--text-muted); }
+  .kunye dd { font-size: var(--fs-base); line-height: var(--lh-body); color: var(--text-body); }
   .kunye dd a { color: var(--green-bright); text-decoration: none; }
   .kunye dd a:hover { text-decoration: underline; text-underline-offset: 2px; }
   @media (max-width: 640px) {
     .kunye-satir { grid-template-columns: 1fr; gap: var(--sp-1); }
   }
 
-  /* Üç adım: büyük soluk numara + başlık + tek cümle */
+  /* ── Üç adım: büyük soluk numara + başlık + tek cümle ── */
   .adimlar { list-style: none; display: flex; flex-direction: column; gap: var(--sp-3); }
   .adim { display: grid; grid-template-columns: 2.5rem 1fr; gap: var(--sp-2); align-items: start; }
   .adim-no {
@@ -190,11 +174,9 @@ const adimlar = [
     line-height: var(--lh-tight);
     font-variant-numeric: tabular-nums;
   }
-  .adim h3 { font-size: var(--fs-md); font-weight: var(--fw-medium); line-height: var(--lh-snug); margin-bottom: var(--sp-1); }
-  .adim p  { font-size: var(--fs-base); color: var(--text-body); line-height: var(--lh-body); }
+  .adim h3 { margin-bottom: var(--sp-1); }
 
   /* ── Çağrı ── */
-  .cta-section { border-top: 1px solid var(--border); }
   .cta-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
   .cta-tel {
     font-size: var(--fs-sm);
@@ -206,63 +188,10 @@ const adimlar = [
   .cta-tel:hover { color: var(--text); }
   .cta-tel:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 
-  /* ── Galeri ── */
-  .gallery-section {
-    padding: 5rem 8%;
-    background: var(--black);
-    border-top: 1px solid var(--border);
-  }
-
-  .gallery-header {
-    margin-bottom: 2.5rem;
-  }
-  .gallery-header h2 {
-    font-size: var(--fs-xl);
-    font-weight: var(--fw-bold);
-    margin-top: .5rem;
-  }
-
-  /* Izgara — satır satır soldan sağa. Kolon bazlı masonry'de (column-count)
-     belge sırası ekrandaki sırayla örtüşmediği için üstteki fotoğraflar en
-     son, alttakiler ilk iniyordu. */
+  /* ── Galeri ızgarası (§2.3 formülü) ── */
   .gallery-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    align-items: start;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+    gap: var(--sp-3);
   }
-  @media (max-width: 960px) { .gallery-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 640px) { .gallery-grid { grid-template-columns: 1fr; } }
-
-  .gallery-item {
-    position: relative;
-    border-radius: var(--radius);
-    overflow: hidden;
-    border: 1px solid var(--border);
-    background: var(--card-bg);
-  }
-  /* Izgarada satırlar hizalı dursun diye ortak oran; yükseklik baştan belli
-     olduğu için görsel inerken sayfa kaymıyor. */
-  .gallery-item img {
-    display: block;
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    height: auto;
-    object-fit: cover;
-    object-position: center 40%;
-  }
-
-  .gallery-caption {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    z-index: 2;
-    background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%);
-    color: var(--text);
-    font-size: var(--fs-sm);
-    font-weight: var(--fw-medium);
-    padding: 1.2rem .9rem .7rem;
-    transform: translateY(100%);
-    transition: transform .3s ease;
-  }
-  .gallery-item:hover .gallery-caption { transform: translateY(0); }
 </style>

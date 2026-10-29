@@ -5,7 +5,7 @@ import Footer from '../components/Footer.astro';
 import PageHero from '../components/PageHero.astro';
 import { supabase, type NewsItem } from '../lib/supabase';
 import { img, imgSet } from '../lib/img';
-import { newsPath, excerpt, formatDate, isoDate } from '../lib/news';
+import { newsPath, formatDate, isoDate } from '../lib/news';
 
 const { data } = await supabase
   .from('news')
@@ -13,8 +13,6 @@ const { data } = await supabase
   .order('id', { ascending: false });
 
 const news: NewsItem[] = data ?? [];
-
-const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=800&q=80';
 ---
 
 <Layout
@@ -23,56 +21,48 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
 >
   <Navbar />
 
-  <main id="icerik" tabindex="-1" class="haberler-page">
+  <main id="icerik" tabindex="-1">
 
     <PageHero
       tag="Son Dakika"
       title="Haber"
       accent="Merkezi"
       description="Kulübümüzden son gelişmeler, maç haberleri ve duyurular."
-      minHeight="38vh"
     />
 
-    <!-- Haberler grid -->
-    {news.length > 0 ? (
-      <section class="news-section">
-        <div class="news-grid">
-          {news.map(n => (
-            <article class="news-card">
-              <a href={newsPath(n)} class="news-link-wrap">
-                <div class="news-img">
-                  <div class="news-img-bg"></div>
-                  <img
-                    class="news-img-fg"
-                    src={img(n.image_url, 800) || fallbackImg}
-                    srcset={imgSet(n.image_url)}
-                    sizes="(max-width: 640px) 100vw, (max-width: 960px) 50vw, 33vw"
-                    alt={n.title}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-                <div class="news-body">
-                  <div class="news-meta">
-                    <span class="news-tag">Haber</span>
-                    {formatDate(n.published_at) && (
-                      <time class="news-date" datetime={isoDate(n.published_at)}>{formatDate(n.published_at)}</time>
-                    )}
-                  </div>
-                  <h2>{n.title}</h2>
-                  <p>{excerpt(n.description, 170)}</p>
-                  <span class="news-more">Devamını Oku →</span>
-                </div>
+    <!-- Haber ızgarası: veri yoksa bölüm hiç basılmaz -->
+    {news.length > 0 && (
+      <section class="band news-section" aria-label="Haberler">
+        <div class="band-inner">
+          <div class="news-grid">
+            {news.map(n => (
+              <a href={newsPath(n)} class="card">
+                {n.image_url
+                  ? (
+                    <span class="card-media">
+                      <img
+                        src={img(n.image_url, 400)}
+                        srcset={imgSet(n.image_url, [400, 800])}
+                        sizes="(max-width: 767px) 100vw, (max-width: 1119px) 50vw, 33vw"
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </span>
+                  )
+                  : <span class="card-media foto-yok"></span>
+                }
+                <h3 class="card-title">{n.title}</h3>
+                <span class="card-meta">
+                  {formatDate(n.published_at) && (
+                    <time datetime={isoDate(n.published_at)}>{formatDate(n.published_at)}</time>
+                  )}
+                </span>
               </a>
-            </article>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
-    ) : (
-      <div class="empty-state">
-        <p>Henüz haber eklenmemiş.</p>
-        <a href="/admin/dashboard" class="btn-primary">Admin Paneline Git</a>
-      </div>
     )}
 
   </main>
@@ -81,154 +71,12 @@ const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w
 </Layout>
 
 <style>
-  /* ── Haber Grid ── */
-  .news-section {
-    padding: 4rem 5%;
-    background: var(--black);
-    border-top: 1px solid var(--border);
-  }
+  .news-section { border-top: 1px solid var(--border); }
 
+  /* Izgara formülü (§2.3) */
   .news-grid {
-    max-width: 1160px;
-    margin: 0 auto;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-  }
-
-  @media (max-width: 960px) {
-    .news-grid { grid-template-columns: repeat(2, 1fr); }
-  }
-  @media (max-width: 640px) {
-    .news-grid { grid-template-columns: 1fr; }
-  }
-
-  .news-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    transition: border-color .15s ease;
-  }
-  .news-card:hover { border-color: var(--border-strong); }
-  .news-card:focus-within {
-    outline: 2px solid var(--green-bright);
-    outline-offset: 3px;
-  }
-
-  /* Kartın tamamı tıklanabilir */
-  .news-link-wrap {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    text-decoration: none;
-    color: inherit;
-  }
-  .news-link-wrap:focus-visible { outline: none; }
-
-  /* Sabit oran, ama tavanla sınırlı: dar kolonlarda kart aşırı uzamıyor */
-  .news-img {
-    position: relative;
-    aspect-ratio: 3 / 4;
-    max-height: var(--card-media-max-h);
-    overflow: hidden;
-    background: var(--surface);
-    flex-shrink: 0;
-  }
-  /* Tek kolona düşünce kart tam genişlik oluyor — oranı koruyup
-     yüksekliği sınırlıyoruz (4/3'e çevirmek dikey görsellerde
-     kenarlarda büyük boşluk bırakıyordu). */
-  @media (max-width: 640px) {
-    .news-img { max-height: 440px; }
-  }
-  /* Görsellerin %73'ü zaten 3:4 dikey, kutuyu tam dolduruyor.
-     Yatay olanlarda bulanık leke yerine düz koyu panel kalıyor. */
-  .news-img-bg {
-    position: absolute;
-    inset: 0;
-    background: var(--surface);
-  }
-  /* Asıl fotoğraf: kırpılmadan, ortalanmış şekilde tamamı görünür */
-  .news-img-fg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    object-position: center;
-    display: block;
-  }
-
-  .news-body {
-    padding: 1.5rem 1.6rem 1.8rem;
-    display: flex;
-    flex-direction: column;
-    gap: .7rem;
-    flex: 1;
-  }
-
-  .news-meta {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: .8rem;
-  }
-  .news-tag {
-    font-size: var(--fs-eyebrow);
-    font-weight: var(--fw-bold);
-    letter-spacing: var(--ls-eyebrow);
-    text-transform: uppercase;
-    color: var(--green-bright);
-  }
-  .news-date {
-    font-size: var(--fs-eyebrow);
-    font-weight: var(--fw-medium);
-    color: var(--text-muted);
-    white-space: nowrap;
-  }
-
-  .news-body h2 {
-    font-size: var(--fs-md);
-    font-weight: var(--fw-bold);
-    line-height: var(--lh-snug);
-    color: var(--text);
-    /* Kart yükseklikleri satır içinde tutarlı kalsın */
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  /* Özet: en fazla 4 satır — kartlar artık uzayıp boşluk bırakmıyor */
-  .news-body p {
-    font-size: var(--fs-sm);
-    color: var(--text-body);
-    line-height: var(--lh-body);
-    flex: 1;
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .news-more {
-    font-size: var(--fs-sm);
-    font-weight: var(--fw-bold);
-    color: var(--green-bright);
-    transition: color .2s;
-  }
-  .news-card:hover .news-more { color: var(--text); }
-
-  /* ── Boş durum ── */
-  .empty-state {
-    padding: 6rem 8%;
-    text-align: center;
-    color: var(--text-body);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+    gap: var(--sp-3);
   }
 </style>

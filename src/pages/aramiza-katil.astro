@@ -112,7 +112,6 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
       title="Aramıza"
       accent="Katıl"
       description="Futbola yeni başlıyor ya da kendini geliştirmek istiyorsan doğru yerdesin. 4–16 yaş akademi kayıtlarımız açık."
-      minHeight="44vh"
       maxTitle="5rem"
     >
         <div class="hero-actions">
@@ -127,11 +126,11 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     </PageHero>
 
     <!-- ── Kimler katılabilir ── -->
-    <section class="section groups-section">
-      <div class="section-inner">
-        <span class="section-eyebrow">Kimler Katılabilir?</span>
+    <section class="band groups-section">
+      <div class="band-inner">
+        <span class="eyebrow">Kimler Katılabilir?</span>
         <h2>Yaş Grupları ve Takımlar</h2>
-        <p class="section-lead">Her seviyeye uygun bir grubumuz var. Hangisine uygun olduğundan emin değilsen bize sor, birlikte belirleyelim.</p>
+        <p>Her seviyeye uygun bir grubumuz var. Hangisine uygun olduğundan emin değilsen bize sor, birlikte belirleyelim.</p>
 
         <div class="groups-grid">
           {gruplar.map(g => (
@@ -157,9 +156,9 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     </section>
 
     <!-- ── Sahalar ── -->
-    <section class="section fields-section">
-      <div class="section-inner">
-        <span class="section-eyebrow">Nerede Antrenman Yapıyoruz?</span>
+    <section class="band fields-section">
+      <div class="band-inner">
+        <span class="eyebrow">Nerede Antrenman Yapıyoruz?</span>
         <h2>Antrenman Sahalarımız</h2>
 
         <div class="fields-grid">
@@ -189,9 +188,9 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     </section>
 
     <!-- ── Adımlar ── -->
-    <section class="section steps-section">
-      <div class="section-inner">
-        <span class="section-eyebrow">Nasıl Başlarım?</span>
+    <section class="band steps-section">
+      <div class="band-inner">
+        <span class="eyebrow">Nasıl Başlarım?</span>
         <h2>3 Adımda Aramıza Katıl</h2>
 
         <ol class="steps">
@@ -211,12 +210,12 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     </section>
 
     <!-- ── Ne getirmeli ── -->
-    <section class="section bring-section">
-      <div class="section-inner bring-inner">
+    <section class="band bring-section">
+      <div class="band-inner bring-inner">
         <div class="bring-text">
-          <span class="section-eyebrow">Hazırlık</span>
+          <span class="eyebrow">Hazırlık</span>
           <h2>İlk Antrenmana Ne Getirmeli?</h2>
-          <p class="section-lead">Deneme antrenmanına gelirken yanında bulunması gerekenler. Eksiğin varsa sorun değil, bize haber ver.</p>
+          <p>Deneme antrenmanına gelirken yanında bulunması gerekenler. Eksiğin varsa sorun değil, bize haber ver.</p>
         </div>
         <ul class="bring-list">
           {getirilecekler.map(item => (
@@ -232,9 +231,9 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     </section>
 
     <!-- ── SSS ── -->
-    <section class="section faq-section">
-      <div class="section-inner">
-        <span class="section-eyebrow">Merak Edilenler</span>
+    <section class="band faq-section">
+      <div class="band-inner">
+        <span class="eyebrow">Merak Edilenler</span>
         <h2>Sık Sorulan Sorular</h2>
 
         <div class="faq-list">
@@ -254,9 +253,9 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     </section>
 
     <!-- ── İletişim ── -->
-    <section class="section contact-section">
-      <div class="section-inner">
-        <span class="section-eyebrow">İletişim</span>
+    <section class="band contact-section">
+      <div class="band-inner">
+        <span class="eyebrow">İletişim</span>
         <h2>Sorularını Bize Sor</h2>
 
         <div class="options-grid">
@@ -332,21 +331,13 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
   .btn-ghost:hover { color: var(--text); }
   .btn-ghost:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 
-  /* ── Ortak bölüm ── */
-  .section { padding: 5rem 8%; border-top: 1px solid var(--border); }
-  .section-inner { max-width: 1100px; margin: 0 auto; }
-
-  .section-eyebrow {
-    display: inline-block;
-    font-size: var(--fs-eyebrow); font-weight: var(--fw-bold); letter-spacing: var(--ls-eyebrow);
-    text-transform: uppercase; color: var(--green-bright); margin-bottom: .8rem;
+  /* ── Ortak bölüm: kap ve ritim global .band/.band-inner'dan gelir;
+     burada yalnız bölümleri ayıran ince çizgi ── */
+  .groups-section, .fields-section, .steps-section,
+  .bring-section, .faq-section, .contact-section {
+    background: var(--black);
+    border-top: 1px solid var(--border);
   }
-  .section h2 {
-    font-size: var(--fs-xl);
-    font-weight: var(--fw-bold);
-    margin-bottom: 1rem;
-  }
-  .section-lead { color: var(--text-body); max-width: 560px; margin-bottom: 2.5rem; line-height: var(--lh-body); }
 
   .note {
     margin-top: 1.5rem;
@@ -360,13 +351,11 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
   .note a:hover { text-decoration: underline; }
 
   /* ── Gruplar ── */
-  .groups-section { background: var(--dark); }
   .groups-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.2rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+    gap: var(--sp-3);
   }
-  @media (max-width: 960px) { .groups-grid { grid-template-columns: 1fr; } }
 
   .group-card {
     background: var(--card-bg);
@@ -398,13 +387,11 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
   .group-gun.muted { font-style: italic; opacity: .8; }
 
   /* ── Sahalar ── */
-  .fields-section { background: var(--black); }
   .fields-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.2rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+    gap: var(--sp-3);
   }
-  @media (max-width: 960px) { .fields-grid { grid-template-columns: 1fr; } }
 
   .field-card {
     display: flex;
@@ -439,15 +426,12 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
   }
 
   /* ── Adımlar ── */
-  .steps-section { background: var(--dark); }
   .steps {
     list-style: none;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+    gap: var(--sp-3);
   }
-  @media (max-width: 960px) { .steps { grid-template-columns: 1fr; } }
 
   .step { display: flex; gap: 1rem; align-items: flex-start; }
   /* Adım numarası: yeşil daire değil, büyük soluk rakam (sayfada tek dolgu butondur) */
@@ -464,15 +448,15 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
   .steps-cta { display: inline-block; }
 
   /* ── Ne getirmeli ── */
-  .bring-section { background: var(--black); }
   .bring-inner {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 3rem;
+    gap: var(--sp-4);
     align-items: start;
   }
-  @media (max-width: 960px) { .bring-inner { grid-template-columns: 1fr; gap: 2rem; } }
-  .bring-text .section-lead { margin-bottom: 0; }
+  .bring-inner > * + * { margin-top: 0; }
+  @media (max-width: 767px) { .bring-inner { grid-template-columns: 1fr; } }
+  .bring-text h2 { margin-bottom: var(--sp-3); }
 
   .bring-list { list-style: none; display: flex; flex-direction: column; gap: .8rem; }
   .bring-list li {
@@ -489,15 +473,14 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
   .bring-list svg { color: var(--text-muted); flex-shrink: 0; }
 
   /* ── SSS ── */
-  .faq-section { background: var(--dark); }
   /* SSS iki kolon — tek kolonda sağ yarı boş kalıyordu */
   .faq-list {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     align-content: start;
-    gap: .7rem;
+    gap: var(--sp-2);
   }
-  @media (max-width: 960px) { .faq-list { grid-template-columns: 1fr; } }
+  @media (max-width: 767px) { .faq-list { grid-template-columns: 1fr; } }
 
   .faq-item {
     background: var(--card-bg);
@@ -534,10 +517,9 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
   }
 
   /* ── İletişim ── */
-  .contact-section { background: var(--black); }
   /* İki kart yan yana — 1280px'te sağ taraf boş kalmıyor */
-  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
-  @media (max-width: 960px) { .options-grid { grid-template-columns: 1fr; } }
+  .options-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+  @media (max-width: 767px) { .options-grid { grid-template-columns: 1fr; } }
 
   .option-card {
     display: flex;
@@ -586,7 +568,6 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
   .contact-alt .dot { margin: 0 .6rem; opacity: .5; }
 
   @media (max-width: 640px) {
-    .section { padding: 3.5rem 6%; }
     .option-card { padding: 1.4rem 1.2rem; gap: 1rem; }
     .option-icon { width: 52px; height: 52px; border-radius: var(--r-md); }
     .option-icon svg { width: 24px; height: 24px; }

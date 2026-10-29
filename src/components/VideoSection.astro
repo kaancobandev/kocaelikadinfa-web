@@ -21,12 +21,10 @@ function isYoutube(url: string): boolean {
 ---
 
 {items.length > 0 && (
-  <section class="video-section" id="videolar">
-    <div class="video-section-inner">
-      <span class="section-tag">Videolar & Fotoğraflar</span>
+  <section class="band video-section" id="videolar">
+    <div class="band-inner">
+      <span class="eyebrow">Videolar & Fotoğraflar</span>
       <h2>Antrenmanlardan Kareler</h2>
-      <a href="/antrenmanlardan-kareler" class="btn-all">Tümünü Gör →</a>
-    </div>
 
     <div class="video-grid">
       {items.map(item => (
@@ -69,6 +67,10 @@ function isYoutube(url: string): boolean {
         </div>
       ))}
     </div>
+
+      <!-- Tek ikincil bağlantı, içeriğin altında (§2.3) -->
+      <a href="/antrenmanlardan-kareler" class="btn-all">Tümünü Gör →</a>
+    </div>
   </section>
 )}
 
@@ -81,52 +83,36 @@ function isYoutube(url: string): boolean {
 
 <style>
   .video-section {
-    padding: 6rem 5%;
     background: var(--black);
-  }
-  .video-section-inner,
-  .video-grid { position: relative; }
-
-  .video-section-inner {
-    max-width: 640px;
-    margin-bottom: 3rem;
-  }
-  .video-section-inner .section-tag { color: var(--green-bright); }
-  .video-section-inner h2 {
-    font-size: var(--fs-xl);
-    font-weight: var(--fw-bold);
-    margin-top: .6rem;
-    color: var(--text);
+    border-top: 1px solid var(--border);
   }
 
+  /* İkincil biçim: metin bağlantı + ok.
+     --green siyah üstünde 2,10:1 — okunmuyordu. --green-bright 8,06:1. */
   .btn-all {
     display: inline-block;
-    margin-top: 1rem;
     font-size: var(--fs-sm);
-    font-weight: var(--fw-bold);
-    /* --green siyah üstünde 2,10:1 — okunmuyordu. --green-bright 8,06:1. */
+    font-weight: var(--fw-medium);
     color: var(--green-bright);
     text-decoration: none;
-    letter-spacing: .5px;
     transition: color .2s;
   }
   .btn-all:hover { color: var(--text); }
+  .btn-all:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 
   /* Dokunmatik cihazlarda basılabilir alan ~44px'e çıkar; yazı yerinde kalır. */
   @media (pointer: coarse) {
     .btn-all { display: inline-block; padding: .75rem 0; }
   }
 
-  /* Kolon bazlı masonry: fotoğraflar kendi oranlarında */
+  /* Izgara formülü (§2.3): satır satır soldan sağa, eşit 4/3 kareler */
   .video-grid {
-    column-count: 3;
-    column-gap: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+    gap: var(--sp-3);
   }
-  @media (max-width: 960px) { .video-grid { column-count: 1; } }
 
   .video-card {
-    break-inside: avoid;
-    margin-bottom: 1.5rem;
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);

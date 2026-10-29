@@ -59,12 +59,12 @@ const stats = ozet(matches);
       title="Maç"
       accent="Geçmişi"
       description="Tüm maçlarımızın sonuçları, skorlar ve karşılaştığımız takımlar."
-      minHeight="40vh"
     />
 
     <!-- Kategori başlığına göre dinamik bölümler -->
     {matchGroups.map(([title, list], gi) => (
-      <section class={`group-section${gi % 2 === 1 ? ' alt' : ''}`}>
+      <section class={`band group-section${gi % 2 === 1 ? ' alt' : ''}`}>
+        <div class="band-inner">
         <div class="group-header">
           <div class="group-title-wrap">
             <span class="group-badge">{title}</span>
@@ -124,6 +124,7 @@ const stats = ozet(matches);
             );
           })}
         </div>
+        </div>
       </section>
     ))}
 
@@ -142,20 +143,11 @@ const stats = ozet(matches);
 <style>
   /* ── Grup bölümü ── */
   .group-section {
-    padding: 4rem 8%;
     background: var(--black);
     border-top: 1px solid var(--border);
   }
   .group-section.alt { background: var(--dark); }
 
-  .group-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-  }
   .group-title-wrap { display: flex; flex-direction: column; gap: .5rem; }
   .group-badge {
     display: inline-block;
@@ -165,8 +157,6 @@ const stats = ozet(matches);
     text-transform: uppercase; padding: .25rem .8rem; border-radius: var(--r-pill);
     width: fit-content;
   }
-  .group-title-wrap h2 { font-size: var(--fs-xl); font-weight: var(--fw-bold); }
-
   /* Özet bar */
   .summary-bar { display: flex; gap: 1.2rem; flex-wrap: wrap; }
   .summary-item { display: flex; flex-direction: column; align-items: center; gap: .2rem; }
@@ -195,7 +185,7 @@ const stats = ozet(matches);
   .match-card:hover { border-color: var(--border-strong); }
 
   .match-meta-left { display: flex; flex-direction: column; gap: .3rem; }
-  .match-date   { font-size: var(--fs-sm); font-weight: var(--fw-bold); color: var(--text); }
+  .match-date   { font-size: var(--fs-sm); line-height: var(--lh-snug); color: var(--text-muted); font-variant-numeric: tabular-nums; }
 
   /* Takımlar + skor */
   .match-teams {
@@ -224,13 +214,14 @@ const stats = ozet(matches);
   }
   .team-logo { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
   .team-logo-fallback {
-    font-size: var(--fs-eyebrow); font-weight: var(--fw-bold);
-    color: var(--text-muted); letter-spacing: .5px;
+    font-size: var(--fs-eyebrow); font-weight: var(--fw-medium);
+    color: var(--text-muted); letter-spacing: var(--ls-eyebrow);
     align-items: center; justify-content: center;
   }
   .team-name {
     font-size: var(--fs-sm);
-    font-weight: var(--fw-bold);
+    font-weight: var(--fw-medium);
+    color: var(--text);
     white-space: normal;
     word-break: break-word;
     line-height: var(--lh-snug);

@@ -95,6 +95,7 @@ const links = [
     /* Gerçek buton: klavyeyle odaklanabilir ve Enter/Space ile açılır */
     background: none;
     border: none;
+    font: inherit;   /* tarayıcının 13,33px buton varsayılanı ölçeğe sızmasın */
     /* Parmakla basılan tek kontrol; 37x36 idi, dokunma hedefi sınırının
        altındaydı. Çizgilerin görünümü aynı, yalnızca kutu büyüyor. */
     min-width: 44px;
@@ -121,13 +122,12 @@ const links = [
     list-style: none;
     gap: 2rem;
   }
+  /* Uppercase yalnız --fs-eyebrow ölçeğinde (§6.1.2); menü --fs-sm'dir */
   .nav-links a {
     text-decoration: none;
     color: var(--text-muted);
     font-size: var(--fs-sm);
     font-weight: var(--fw-medium);
-    letter-spacing: var(--ls-eyebrow);
-    text-transform: uppercase;
     transition: color .25s;
   }
   .nav-links a:hover { color: var(--green-bright); }
@@ -202,10 +202,11 @@ const links = [
       visibility: visible;
       transition: transform .35s ease, opacity .3s ease, visibility 0s;
     }
-    .nav-links li { width: 100%; text-align: center; }
+    /* Mobil menü de sola hizalı: ortalanmış metin yok (§2.2.6) */
+    .nav-links li { width: 100%; }
     .nav-links a {
       display: block;
-      padding: 1rem 0;
+      padding: 1rem var(--gutter);
       font-size: var(--fs-base);
       border-bottom: 1px solid var(--border);
     }

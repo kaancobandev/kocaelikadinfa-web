@@ -1,26 +1,27 @@
 ---
 /**
- * Sayfa başlığı bloğu.
+ * Sayfa başlığı bloğu — iç sayfaların tek h1'i.
  *
- * Bu blok (ızgara deseni + degrade + vurgulu başlık) daha önce 7 sayfada
- * birebir kopyalanmıştı. Tek yerde toplandı; sayfalar yalnızca farklılıkları
- * prop olarak veriyor.
+ * Eskiden 7 sayfada birebir kopyalanan ızgara deseni + degrade + yeşil
+ * ikinci satır burada toplanmıştı; degrade, doku ve yeşil vurgu gitti.
+ * Fotoğraflı varyantta görsel artık metnin ARKASINDA değil ALTINDA durur:
+ * tam iç genişlik, üstüne hiçbir metin binmez, karartma gerekmez (§2.2.1,
+ * §2.2.5). Blok sayfanın birincil öğesidir: üst/alt boşluğu komşu
+ * bölümlerin iki katıdır (§4.3).
  */
 interface Props {
-  /** Üstteki küçük etiket — ör. "Son Dakika" */
+  /** Üstteki küçük etiket — birim ya da zaman, h1'i tekrar etmez */
   tag?: string;
-  /** Başlığın ilk satırı */
+  /** Başlık */
   title: string;
-  /** Başlığın yeşil degradeli ikinci satırı */
+  /** Başlığın devamı (aynı renk, aynı satırda sarılır) */
   accent?: string;
-  /** Başlık altındaki açıklama */
+  /** Başlık altındaki tek giriş paragrafı */
   description?: string;
-  /** Bölüm yüksekliği — ör. "38vh" */
-  minHeight?: string;
-  /** Arka plan fotoğrafı (CSS url değeri hazır gelmeli) */
+  /** Başlığın altında tam genişlik basılan fotoğraf (img() çıktısı) */
   image?: string;
-  /** Metin hizası */
-  align?: 'left' | 'right';
+  /** Fotoğrafın srcset'i (imgSet() çıktısı) */
+  imageSet?: string;
   /** Başlık boyutu için clamp üst sınırı */
   maxTitle?: string;
 }
@@ -30,65 +31,37 @@ const {
   title,
   accent,
   description,
-  minHeight = '40vh',
   image,
-  align = 'left',
+  imageSet,
   maxTitle = '5.5rem',
 } = Astro.props;
 ---
 
-<section
-  class:list={['page-hero', { 'has-image': !!image, right: align === 'right' }]}
-  style={`--ph-min:${minHeight};--ph-max-title:${maxTitle};${image ? `--ph-image:url('${image}');` : ''}`}
->
-  <div class="page-hero-inner">
-    {tag && <span class="ph-tag">{tag}</span>}
-    <h1>
-      {title}{accent && <><br /><span>{accent}</span></>}
-    </h1>
-    {description && <p class="ph-desc">{description}</p>}
+<section class="page-hero band" style={`--ph-max-title:${maxTitle};`}>
+  <div class="band-inner">
+    {tag && <span class="eyebrow">{tag}</span>}
+    <h1>{accent ? `${title} ${accent}` : title}</h1>
+    {description && <p>{description}</p>}
     <slot />
+    {image && (
+      <img
+        class="ph-image"
+        src={image}
+        srcset={imageSet}
+        sizes="(max-width: 1120px) 100vw, 1120px"
+        alt=""
+        fetchpriority="high"
+        decoding="async"
+      />
+    )}
   </div>
 </section>
 
 <style>
-  .page-hero {
-    min-height: var(--ph-min);
-    display: flex;
-    align-items: center;
-    padding: 5rem 8%;
-    position: relative;
-    overflow: hidden;
-    background: var(--black);
-  }
-
-  /* Fotoğraflı varyant: görsel en altta, üstünde düz karartma (degrade yok) */
-  .page-hero.has-image {
-    background: var(--ph-image) center / cover no-repeat;
-  }
-  .page-hero.has-image::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: var(--scrim);
-  }
-
-  .page-hero-inner {
-    position: relative;
-    max-width: 680px;
-  }
-  .page-hero.right .page-hero-inner { margin-left: auto; text-align: right; }
-  .page-hero.right .ph-desc { margin-left: auto; }
-
-  .ph-tag {
-    display: inline-block;
-    font-size: var(--fs-eyebrow);
-    font-weight: var(--fw-bold);
-    letter-spacing: var(--ls-eyebrow);
-    text-transform: uppercase;
-    color: var(--green-bright);
-    margin-bottom: 1rem;
+  /* Birincil öğe: üst/alt boşluk komşu bölümlerin (--sp-6) iki katı */
+  .page-hero { padding-block: calc(var(--sp-6) * 2); }
+  @media (max-width: 768px) {
+    .page-hero { padding-block: calc(var(--sp-5) * 2); }
   }
 
   .page-hero h1 {
@@ -98,18 +71,21 @@ const {
     font-weight: var(--fw-bold);
     line-height: var(--lh-tight);
     letter-spacing: var(--ls-display);
-    margin-bottom: 1.2rem;
-  }
-  /* İkinci satır artık yeşil değil: --green-bright başlık ölçeğinde kullanılmaz */
-
-  .ph-desc {
-    font-size: var(--fs-base);
-    color: var(--text-body);
-    max-width: 460px;
-    line-height: var(--lh-body);
+    max-width: 20ch;
   }
 
-  @media (max-width: 640px) {
-    .page-hero { padding: 4rem 6%; }
+  /* Fotoğraf: geniş kadraj, kırpma odağı üstte (yüzler üst yarıda) */
+  .ph-image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 21 / 9;
+    max-height: var(--media-max-h);
+    object-fit: cover;
+    object-position: center 35%;
+    border-radius: var(--r-md);
+    margin-top: var(--sp-5);
+  }
+  @media (max-width: 768px) {
+    .ph-image { aspect-ratio: 4 / 3; max-height: var(--media-max-h-sm); }
   }
 </style>
