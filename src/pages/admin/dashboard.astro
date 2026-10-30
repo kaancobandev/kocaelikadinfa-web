@@ -425,12 +425,76 @@ const panels = [
         });
       });
 
+      // ── Bildirim ──
+      var bildirimZaman;
+      function bildir(metin, hataMi) {
+        var el = document.querySelector('.alert');
+        if (!el) {
+          el = document.createElement('div');
+          document.body.appendChild(el);
+        }
+        el.className = 'alert ' + (hataMi ? 'error' : 'success');
+        el.setAttribute('role', hataMi ? 'alert' : 'status');
+        el.textContent = metin;
+        clearTimeout(bildirimZaman);
+        bildirimZaman = setTimeout(function () { el.classList.add('is-hidden'); }, 3500);
+      }
+
+      // Sunucudan gelen mesaj da kendiliğinden kaybolsun
+      var ilkUyari = document.querySelector('.alert');
+      if (ilkUyari) {
+        bildirimZaman = setTimeout(function () { ilkUyari.classList.add('is-hidden'); }, 3500);
+      }
+
       // ── Silme onayı ──
       document.addEventListener('submit', function (e) {
         var form = e.target;
         var msg  = form && form.getAttribute ? form.getAttribute('data-confirm') : null;
-        if (msg && !window.confirm(msg)) e.preventDefault();
+        if (msg && !window.confirm(msg)) { e.preventDefault(); return; }
+
+        // Galeride tek tek silerken sayfa yenilenirse kaydırma konumu
+        // kayboluyor ve kullanıcı yüzlerce karenin neresinde kaldığını
+        // unutuyordu. İsteği, panelin kullandığı aksiyon kaydının JSON
+        // ucuna gönderip kartı yerinde kaldırıyoruz: sayfa hiç yenilenmiyor.
+        if (form.classList && form.classList.contains('gallery-delete-form')) {
+          e.preventDefault();
+          galeridenSil(form);
+        }
       });
+
+      function galeridenSil(form) {
+        var kart  = form.closest('.gallery-admin-item');
+        var panel = form.closest('.panel');
+        var dugme = form.querySelector('button');
+        if (dugme) { dugme.disabled = true; dugme.textContent = 'Siliniyor…'; }
+
+        fetch('/api/admin/upload', { method: 'POST', body: new FormData(form) })
+          .then(function (r) {
+            return r.json().then(function (govde) { return { ok: r.ok, govde: govde }; });
+          })
+          .then(function (c) {
+            if (!c.ok || (c.govde && c.govde.error)) {
+              throw new Error((c.govde && c.govde.error) || 'Silinemedi.');
+            }
+            if (kart) kart.remove();
+            sayimGuncelle(panel);
+            bildir((c.govde && c.govde.ok) || 'Silindi.', false);
+          })
+          .catch(function (hata) {
+            if (dugme) { dugme.disabled = false; dugme.textContent = 'Sil'; }
+            bildir(hata.message || 'Silinemedi.', true);
+          });
+      }
+
+      // "Yüklenenler (N)" başlığı silinen kartla birlikte düşsün
+      function sayimGuncelle(panel) {
+        if (!panel) return;
+        var baslik = panel.querySelector('.list-heading');
+        if (baslik) {
+          baslik.textContent = 'Yüklenenler (' +
+            panel.querySelectorAll('.gallery-admin-item').length + ')';
+        }
+      }
     })();
   </script>
 </body>

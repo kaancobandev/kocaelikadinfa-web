@@ -148,16 +148,32 @@ body {
 .js-tabs .panel { display: none; }
 .js-tabs .panel.is-active { display: block; }
 
-/* ── Uyarılar ────────────────────────────────────────────────────────── */
+/* ── Bildirim ─────────────────────────────────────────────────────────
+   Sayfa akışında DEĞİL, üst çubuğun altında yüzer ve kendiliğinden kaybolur.
+   Akışta olduğunda iki sorun vardı: belirip kaybolurken içeriği aşağı/yukarı
+   kaydırıyordu ve kullanıcıyı görmek için sayfa başına dönmek zorundaydı.
+   Zeminleri opak, çünkü artık içeriğin üstünde duruyor. */
 .alert {
+  position: fixed;
+  top: calc(var(--a-topbar-h) + .8rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  max-width: min(92vw, 520px);
   border-radius: 8px;
   padding: .8rem 1.2rem;
   font-size: .85rem;
   font-weight: 600;
-  margin-bottom: 1.2rem;
+  box-shadow: 0 12px 32px rgba(0,0,0,.5);
+  transition: opacity .25s ease, transform .25s ease;
 }
-.alert.success { background: rgba(34,150,58,.15); border: 1px solid rgba(34,150,58,.3); color: var(--a-green); }
-.alert.error   { background: rgba(200,40,40,.15); border: 1px solid rgba(200,40,40,.3); color: var(--a-red); }
+.alert.is-hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-10px);
+  pointer-events: none;
+}
+.alert.success { background: #0f2f18; border: 1px solid rgba(34,150,58,.45); color: var(--a-green); }
+.alert.error   { background: #301111; border: 1px solid rgba(200,40,40,.45); color: var(--a-red); }
 
 /* ── Panel ───────────────────────────────────────────────────────────── */
 .panel {
