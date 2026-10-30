@@ -1,0 +1,141 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import PageHero from '../components/PageHero.astro';
+import { supabase } from '../lib/supabase';
+import { img, imgSet } from '../lib/img';
+
+/**
+ * Takımlar — iki takımı eşit ağırlıkta tanıtan giriş sayfası.
+ *
+ * Menüdeki "Takımlar" eskiden doğrudan /a-takim'a gidiyordu. O sayfaya düşen
+ * ziyaretçi kulübün tek takımı olduğunu sanabiliyordu, çünkü Pilot Takım'a
+ * giden bağlantıyı görmemiş olabiliyordu. Burada ikisi de aynı ızgarada,
+ * aynı boyutta ve aynı sırada duruyor; hangisinin "birinci" olduğu sırayla
+ * belli oluyor, görünürlükle değil.
+ *
+ * Detay sayfaları olduğu gibi duruyor: /a-takim ve /pilot-takim silinmedi,
+ * yönlendirilmedi. Bu yüzden 301 altyapısı gerekmiyor ve dizine girmiş
+ * adresler kırılmıyor.
+ *
+ * İÇERİK UYDURULMADI. Her kartın açıklaması o takımın kendi sayfasındaki
+ * hero açıklamasının birebir aynısı; görseller de aynı kaynaktan geliyor
+ * (hero_settings: 2 = pilot takım, 3 = A takım). Kulüp panelden görseli
+ * değiştirdiğinde bu sayfa da değişir.
+ */
+const [aTakim, pilot] = await Promise.all([
+  supabase.from('hero_settings').select('image_url').eq('id', 3).maybeSingle(),
+  supabase.from('hero_settings').select('image_url').eq('id', 2).maybeSingle(),
+]);
+
+const takimlar = [
+  {
+    ad: 'A Takım',
+    lig: 'Kadınlar 1. Ligi',
+    href: '/a-takim',
+    gorsel: aTakim.data?.image_url ?? '/a-takim-hero.jpeg',
+    aciklama:
+      'Altyapıya verdiğimiz önem ve genç oyuncularımıza duyduğumuz güvenle, kadın futbolunda sürdürülebilir başarı hedefliyoruz.',
+  },
+  {
+    ad: 'Pilot Takım',
+    lig: 'Kadınlar 3. Ligi',
+    href: '/pilot-takim',
+    gorsel: pilot.data?.image_url ?? '/pilot-hero.jpg',
+    aciklama:
+      'Tutkuyla çalışan, disiplinle oynayan ve sahada hiçbir zaman pes etmeyen bir kadro.',
+  },
+];
+---
+
+<Layout
+  title="Takımlar — Kocaeli Kadın Futbol Kulübü"
+  description="Kocaeli Kadın Futbol Kulübü takımları: Kadınlar 1. Ligi'nde A Takım, Kadınlar 3. Ligi'nde Pilot Takım."
+>
+  <Navbar />
+
+  <main id="icerik" tabindex="-1">
+    {/* compact: bu sayfanın birincil öğesi başlık değil, hemen altındaki iki
+        takım kartı. Tam yükseklik hero onları ilk ekranın dışına iterdi ve
+        sayfanın varlık sebebi tam olarak ikisinin birlikte görünmesi. */}
+    <PageHero
+      tag="Kulüp"
+      title="Takımlar"
+      description="Kadınlar 1. Ligi'nde A Takım, Kadınlar 3. Ligi'nde Pilot Takım ile mücadele ediyoruz."
+      maxTitle="4.5rem"
+      compact
+    />
+
+    <section class="band takimlar-section">
+      <div class="band-inner">
+        <div class="takimlar-grid">
+          {takimlar.map(t => (
+            <a href={t.href} class="card takim-kart">
+              <span class="card-media">
+                <img
+                  src={img(t.gorsel, 800)}
+                  srcset={imgSet(t.gorsel, [400, 800, 1200])}
+                  sizes="(max-width: 767px) 100vw, 50vw"
+                  alt={`${t.ad} — ${t.lig}`}
+                  loading="lazy"
+                />
+              </span>
+              <span class="eyebrow">{t.lig}</span>
+              <span class="card-title takim-ad">{t.ad}</span>
+              <span class="takim-aciklama">{t.aciklama}</span>
+              <span class="takim-git">Takımı tanı →</span>
+            </a>
+          ))}
+        </div>
+
+        {/* Üçüncü birim. Akademi menüde kendi sekmesinde olduğu için burada
+            kart değil üçüncül bağlantı: kulüp üç birimden oluşuyor ama bu
+            sayfa iki TAKIM sayfası, akademi yaş grubu yapısı. */}
+        <a href="/akademi" class="link-tertiary">Akademi — 4-16 Yaş →</a>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  /* Tek kolon tabanda, 768'den itibaren iki eşit kolon. Üçüncü bir kolon
+     yok: iki takım var ve kartların eşit kalması sayfanın tek işi. */
+  .takimlar-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--sp-3);
+  }
+  @media (min-width: 768px) {
+    .takimlar-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .takim-ad {
+    font-size: var(--fs-lg);
+    letter-spacing: var(--ls-tight);
+  }
+  .takim-aciklama {
+    font-size: var(--fs-sm);
+    line-height: var(--lh-body);
+    color: var(--text-body);
+  }
+  /* Kart zaten bağlantı; bu satır buton değil, yön gösteren bir işaret */
+  .takim-git {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    color: var(--green-bright);
+  }
+
+  .link-tertiary {
+    display: inline-block;
+    margin-top: var(--sp-4);
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .link-tertiary:hover { color: var(--text); }
+  .link-tertiary:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
+</style>

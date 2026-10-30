@@ -10,12 +10,15 @@ import { newsPath, isoDate } from '../lib/news';
 
 const SITE = 'https://kocaelikadinfa.com';
 
-// Menüden bağımsızdır: 8 rotanın hepsi listelenir (menüden çıkan /pilot-takim
-// dahil). Öncelikler yeni hiyerarşiye göre: akademi ve ön kayıt en üstte.
+// Menüden bağımsızdır: 9 rotanın hepsi listelenir (menüde kendi sekmesi
+// olmayan /pilot-takim dahil). Öncelikler yeni hiyerarşiye göre: akademi ve
+// ön kayıt en üstte; /takimlar iki takımın giriş sayfası olduğu için
+// detay sayfalarından önce gelir.
 const staticPages: { path: string; changefreq: string; priority: string }[] = [
   { path: '/',                        changefreq: 'weekly',  priority: '1.0' },
   { path: '/haberler',                changefreq: 'daily',   priority: '0.8' },
-  { path: '/a-takim',                 changefreq: 'weekly',  priority: '0.8' },
+  { path: '/takimlar',                changefreq: 'monthly', priority: '0.8' },
+  { path: '/a-takim',                 changefreq: 'weekly',  priority: '0.7' },
   { path: '/pilot-takim',             changefreq: 'weekly',  priority: '0.7' },
   { path: '/akademi',                 changefreq: 'weekly',  priority: '0.9' },
   { path: '/mac-gecmisi',             changefreq: 'weekly',  priority: '0.7' },
