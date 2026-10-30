@@ -286,7 +286,13 @@ const ikonlar: Record<string, string> = {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     align-items: center;
-    background: var(--alt-nav-zemin);
+    /* Buzlu cam: arkadaki içerik bulanık geçiyor. Faz 3'te siteden
+       backdrop-filter bilinçli olarak kaldırılmıştı; burada tek bir
+       yüzen çubuk için geri getiriliyor, sayfa yüzeylerine yayılmıyor. */
+    background: var(--alt-nav-cam);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    backdrop-filter: blur(18px) saturate(1.4);
+    border: 1px solid rgba(255,255,255,.45);
     border-radius: var(--r-pill);
     box-shadow: 0 10px 30px rgba(0,0,0,.45);
   }
@@ -336,6 +342,12 @@ const ikonlar: Record<string, string> = {
   .alt-nav-oge.aktif .alt-nav-kapsul { color: var(--text); }
   .alt-nav-oge.aktif .alt-nav-etiket { font-weight: var(--fw-bold); }
   .alt-nav-oge:focus-visible { outline: 2px solid var(--alt-nav-vurgu); outline-offset: 2px; }
+
+  /* Cam desteklenmiyorsa (eski tarayıcı) opak zemine düş: saydam kalırsa
+     arkadaki içerik okunurluğu bozar. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .alt-nav-liste { background: var(--alt-nav-zemin); }
+  }
 
   /* CTA bir sekme değil: daire, çubuktan yukarı taşıyor ve hiç hareket
      etmiyor. Aktif kapsülle aynı renkte olduğu için ayrımı şekil yapıyor. */
