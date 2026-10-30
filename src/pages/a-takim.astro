@@ -26,6 +26,17 @@ const photos: GalleryItem[] = galleryData ?? [];
 
   <main id="icerik" tabindex="-1">
 
+    {/* İki takım da menüde tek "Takımlar" sekmesinin arkasında; geçiş burada
+        görünür olmalı, gövdenin içinde üçüncül bir bağlantı olarak değil. */}
+    <nav class="band takim-gecis-band" aria-label="Takımlar">
+      <div class="band-inner">
+        <ul class="takim-gecis">
+          <li><span class="takim aktif" aria-current="page">A Takım — Kadınlar 1. Ligi</span></li>
+          <li><a class="takim" href="/pilot-takim">Pilot Takım — Kadınlar 3. Ligi</a></li>
+        </ul>
+      </div>
+    </nav>
+
     <PageHero
       tag="Takımlar"
       title="A Takım — Kadınlar 1. Ligi"
@@ -41,8 +52,6 @@ const photos: GalleryItem[] = galleryData ?? [];
         <p>
           Kadınlar 1. Lig'inin en genç, tamamen yerli ve yabancı oyuncu bulundurmayan tek takımı olarak; başarımızı kendi altyapımızdan yetişen genç yeteneklere verdiğimiz değerle inşa ediyoruz. Kocaeli Kadın Futbol Akademisi olarak geleceği kendi sporcularımızla yazıyoruz.
         </p>
-        <!-- Pilot Takım menüde değil; ona buradan gidiliyor (üçüncül bağlantı) -->
-        <a href="/pilot-takim" class="link-tertiary">Pilot Takım — Kadınlar 3. Ligi →</a>
       </div>
     </section>
 
@@ -116,4 +125,27 @@ const photos: GalleryItem[] = galleryData ?? [];
     grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
     gap: var(--sp-3);
   }
+
+  /* Takım geçişi: menüde "Takımlar" tek sekme olduğu için iki takıma da
+     buradan ulaşılıyor. Gövdenin içindeki üçüncül bağlantının yerini aldı —
+     diğer takım sayfanın dibinde değil, başında görünür. */
+  .takim-gecis-band { padding-block: 0; }
+  .takim-gecis {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-4);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: var(--sp-2);
+  }
+  .takim {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  a.takim:hover { color: var(--text); }
+  a.takim:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
+  .takim.aktif { color: var(--green-bright); }
 </style>
