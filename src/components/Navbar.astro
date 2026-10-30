@@ -36,7 +36,7 @@ const ustLink    = links.find(l => l.href === UST_SERIT);
 
 /* İkonlar satır içi SVG — yeni bağımlılık yok. 24x24, currentColor. */
 const ikonlar: Record<string, string> = {
-  '/a-takim': '<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.4 2.9-5.8 6.5-5.8s6.5 2.4 6.5 5.8"/><path d="M16.5 5.6a3.2 3.2 0 0 1 0 6"/><path d="M21.5 20c0-2.5-1.3-4.3-3.3-5.2"/>',
+  '/takimlar': '<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.4 2.9-5.8 6.5-5.8s6.5 2.4 6.5 5.8"/><path d="M16.5 5.6a3.2 3.2 0 0 1 0 6"/><path d="M21.5 20c0-2.5-1.3-4.3-3.3-5.2"/>',
   '/akademi': '<path d="M12 4 2.5 8.6 12 13.2l9.5-4.6L12 4Z"/><path d="M6.5 10.6V15c0 1.8 2.5 3 5.5 3s5.5-1.2 5.5-3v-4.4"/>',
   '/haberler': '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M7 9.5h6M7 13h10M7 16h6"/>',
   '/antrenmanlardan-kareler': '<rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="8.5" cy="10" r="1.6"/><path d="m4.5 17.5 4.5-4.5 3.5 3.5 3-2.5 4 4"/>',
@@ -262,12 +262,11 @@ const ikonlar: Record<string, string> = {
   .ust-serit-link:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 
   /* ── Alt navigasyon ───────────────────────────────────────────────
-     Yüzen hap çubuk. Zemin --kemik (açık): sayfanın geri kalanı koyu
-     olduğu için açık yüzey, navigasyonun içerikten ayrı bir KATMAN
+     Yüzen hap çubuk. Renkler site paletinden DEĞİL, NERVA referans
+     görselinin piksellerinden örneklendi (bkz. Layout.astro :root).
+     Açık zemin ayrıca işlevsel: navigasyonun içerikten ayrı bir KATMAN
      olduğunu söylüyor ve arkasında hangi fotoğraf olursa olsun okunur
-     kalıyor. Koyu yeşil kapsülün görünmesi de buna bağlı: --green,
-     --kemik üstünde 8,9:1; koyu bir çubuk zemininde 1,8:1 olurdu,
-     yani kapsül fark edilmezdi. */
+     kalıyor; koyu kapsülün görünmesi de buna bağlı. */
   .alt-nav {
     display: block;
     position: fixed;
@@ -287,7 +286,7 @@ const ikonlar: Record<string, string> = {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     align-items: center;
-    background: var(--kemik);
+    background: var(--alt-nav-zemin);
     border-radius: var(--r-pill);
     box-shadow: 0 10px 30px rgba(0,0,0,.45);
   }
@@ -311,7 +310,7 @@ const ikonlar: Record<string, string> = {
     position: absolute;
     top: 0; left: 0;
     border-radius: var(--r-pill);
-    background: var(--green);
+    background: var(--alt-nav-vurgu);
     opacity: 0;
     pointer-events: none;
     transition: transform .28s cubic-bezier(.4, 0, .2, 1), opacity .2s;
@@ -333,10 +332,10 @@ const ikonlar: Record<string, string> = {
     line-height: 1;
     white-space: nowrap;
   }
-  .alt-nav-oge.aktif { color: var(--surface); }
+  .alt-nav-oge.aktif { color: var(--alt-nav-aktif); }
   .alt-nav-oge.aktif .alt-nav-kapsul { color: var(--text); }
   .alt-nav-oge.aktif .alt-nav-etiket { font-weight: var(--fw-bold); }
-  .alt-nav-oge:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+  .alt-nav-oge:focus-visible { outline: 2px solid var(--alt-nav-vurgu); outline-offset: 2px; }
 
   /* CTA bir sekme değil: daire, çubuktan yukarı taşıyor ve hiç hareket
      etmiyor. Aktif kapsülle aynı renkte olduğu için ayrımı şekil yapıyor. */
@@ -348,9 +347,9 @@ const ikonlar: Record<string, string> = {
     width: 54px; height: 54px;
     margin-top: -24px;
     border-radius: 50%;
-    background: var(--green);
+    background: var(--alt-nav-vurgu);
     color: var(--text);
-    border: 3px solid var(--kemik);
+    border: 3px solid var(--alt-nav-zemin);
     box-shadow: 0 8px 18px rgba(0,0,0,.4);
   }
   .alt-nav-cta svg { width: 22px; height: 22px; }
