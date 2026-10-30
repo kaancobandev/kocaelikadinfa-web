@@ -76,6 +76,10 @@ const ikonlar: Record<string, string> = {
     yapıyor (renk değil), çünkü ikisi aynı renkte. */}
 <nav class="alt-nav" aria-label="Alt menü">
   <ul class="alt-nav-liste">
+    {/* Kayan gösterge: her sekmenin kendi zemini DEĞİL, tek bir öğe.
+        Sekmeler ayrı sayfalar olduğu için kapsül kendiliğinden kaymaz;
+        dokunulduğunda JS onu hedefe ötelerken sayfa arkada yükleniyor. */}
+    <span class="alt-nav-gosterge" aria-hidden="true"></span>
     {altLinkler.slice(0, 2).map(l => (
       <li>
         <a
@@ -279,6 +283,7 @@ const ikonlar: Record<string, string> = {
     margin: 0 auto;
     padding: .35rem .5rem;
     max-width: 440px;
+    position: relative;   /* göstergenin çapası */
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     align-items: center;
@@ -299,7 +304,22 @@ const ikonlar: Record<string, string> = {
     color: var(--alt-nav-pasif);
     border-radius: var(--r-pill);
   }
+  /* Gösterge, kapsüllerin ARKASINDA duran tek yeşil öğe. Konumu ve
+     ölçüsü JS'ten geliyor (hedef kapsülün kutusu ölçülüyor), böylece
+     sekme sayısı ya da etiket genişliği değişse de takip ediyor. */
+  .alt-nav-gosterge {
+    position: absolute;
+    top: 0; left: 0;
+    border-radius: var(--r-pill);
+    background: var(--green);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform .28s cubic-bezier(.4, 0, .2, 1), opacity .2s;
+  }
+
   .alt-nav-kapsul {
+    position: relative;   /* göstergenin üstünde kalsın */
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -314,7 +334,7 @@ const ikonlar: Record<string, string> = {
     white-space: nowrap;
   }
   .alt-nav-oge.aktif { color: var(--surface); }
-  .alt-nav-oge.aktif .alt-nav-kapsul { background: var(--green); color: var(--text); }
+  .alt-nav-oge.aktif .alt-nav-kapsul { color: var(--text); }
   .alt-nav-oge.aktif .alt-nav-etiket { font-weight: var(--fw-bold); }
   .alt-nav-oge:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
 
@@ -382,13 +402,52 @@ const ikonlar: Record<string, string> = {
     // birikerek eşiği aşardı.
   }, { passive: true });
 
-  // Dokunulan sekmenin kapsülü hemen yerine geçsin. Sayfa yüklenene
-  // kadar geri bildirim verir ama gezinmeyi geciktirmez (preventDefault yok).
-  document.querySelectorAll<HTMLElement>('.alt-nav-oge').forEach(oge => {
+  // ── Alt çubuk: kayan gösterge ──
+  const liste    = document.querySelector<HTMLElement>('.alt-nav-liste');
+  const gosterge = document.querySelector<HTMLElement>('.alt-nav-gosterge');
+  const altOgeler = Array.from(document.querySelectorAll<HTMLElement>('.alt-nav-oge'));
+
+  /** Göstergeyi hedef sekmenin kapsülünün tam üstüne koyar. */
+  function gostergeyiYerlestir(oge: HTMLElement | null, animasyonlu: boolean) {
+    if (!liste || !gosterge) return;
+    if (!oge) { gosterge.style.opacity = '0'; return; }
+
+    const kapsul = oge.querySelector<HTMLElement>('.alt-nav-kapsul');
+    if (!kapsul) return;
+
+    const k = kapsul.getBoundingClientRect();
+    const l = liste.getBoundingClientRect();
+
+    // İlk yerleştirmede ve yeniden boyutlandırmada kayma OLMAMALI;
+    // yoksa sayfa her açıldığında gösterge soldan süzülürdü.
+    if (!animasyonlu) gosterge.style.transition = 'none';
+
+    gosterge.style.width  = k.width + 'px';
+    gosterge.style.height = k.height + 'px';
+    gosterge.style.transform =
+      'translate(' + (k.left - l.left) + 'px, ' + (k.top - l.top) + 'px)';
+    gosterge.style.opacity = '1';
+
+    if (!animasyonlu) {
+      void gosterge.offsetWidth;   // stil uygulansın, sonra geçiş geri gelsin
+      gosterge.style.transition = '';
+    }
+  }
+
+  const aktifOge = () => altOgeler.find(o => o.classList.contains('aktif')) ?? null;
+
+  // Sayfa açılışında gösterge zaten yerinde: bu sayfanın sekmesi hangisiyse.
+  // "Sonuçlar" gibi alt çubukta karşılığı olmayan sayfalarda hiç görünmez.
+  gostergeyiYerlestir(aktifOge(), false);
+  window.addEventListener('resize', () => gostergeyiYerlestir(aktifOge(), false));
+
+  // Dokununca gösterge hedefe KAYAR; gezinme geciktirilmiyor
+  // (preventDefault yok), kayma sayfa yüklenirken görünüyor.
+  altOgeler.forEach(oge => {
     oge.addEventListener('click', () => {
-      document.querySelectorAll('.alt-nav-oge.aktif')
-        .forEach(eski => eski.classList.remove('aktif'));
+      altOgeler.forEach(eski => eski.classList.remove('aktif'));
       oge.classList.add('aktif');
+      gostergeyiYerlestir(oge, true);
     });
   });
 </script>
