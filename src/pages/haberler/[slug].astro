@@ -72,7 +72,10 @@ const jsonLd = {
   <main id="icerik" tabindex="-1">
     <article>
       <!-- Başlık: sayfanın birincil öğesi. Eyebrow = yayın tarihi (zaman), varsa. -->
-      <PageHero tag={tarih || undefined} title={article.title} maxTitle="4rem">
+      {/* compact: tam yükseklik hero bu sayfada görseli ve gövdeyi katlamanın
+          altına itiyordu (1440×900'de gövde 1500px'te başlıyordu). Okumaya
+          gelinen tek sayfa türünde ilk ekran yalnız başlıktan ibaret kalmasın. */}
+      <PageHero tag={tarih || undefined} title={article.title} maxTitle="4rem" compact>
         <a href="/haberler" class="back-link">Tüm Haberler →</a>
       </PageHero>
 
