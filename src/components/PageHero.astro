@@ -22,6 +22,9 @@ interface Props {
   image?: string;
   /** Fotoğrafın srcset'i (imgSet() çıktısı) */
   imageSet?: string;
+  /** Fotoğrafın ALTINDAKİ tek satır künye (§2.2.5). Yalnız fotoğraf varsa
+      basılır; boşsa hiç basılmaz, boş satır bırakmaz. */
+  caption?: string;
   /** Başlık boyutu için clamp üst sınırı */
   maxTitle?: string;
   /**
@@ -40,6 +43,7 @@ const {
   description,
   image,
   imageSet,
+  caption,
   maxTitle = '5.5rem',
   compact = false,
 } = Astro.props;
@@ -62,10 +66,20 @@ const {
         decoding="async"
       />
     )}
+    {image && caption && <p class="ph-altyazi">{caption}</p>}
   </div>
 </section>
 
 <style>
+  /* Fotoğraf künyesi: görselin hemen altında, overlay değil (§2.2.5) */
+  .ph-altyazi {
+    margin-top: var(--sp-2);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-body);
+    color: var(--text-muted);
+    max-width: var(--measure-text);
+  }
+
   /* Birincil öğe: üst/alt boşluk komşu bölümlerin (--sp-6) iki katı */
   .page-hero { padding-block: calc(var(--sp-6) * 2); }
   @media (max-width: 767px) {

@@ -73,8 +73,8 @@ const [
   supabase.from('news').select('*').order('id', { ascending: false }),
   supabase.from('hero_settings').select('*').eq('id', 1).maybeSingle(),
   supabase.from('gallery').select('*').order('sort_order'),
-  supabase.from('hero_settings').select('image_url').eq('id', 2).maybeSingle(),
-  supabase.from('hero_settings').select('image_url').eq('id', 3).maybeSingle(),
+  supabase.from('hero_settings').select('image_url,description').eq('id', 2).maybeSingle(),
+  supabase.from('hero_settings').select('image_url,description').eq('id', 3).maybeSingle(),
   supabase.from('hero_settings').select('*').eq('id', 4).maybeSingle(),
   supabase.from('pilot_gallery').select('*').order('sort_order'),
   supabase.from('a_takim_gallery').select('*').order('sort_order'),
@@ -92,6 +92,10 @@ const antrenmanItems: AntrenmanGaleriItem[] = antrenmanRes.data ?? [];
 const videos:       VideoItem[]           = videoRes.data     ?? [];
 const pilotHeroImage: string | null       = pilotHeroRes.data?.image_url ?? null;
 const aTakimHeroImage: string | null      = aTakimHeroRes.data?.image_url ?? null;
+// Hero fotoğrafının ALTINDAKİ künye (hero_settings.description). Boş bırakılırsa
+// sitede o satır hiç basılmaz — yarım bir künye hiç olmayandan kötüdür.
+const pilotHeroAltyazi: string            = pilotHeroRes.data?.description ?? '';
+const aTakimHeroAltyazi: string           = aTakimHeroRes.data?.description ?? '';
 const serit: HeroSettings | null          = seritRes.data ?? null;
 
 // Maçları kategori (badge) başlığına göre grupla
@@ -205,6 +209,13 @@ const panels = [
             <ImageField current={aTakimHeroImage} urlValue={aTakimHeroImage} />
           </div>
 
+          <div class="form-row">
+            <label class="grow">Fotoğrafın Altındaki Yazı
+              <textarea name="description" rows="2" placeholder="Örn: Sezon açılışı, Kocaeli Osmangazi Üniversitesi sahası">{aTakimHeroAltyazi}</textarea>
+              <span class="section-note">Fotoğrafın hemen altında küçük punto ile çıkar. Boş bırakırsanız hiç görünmez.</span>
+            </label>
+          </div>
+
           <div class="form-actions">
             <button type="submit" class="btn-save">Kaydet</button>
           </div>
@@ -226,6 +237,13 @@ const panels = [
 
           <div class="form-row">
             <ImageField current={pilotHeroImage} urlValue={pilotHeroImage} />
+          </div>
+
+          <div class="form-row">
+            <label class="grow">Fotoğrafın Altındaki Yazı
+              <textarea name="description" rows="2" placeholder="Örn: Gölcük İdmanocağı ile oynanan hazırlık maçı">{pilotHeroAltyazi}</textarea>
+              <span class="section-note">Fotoğrafın hemen altında küçük punto ile çıkar. Boş bırakırsanız hiç görünmez.</span>
+            </label>
           </div>
 
           <div class="form-actions">
