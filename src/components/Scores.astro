@@ -104,14 +104,24 @@ function formatDate(d: string) {
     border-top: 1px solid var(--border);
   }
 
+  /* Bölüm ortalı. auto-fill yerine auto-fit: auto-fill 1120px'e üç kolon
+     açıyor, iki maç varken üçüncü kolon BOŞ KALIYOR ama yer kaplamaya
+     devam ediyordu — kartlar solda, sağda kocaman boşluk. auto-fit boş
+     kolonu çökertiyor, böylece justify-content ortalayacak boşluk buluyor.
+     1fr yerine 360px tavanı: 1fr kartları gerip tüm genişliğe yayardı,
+     ortalanacak boşluk yine kalmazdı. */
+  .scores-section .band-inner { text-align: center; }
   .scores-grid {
     display: grid;
     /* KORUNDU: min() olmadan kolon tabanı 320px'de sabitleniyor; 320px'lik
        ekranda dolgudan sonra 288px yer kaldığı için kart taşıyor ve
        sayfa yatay kayıyordu. min(320px, 100%) tabanı dar ekranda kaldırıyor. */
-    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 360px));
+    justify-content: center;
     gap: var(--sp-3);
   }
+  /* Kart içi olduğu gibi kalır: skor satırı ve takım adları sola hizalı */
+  .score-card { text-align: left; }
 
   .score-card {
     display: flex;
