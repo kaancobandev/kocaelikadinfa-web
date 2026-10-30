@@ -71,13 +71,27 @@ const {
 </section>
 
 <style>
-  /* Fotoğraf künyesi: görselin hemen altında, overlay değil (§2.2.5) */
+  /* Fotoğraf künyesi: görselin hemen altında, overlay değil (§2.2.5).
+
+     İki düzeltme: (1) pre-line, çünkü panelde Enter ile atılan satır
+     sonları metin düğümünde duruyor ama HTML varsayılanında tek boşluğa
+     iniyordu — kullanıcı alt satıra geçemiyordu. (2) Genişlik sınırı
+     kaldırıldı: --measure-text (620px) okunabilirlik için doğru ölçü ama
+     alan tek satırlık künye değil, uzun tanıtım metni olarak kullanılıyor
+     ve 1120px'lik fotoğrafın altında yarıya kadar yazıp kesiliyordu.
+     Artık fotoğrafla aynı genişlikte.
+
+     max-width: none AÇIKÇA yazılmak zorunda: Layout.astro'daki global
+     "p { max-width: var(--measure-text) }" kuralı bu öğeye de uyuyor,
+     yani bildirimi buradan silmek sınırı kaldırmıyor, sadece global
+     değeri devralıyor. */
   .ph-altyazi {
     margin-top: var(--sp-2);
+    max-width: none;
     font-size: var(--fs-sm);
     line-height: var(--lh-body);
     color: var(--text-muted);
-    max-width: var(--measure-text);
+    white-space: pre-line;
   }
 
   /* Birincil öğe: üst/alt boşluk komşu bölümlerin (--sp-6) iki katı */
