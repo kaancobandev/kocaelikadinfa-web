@@ -48,11 +48,12 @@ const [aTakim, akademi, pilot] = await Promise.all([
   supabase.from('gallery').select('*', { count: 'exact', head: true }),
   supabase.from('pilot_gallery').select('*', { count: 'exact', head: true }),
 ]);
-const kardesler = [
-  { ad: "A Takım'dan Kareler",     sayi: aTakim.count ?? 0,  href: '/a-takim#kareler' },
-  { ad: "Akademi'den Kareler",     sayi: akademi.count ?? 0, href: '/akademi#kareler' },
-  { ad: "Pilot Takım'dan Kareler", sayi: pilot.count ?? 0,   href: '/pilot-takim#kareler' },
-].filter(k => k.sayi > 0);
+const albumler = [
+  { ad: 'Antrenmanlardan', sayi: sonuc.count ?? 0,   href: '/antrenmanlardan-kareler', aktif: true },
+  { ad: 'A Takım',         sayi: aTakim.count ?? 0,  href: '/a-takim#kareler',         aktif: false },
+  { ad: 'Akademi',         sayi: akademi.count ?? 0, href: '/akademi#kareler',         aktif: false },
+  { ad: 'Pilot Takım',     sayi: pilot.count ?? 0,   href: '/pilot-takim#kareler',     aktif: false },
+].filter(a => a.sayi > 0);
 
 function youtubeId(url: string): string | null {
   const m = url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);
@@ -79,6 +80,25 @@ function isYoutube(url: string): boolean {
       maxTitle="4.5rem"
       compact
     />
+
+    {/* Albüm şeridi: bu sayfa "Galeri" adını taşıyor ama yalnız antrenman
+        albümünü gösteriyor. Diğer üç albüm sayfalamanın altındaydı, yani
+        86 fotoğraf ve 4 sayfa sonra görünüyordu. Şerit ilk ekranda. */}
+    {albumler.length > 1 && (
+      <nav class="band albumler-band" aria-label="Albümler">
+        <div class="band-inner">
+          <ul class="albumler">
+            {albumler.map(a => (
+              <li>
+                {a.aktif
+                  ? <span class="album aktif" aria-current="page">{a.ad} <span class="album-sayi">{a.sayi}</span></span>
+                  : <a class="album" href={a.href}>{a.ad} <span class="album-sayi">{a.sayi}</span></a>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </nav>
+    )}
 
     <!-- Izgara: sayfanın birincil öğesi (lead hücre) ilk ekranda; bölümün
          kendi h2'si yok ki ilk ekranda h1 tek büyük metin kalsın (§4.3).
@@ -129,7 +149,7 @@ function isYoutube(url: string): boolean {
             ))}
           </div>
 
-          <!-- Sayfalama ve kardeş albümler -->
+          <!-- Sayfalama -->
           <div class="galeri-alt">
             {toplamSayfa > 1 && (
               <nav class="sayfalama" aria-label="Sayfalar">
@@ -139,14 +159,6 @@ function isYoutube(url: string): boolean {
                     : <a class="sayfa" href={`?sayfa=${n}`}>{n}</a>
                 ))}
               </nav>
-            )}
-
-            {kardesler.length > 0 && (
-              <ul class="kardesler" aria-label="Diğer albümler">
-                {kardesler.map(k => (
-                  <li><a href={k.href}>{k.ad} ({k.sayi}) →</a></li>
-                ))}
-              </ul>
             )}
           </div>
 
@@ -207,20 +219,26 @@ function isYoutube(url: string): boolean {
   /* Yeşil yalnız aktif sayfa numarasında (§5.11) */
   .sayfa.aktif { color: var(--green-bright); border-color: var(--border-strong); }
 
-  /* Üçüncül bağlantılar: soluk metin, kart/buton değil */
-  .kardesler {
+  /* Albüm şeridi: sekme değil, ince bir çizgi üstünde soluk metinler.
+     Aktif albüm yeşil; sayılar sorgudan gelir, elle yazılmaz. */
+  .albumler-band { padding-block: 0; }
+  .albumler {
     list-style: none;
     display: flex;
     flex-wrap: wrap;
-    gap: var(--sp-2) var(--sp-3);
+    gap: var(--sp-2) var(--sp-4);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: var(--sp-2);
   }
-  .kardesler a {
+  .album {
     font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
     color: var(--text-muted);
     text-decoration: none;
-    font-variant-numeric: tabular-nums;
     transition: color .2s;
   }
-  .kardesler a:hover { color: var(--text); }
-  .kardesler a:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
+  a.album:hover { color: var(--text); }
+  a.album:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
+  .album.aktif { color: var(--green-bright); }
+  .album-sayi { font-variant-numeric: tabular-nums; color: var(--text-dim); }
 </style>
