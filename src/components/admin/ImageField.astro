@@ -38,8 +38,19 @@ const {
 
 <label>{label}
   <div class="file-wrap">
-    {current && <img src={current} class="news-preview" alt="Kayıtlı görsel" />}
-    <img class="news-preview file-preview" alt="Seçilen dosyanın önizlemesi" />
+    {current && (
+      <span class="onizleme-kutu">
+        <span class="onizleme-etiket">Kayıtlı</span>
+        <img src={current} class="news-preview" alt="Kayıtlı görsel" />
+      </span>
+    )}
+    {/* Dosya seçilene kadar kutu tamamen gizli; yoksa boşta duran bir
+        "Yeni seçilen" etiketi kalırdı. Görünürlüğü dashboard.astro'daki
+        delege dinleyici .is-visible ile açıyor. */}
+    <span class="onizleme-kutu onizleme-kutu--yeni">
+      <span class="onizleme-etiket onizleme-etiket--yeni">Yeni seçilen</span>
+      <img class="news-preview file-preview" alt="Seçilen dosyanın önizlemesi" />
+    </span>
     <input type="file" name={fileName} accept={accept} class="file-input" multiple={multiple} />
     {multiple && (
       <span class="section-note">

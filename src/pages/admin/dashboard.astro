@@ -320,6 +320,11 @@ const panels = [
         if (!preview || !ilk || ilk.type.indexOf('image/') !== 0) return;
         preview.src = URL.createObjectURL(ilk);
         preview.classList.add('is-visible');
+        // Etiketli kutu da açılsın; etiket önizlemeyle birlikte görünür
+        var kutu = preview.parentElement;
+        if (kutu && kutu.classList.contains('onizleme-kutu--yeni')) {
+          kutu.classList.add('is-visible');
+        }
       });
 
       // ── Toplu fotoğraf yükleme ────────────────────────────────────────

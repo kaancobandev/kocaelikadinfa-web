@@ -324,7 +324,23 @@ input[type="file"].file-input:hover { border-color: var(--a-green); color: var(-
   border-radius: 8px;
   border: 1px solid rgba(255,255,255,0.08);
 }
-/* Dosya seçilince gösterilen anlık önizleme */
+/* Önizleme kutuları: hangisinin kayıtlı hangisinin yeni seçilen olduğu
+   etiketle yazıyor. Eskiden iki görsel üst üste etiketsiz duruyordu ve
+   hangisinin kaydedileceği belli olmuyordu. */
+.onizleme-kutu { display: flex; flex-direction: column; gap: .3rem; }
+.onizleme-etiket {
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--a-muted);
+}
+/* Kaydedilecek olan bu: yeşil, diğerinden ayrışsın */
+.onizleme-etiket--yeni { color: var(--a-green); }
+
+/* Dosya seçilene kadar kutu ve içindeki önizleme gizli */
+.onizleme-kutu--yeni { display: none; }
+.onizleme-kutu--yeni.is-visible { display: flex; }
 .file-preview { display: none; }
 .file-preview.is-visible { display: block; }
 
