@@ -189,15 +189,19 @@ const jsonLd = {
 
   /* ── Görsel ── */
   .article-media-band { padding-block: 0; }
+  /* Kutu görseli değil görsel kutuyu belirler. width:100% + contain, dikey
+     fotoğrafı 916x520'lik kutuya sığdırıp iki yana ~526px boşluk bırakıyordu;
+     object-position:left o boşluğun tamamını sağa yığıyor, background da onu
+     görünür bir blok yapıyordu. width:auto ile öge fotoğrafın oranını alır:
+     boşluk kalmaz, dikey de yatay da doğru durur. */
   .article-media {
     display: block;
-    width: 100%;
+    width: auto;
+    max-width: 100%;
     height: auto;
     max-height: var(--media-max-h);
-    object-fit: contain;
-    object-position: left center;
+    margin-inline: auto;
     border-radius: var(--r-md);
-    background: var(--surface);
   }
 
   /* ── Metin ── */
