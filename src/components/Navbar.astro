@@ -319,7 +319,9 @@ const ikonlar: Record<string, string> = {
     background: var(--alt-nav-vurgu);
     opacity: 0;
     pointer-events: none;
-    transition: transform .28s cubic-bezier(.4, 0, .2, 1), opacity .2s;
+    /* Yumuşak yavaşlayan eğri: hedefe hızlı çıkıp uzun süre süzülerek
+       oturuyor, lineer bir ease'e göre gözle belirgin biçimde akıcı. */
+    transition: transform .42s cubic-bezier(.22, 1, .36, 1), opacity .25s ease;
   }
 
   .alt-nav-kapsul {
