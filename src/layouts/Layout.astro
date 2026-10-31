@@ -184,17 +184,22 @@ const jsonLd = {
        Tek sapma pasif etiket: referanstaki #a8aaa9 yalnız 1,83:1 veriyor ve
        AA'yı geçmiyor; gerçek sitede okunmaz kalırdı, bu yüzden AA geçen en
        açık tona çekildi. */
-    --alt-nav-zemin: #e4e6e5;              /* opak yedek (cam desteklenmezse) */
-    --alt-nav-cam:   rgba(228,230,229,.88); /* buzlu cam yüzey                */
-    --alt-nav-vurgu: #092117;              /* kapsül ve CTA dairesi           */
-    --alt-nav-aktif: #000603;              /* aktif etiket                    */
-    --alt-nav-pasif: #4a4e4b;              /* pasif ikon ve etiket            */
+    --alt-nav-zemin: #fafafa;              /* opak yedek (cam desteklenmezse) */
+    --alt-nav-cam:   rgba(250,250,250,.88); /* buzlu cam yüzey                */
+    --alt-nav-vurgu: #1b1b1b;              /* kapsül ve CTA dairesi           */
+    --alt-nav-aktif: #080808;              /* aktif etiket                    */
+    --alt-nav-pasif: #5c5c5c;              /* pasif ikon ve etiket            */
 
-    /* Kontrastlar EN KÖTÜ duruma göre ölçüldü: cam %88 saydam olduğu için
-       arkada saf siyah varken etkin zemin #c7c9c8'e düşüyor. O zeminde
-       kapsül 9,85:1, aktif etiket 12,28:1, pasif etiket 5,08:1. Pasif ton
-       bu yüzden #5f6360'tan koyultuldu; eski değer camda 3,67:1 kalıyordu.
-       Arkada fotoğraf ya da açık içerik varsa zemin açılır, oranlar artar. */
+    /* Referans videonun çubuğu #e4e6e5 ölçülmüştü ama orada BEYAZ bir
+       uygulama ekranının üstünde duruyor; aynı renk bizim siyah sayfamızın
+       üstünde krem bir leke gibi okunuyordu (eşzamanlı kontrast). Rengi
+       kopyalamak algıyı kopyalamaya yetmediği için çubuk beyaza çekildi.
+       Vurgu da nötr koyuya alındı: referansta koyu yeşildi, istenmedi.
+
+       Kontrastlar EN KÖTÜ duruma göre: cam %88 saydam, arkada saf siyah
+       varken etkin zemin #dcdcdc. O zeminde kapsül 12,49:1, aktif etiket
+       14,60:1, pasif etiket 4,81:1, kapsül içindeki beyaz ikon 17,13:1.
+       Arkada fotoğraf varsa zemin açılır, oranlar daha da yükselir. */
 
     --amber-wash:   rgba(212,160,82,.14);   /* yalnız beraberlik rozeti zemini */
     --kirmizi-wash: rgba(224,85,85,.14);    /* yalnız mağlubiyet rozeti zemini */
