@@ -24,6 +24,23 @@ const links = [
 const dolguluSayfalar = ['/', '/akademi', '/aramiza-katil'];
 const yol = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const cerceveli = dolguluSayfalar.includes(yol);
+
+/* Alt navigasyon (<1160px) dört düğüm taşır; beşinci düğüm "Sonuçlar"
+   üst şeritte kalır, çünkü çubuğun ortasındaki yükseltilmiş daire
+   "Aramıza Katıl"a ait. İkinci bir liste TUTULMUYOR: dörtleme kuralı
+   (Navbar/Footer/404/sitemap) bozulmasın diye kaynak yine yukarıdaki
+   links dizisi, buradan yalnızca süzülüyor. */
+const UST_SERIT = '/mac-gecmisi';
+const altLinkler = links.filter(l => l.href !== UST_SERIT);
+const ustLink    = links.find(l => l.href === UST_SERIT);
+
+/* İkonlar satır içi SVG — yeni bağımlılık yok. 24x24, currentColor. */
+const ikonlar: Record<string, string> = {
+  '/takimlar': '<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.4 2.9-5.8 6.5-5.8s6.5 2.4 6.5 5.8"/><path d="M16.5 5.6a3.2 3.2 0 0 1 0 6"/><path d="M21.5 20c0-2.5-1.3-4.3-3.3-5.2"/>',
+  '/akademi': '<path d="M12 4 2.5 8.6 12 13.2l9.5-4.6L12 4Z"/><path d="M6.5 10.6V15c0 1.8 2.5 3 5.5 3s5.5-1.2 5.5-3v-4.4"/>',
+  '/haberler': '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M7 9.5h6M7 13h10M7 16h6"/>',
+  '/antrenmanlardan-kareler': '<rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="8.5" cy="10" r="1.6"/><path d="m4.5 17.5 4.5-4.5 3.5 3.5 3-2.5 4 4"/>',
+};
 ---
 
 <nav class="navbar" id="navbar">
@@ -32,16 +49,14 @@ const cerceveli = dolguluSayfalar.includes(yol);
     <span class="logo-text">Kocaeli Kadın Futbol Kulübü</span>
   </a>
 
-  <button
-    type="button"
-    id="nav-toggle"
-    class="nav-burger"
-    aria-label="Menüyü aç"
-    aria-expanded="false"
-    aria-controls="nav-links"
-  >
-    <span></span><span></span><span></span>
-  </button>
+  {/* Dar ekranda menü alt çubuğa taşındı; beşinci düğüm burada kalıyor */}
+  {ustLink && (
+    <a
+      class="ust-serit-link"
+      href={ustLink.href}
+      aria-current={yol === ustLink.href ? 'page' : undefined}
+    >{ustLink.label}</a>
+  )}
 
   <ul class="nav-links" id="nav-links">
     {links.map(l => (
@@ -50,6 +65,62 @@ const cerceveli = dolguluSayfalar.includes(yol);
     <li>
       <a href="/aramiza-katil" class:list={['btn-join', { 'btn-join--cerceveli': cerceveli }]}>Aramıza Katıl</a>
     </li>
+  </ul>
+</nav>
+
+{/* ── Alt navigasyon (<1160px) ──────────────────────────────────────
+    Hamburger'ın yerini alır: beş yüzeyin dördü burada, beşincisi üst
+    şeritte; hiçbiri saklı değil. Ortadaki yükseltilmiş daire bir sekme
+    DEĞİL, CTA — bu yüzden asla "aktif" durumuna girmez. Aktif sekmeyi
+    KAPSÜL, CTA'yı DAİRE gösteriyor: ikisi de koyu yeşil, ayrımı şekil
+    yapıyor (renk değil), çünkü ikisi aynı renkte. */}
+<nav class="alt-nav" aria-label="Alt menü">
+  <ul class="alt-nav-liste">
+    {/* Kayan gösterge: her sekmenin kendi zemini DEĞİL, tek bir öğe.
+        Sekmeler ayrı sayfalar olduğu için kapsül kendiliğinden kaymaz;
+        dokunulduğunda JS onu hedefe ötelerken sayfa arkada yükleniyor. */}
+    <span class="alt-nav-gosterge" aria-hidden="true"></span>
+    {altLinkler.slice(0, 2).map(l => (
+      <li>
+        <a
+          href={l.href}
+          class:list={['alt-nav-oge', { aktif: yol === l.href }]}
+          aria-current={yol === l.href ? 'page' : undefined}
+        >
+          <span class="alt-nav-kapsul">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <Fragment set:html={ikonlar[l.href] ?? ''} />
+            </svg>
+          </span>
+          <span class="alt-nav-etiket">{l.label}</span>
+        </a>
+      </li>
+    ))}
+
+    <li class="alt-nav-cta-yuva">
+      <a href="/aramiza-katil" class="alt-nav-cta" aria-label="Aramıza Katıl">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <path d="M12 6v12M6 12h12" />
+        </svg>
+      </a>
+    </li>
+
+    {altLinkler.slice(2).map(l => (
+      <li>
+        <a
+          href={l.href}
+          class:list={['alt-nav-oge', { aktif: yol === l.href }]}
+          aria-current={yol === l.href ? 'page' : undefined}
+        >
+          <span class="alt-nav-kapsul">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <Fragment set:html={ikonlar[l.href] ?? ''} />
+            </svg>
+          </span>
+          <span class="alt-nav-etiket">{l.label}</span>
+        </a>
+      </li>
+    ))}
   </ul>
 </nav>
 
@@ -65,14 +136,10 @@ const cerceveli = dolguluSayfalar.includes(yol);
     justify-content: space-between;
     padding: 0 5%;
     z-index: 1000;
-    transition: height .3s;
+    transition: height .3s, transform .3s ease;
   }
   .navbar.scrolled { height: 58px; }
 
-  /* Mobil menü açıkken arkadaki sayfa kaymasın. Sınıf <html> üzerinde
-     olduğu için :global gerekiyor (IntroLoader da aynı yöntemi kullanıyor). */
-  :global(html.nav-locked),
-  :global(html.nav-locked body) { overflow: hidden; }
 
   .nav-logo {
     display: flex;
@@ -93,36 +160,6 @@ const cerceveli = dolguluSayfalar.includes(yol);
     color: var(--text);
   }
 
-  .nav-burger {
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-    cursor: pointer;
-    /* Gerçek buton: klavyeyle odaklanabilir ve Enter/Space ile açılır */
-    background: none;
-    border: none;
-    font: inherit;   /* tarayıcının 13,33px buton varsayılanı ölçeğe sızmasın */
-    /* Parmakla basılan tek kontrol; 37x36 idi, dokunma hedefi sınırının
-       altındaydı. Çizgilerin görünümü aynı, yalnızca kutu büyüyor. */
-    min-width: 44px;
-    min-height: 44px;
-    padding: 0;
-    margin-right: -9px;
-    border-radius: var(--r-sm);
-  }
-  .nav-burger span {
-    display: block;
-    width: 25px; height: 2px;
-    background: var(--text);
-    border-radius: var(--r-sm);
-    transition: .3s;
-  }
-  .nav-burger:focus-visible {
-    outline: 2px solid var(--green-bright);
-    outline-offset: 2px;
-  }
 
   .nav-links {
     display: flex;
@@ -195,142 +232,235 @@ const cerceveli = dolguluSayfalar.includes(yol);
       max-width: 180px;
     }
 
-    .nav-burger { display: flex; }
+    /* Menü alt çubuğa taşındı; üstte logo + beşinci düğüm kalıyor */
+    .nav-links { display: none; }
 
-    .nav-links {
-      position: fixed;
-      top: var(--nav-h); left: 0; right: 0;
-      background: var(--black);
-      flex-direction: column;
-      gap: 0;
-      padding: 0.5rem 0 2rem;
-      transform: translateY(-110%);
-      opacity: 0;
-      /* Kapalıyken klavyeyle içine sekme yapılamasın.
-         visibility kapanışta animasyon bitince, açılışta ise anında değişsin. */
-      visibility: hidden;
-      transition: transform .35s ease, opacity .3s ease, visibility 0s linear .35s;
-      border-bottom: 1px solid var(--border);
-      z-index: 999;
-    }
-    .navbar.nav-open .nav-links {
-      visibility: visible;
-      transition: transform .35s ease, opacity .3s ease, visibility 0s;
-    }
-    /* Mobil menü de sola hizalı: ortalanmış metin yok (§2.2.6) */
-    .nav-links li { width: 100%; }
-    .nav-links a {
-      display: block;
-      padding: 1rem var(--gutter);
-      font-size: var(--fs-base);
-      border-bottom: 1px solid var(--border);
-    }
-    .nav-links li:last-child a { border-bottom: none; }
+    /* Üst şerit aşağı kaydırınca gizlenir; alt çubuk HİÇ gizlenmez —
+       menünün sürekli görünür olması bu işin asıl sebebi. */
+    .navbar.ust-gizli { transform: translateY(-100%); }
+    /* İçerik çubuğun altında kalmasın */
+    :global(body) { padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)); }
+  }
+  /* ── Üst şeritteki beşinci düğüm (yalnız dar ekran) ── */
+  .ust-serit-link {
+    display: inline-flex;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    letter-spacing: .5px;
+    color: var(--text);
+    text-decoration: none;
+    padding: .45rem .9rem;
+    min-height: 44px;
+    align-items: center;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-pill);
+  }
+  .ust-serit-link[aria-current='page'] {
+    color: var(--green-bright);
+    border-color: var(--green-bright);
+  }
+  .ust-serit-link:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 
-    .navbar.nav-open .nav-links {
-      transform: translateY(0);
-      opacity: 1;
-    }
+  /* ── Alt navigasyon ───────────────────────────────────────────────
+     Yüzen hap çubuk. Renkler site paletinden DEĞİL, NERVA referans
+     görselinin piksellerinden örneklendi (bkz. Layout.astro :root).
+     Açık zemin ayrıca işlevsel: navigasyonun içerikten ayrı bir KATMAN
+     olduğunu söylüyor ve arkasında hangi fotoğraf olursa olsun okunur
+     kalıyor; koyu kapsülün görünmesi de buna bağlı. */
+  .alt-nav {
+    display: block;
+    position: fixed;
+    left: 0; right: 0;
+    bottom: calc(var(--sp-2) + env(safe-area-inset-bottom, 0px));
+    z-index: 1000;
+    padding-inline: var(--sp-3);
+    pointer-events: none;   /* yalnız çubuğun kendisi tıklanabilir */
+  }
+  .alt-nav-liste {
+    pointer-events: auto;
+    list-style: none;
+    margin: 0 auto;
+    padding: .35rem .5rem;
+    max-width: 440px;
+    position: relative;   /* göstergenin çapası */
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    align-items: center;
+    /* Buzlu cam: arkadaki içerik bulanık geçiyor. Faz 3'te siteden
+       backdrop-filter bilinçli olarak kaldırılmıştı; burada tek bir
+       yüzen çubuk için geri getiriliyor, sayfa yüzeylerine yayılmıyor. */
+    background: var(--alt-nav-cam);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    backdrop-filter: blur(18px) saturate(1.4);
+    border: 1px solid rgba(255,255,255,.45);
+    border-radius: var(--r-pill);
+    box-shadow: 0 10px 30px rgba(0,0,0,.45);
+  }
 
-    /* Burger → X animasyonu */
-    .nav-burger[aria-expanded='true'] span:nth-child(1) {
-      transform: translateY(7px) rotate(45deg);
-    }
-    .nav-burger[aria-expanded='true'] span:nth-child(2) {
-      opacity: 0;
-      transform: scaleX(0);
-    }
-    .nav-burger[aria-expanded='true'] span:nth-child(3) {
-      transform: translateY(-7px) rotate(-45deg);
-    }
+  .alt-nav-oge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding-block: 5px;
+    min-height: 44px;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--alt-nav-pasif);
+    border-radius: var(--r-pill);
+  }
+  /* Gösterge, kapsüllerin ARKASINDA duran tek yeşil öğe. Konumu ve
+     ölçüsü JS'ten geliyor (hedef kapsülün kutusu ölçülüyor), böylece
+     sekme sayısı ya da etiket genişliği değişse de takip ediyor. */
+  .alt-nav-gosterge {
+    position: absolute;
+    top: 0; left: 0;
+    border-radius: var(--r-pill);
+    background: var(--alt-nav-vurgu);
+    opacity: 0;
+    pointer-events: none;
+    /* Yumuşak yavaşlayan eğri: hedefe hızlı çıkıp uzun süre süzülerek
+       oturuyor, lineer bir ease'e göre gözle belirgin biçimde akıcı. */
+    transition: transform .42s cubic-bezier(.22, 1, .36, 1), opacity .25s ease;
+  }
+
+  .alt-nav-kapsul {
+    position: relative;   /* göstergenin üstünde kalsın */
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px; height: 28px;
+    border-radius: var(--r-pill);
+    transition: background-color .25s ease, color .25s ease;
+  }
+  .alt-nav-kapsul svg { width: 19px; height: 19px; }
+  .alt-nav-etiket {
+    font-size: .66rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .alt-nav-oge.aktif { color: var(--alt-nav-aktif); }
+  .alt-nav-oge.aktif .alt-nav-kapsul { color: var(--text); }
+  .alt-nav-oge.aktif .alt-nav-etiket { font-weight: var(--fw-bold); }
+  .alt-nav-oge:focus-visible { outline: 2px solid var(--alt-nav-vurgu); outline-offset: 2px; }
+
+  /* Cam desteklenmiyorsa (eski tarayıcı) opak zemine düş: saydam kalırsa
+     arkadaki içerik okunurluğu bozar. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .alt-nav-liste { background: var(--alt-nav-zemin); }
+  }
+
+  /* CTA bir sekme değil: daire, çubuktan yukarı taşıyor ve hiç hareket
+     etmiyor. Aktif kapsülle aynı renkte olduğu için ayrımı şekil yapıyor. */
+  .alt-nav-cta-yuva { display: flex; justify-content: center; }
+  .alt-nav-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px; height: 54px;
+    margin-top: -24px;
+    border-radius: 50%;
+    background: var(--alt-nav-vurgu);
+    color: var(--text);
+    border: 3px solid var(--alt-nav-zemin);
+    box-shadow: 0 8px 18px rgba(0,0,0,.4);
+  }
+  .alt-nav-cta svg { width: 22px; height: 22px; }
+  .alt-nav-cta:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
+
+  /* Masaüstünde alt çubuk yok; üstteki navbar devralıyor. Bu kural
+     taban .alt-nav kuralından SONRA gelmek zorunda: ikisi de 0,2,0
+     özgüllükte, kazananı sıra belirliyor. */
+  @media (min-width: 1161px) {
+    .alt-nav { display: none; }
+    .ust-serit-link { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .alt-nav-kapsul, .navbar { transition: none; }
   }
 </style>
 
 <script>
   const navbar = document.getElementById('navbar');
-  const toggle = document.getElementById('nav-toggle') as HTMLButtonElement | null;
 
   // iOS Safari sticky fix: boş touchstart ile dokunma olayları etkinleşir
   navbar?.addEventListener('touchstart', () => {}, { passive: true });
 
-  // Scroll → küçült
+  // Scroll → üst şeridi küçült, aşağı kaydırırken gizle.
+  // Alt çubuk bu mantığın DIŞINDA: hiçbir koşulda gizlenmiyor, çünkü
+  // menünün sürekli görünür olması hamburger'ı kaldırma sebebimizdi.
+  let sonY = window.scrollY;
   window.addEventListener('scroll', () => {
-    navbar?.classList.toggle('scrolled', window.scrollY > 60);
-  });
+    const y = window.scrollY;
+    navbar?.classList.toggle('scrolled', y > 60);
 
-  const navLinks = document.getElementById('nav-links');
+    // Sayfa başında şerit hep görünür
+    if (y <= 120) { navbar?.classList.remove('ust-gizli'); sonY = y; return; }
 
-  const isOpen = () => toggle?.getAttribute('aria-expanded') === 'true';
+    // Eşikler BİLEREK asimetrik. Aşırı kaydırma geri tepmesi ölçüldü:
+    // tek hamlede 803e çıkıp 797ye yaslanıyor. Simetrik eşikte o 6px
+    // "yukarı kaydırma" sayılıp şeridi anında geri getiriyordu. Gizleme
+    // küçük harekete, geri getirme BİLİNÇLİ bir yukarı kaydırmaya bağlı.
+    const fark = y - sonY;
+    if (fark > 8) {
+      navbar?.classList.add('ust-gizli');
+      sonY = y;
+    } else if (fark < -40) {
+      navbar?.classList.remove('ust-gizli');
+      sonY = y;
+    }
+    // Aradaki küçük oynamalarda sonY GÜNCELLENMEZ; yoksa geri tepme
+    // birikerek eşiği aşardı.
+  }, { passive: true });
 
-  /** Menü açıkken Tab'ın dolaşabileceği öğeler — hamburger butonu dahil,
-   *  böylece Shift+Tab ile butona dönüp menüyü kapatmak mümkün. */
-  const odaklanabilirler = (): HTMLElement[] => [
-    ...(toggle ? [toggle] : []),
-    ...Array.from(navLinks?.querySelectorAll<HTMLElement>('a[href]') ?? []),
-  ];
+  // ── Alt çubuk: kayan gösterge ──
+  const liste    = document.querySelector<HTMLElement>('.alt-nav-liste');
+  const gosterge = document.querySelector<HTMLElement>('.alt-nav-gosterge');
+  const altOgeler = Array.from(document.querySelectorAll<HTMLElement>('.alt-nav-oge'));
 
-  function setMenu(open: boolean) {
-    const odakMenüdeydi = !!navLinks?.contains(document.activeElement);
+  /** Göstergeyi hedef sekmenin kapsülünün tam üstüne koyar. */
+  function gostergeyiYerlestir(oge: HTMLElement | null, animasyonlu: boolean) {
+    if (!liste || !gosterge) return;
+    if (!oge) { gosterge.style.opacity = '0'; return; }
 
-    navbar?.classList.toggle('nav-open', open);
-    // Menü açıkken arkadaki sayfa kaymasın
-    document.documentElement.classList.toggle('nav-locked', open);
-    toggle?.setAttribute('aria-expanded', String(open));
-    toggle?.setAttribute('aria-label', open ? 'Menüyü kapat' : 'Menüyü aç');
+    const kapsul = oge.querySelector<HTMLElement>('.alt-nav-kapsul');
+    if (!kapsul) return;
 
-    if (open) {
-      // Odağı menünün içine al; aksi hâlde Tab, menünün arkasındaki
-      // görünmeyen bağlantılar arasında dolaşıyordu.
-      odaklanabilirler()[1]?.focus();
-    } else if (odakMenüdeydi) {
-      // Menü kapanırken odak görünmez bir öğede kalmasın
-      toggle?.focus();
+    const k = kapsul.getBoundingClientRect();
+    const l = liste.getBoundingClientRect();
+
+    // İlk yerleştirmede ve yeniden boyutlandırmada kayma OLMAMALI;
+    // yoksa sayfa her açıldığında gösterge soldan süzülürdü.
+    if (!animasyonlu) gosterge.style.transition = 'none';
+
+    gosterge.style.width  = k.width + 'px';
+    gosterge.style.height = k.height + 'px';
+    gosterge.style.transform =
+      'translate(' + (k.left - l.left) + 'px, ' + (k.top - l.top) + 'px)';
+    gosterge.style.opacity = '1';
+
+    if (!animasyonlu) {
+      void gosterge.offsetWidth;   // stil uygulansın, sonra geçiş geri gelsin
+      gosterge.style.transition = '';
     }
   }
 
-  toggle?.addEventListener('click', () => setMenu(!isOpen()));
+  const aktifOge = () => altOgeler.find(o => o.classList.contains('aktif')) ?? null;
 
-  document.addEventListener('keydown', e => {
-    if (!isOpen()) return;
+  // Sayfa açılışında gösterge zaten yerinde: bu sayfanın sekmesi hangisiyse.
+  // "Sonuçlar" gibi alt çubukta karşılığı olmayan sayfalarda hiç görünmez.
+  gostergeyiYerlestir(aktifOge(), false);
+  window.addEventListener('resize', () => gostergeyiYerlestir(aktifOge(), false));
 
-    if (e.key === 'Escape') {
-      setMenu(false);
-      toggle?.focus();
-      return;
-    }
-
-    // Odak tuzağı: Tab menünün dışına çıkmasın, başa/sona sarsın
-    if (e.key === 'Tab') {
-      const öğeler = odaklanabilirler();
-      if (!öğeler.length) return;
-      const ilk = öğeler[0];
-      const son = öğeler[öğeler.length - 1];
-
-      if (e.shiftKey && document.activeElement === ilk) {
-        e.preventDefault();
-        son.focus();
-      } else if (!e.shiftKey && document.activeElement === son) {
-        e.preventDefault();
-        ilk.focus();
-      }
-    }
-  });
-
-  // Ekran hamburger eşiğinin üstüne büyürse menü kapansın; aksi hâlde
-  // görünmeyen bir menü yüzünden sayfa kilitli kalıyor.
-  const genişEkran = window.matchMedia('(min-width: 1161px)');
-  genişEkran.addEventListener('change', e => {
-    if (e.matches && isOpen()) setMenu(false);
-  });
-
-  // Menü dışına tıklayınca kapat
-  document.addEventListener('click', e => {
-    if (!isOpen()) return;
-    if (!navbar?.contains(e.target as Node)) setMenu(false);
-  });
-
-  // Mobil: linke tıklayınca menüyü kapat (logo dahil)
-  document.querySelectorAll('.nav-links a, .nav-logo').forEach(link => {
-    link.addEventListener('click', () => setMenu(false));
+  // Dokununca gösterge hedefe KAYAR; gezinme geciktirilmiyor
+  // (preventDefault yok), kayma sayfa yüklenirken görünüyor.
+  altOgeler.forEach(oge => {
+    oge.addEventListener('click', () => {
+      altOgeler.forEach(eski => eski.classList.remove('aktif'));
+      oge.classList.add('aktif');
+      gostergeyiYerlestir(oge, true);
+    });
   });
 </script>
