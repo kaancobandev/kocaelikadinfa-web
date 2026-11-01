@@ -177,29 +177,23 @@ const jsonLd = {
     --kirmizi: #e05555;   /* hata ve kayıp.                5,60:1 / 5,18:1 */
     --link:    #4da6ff;   /* YALNIZ haber gövdesi içi bağlantı. 8,21:1 / 7,59:1 */
 
-    /* Alt navigasyon çubuğu BİLİNÇLİ olarak site paletinin dışında: renkleri
-       NERVA referans VİDEOSUNUN karelerinden örneklendi (poster görseli
-       değil; video tuvale çizilip baskın tonlar sayıldı), böylece çubuk
-       referanstaki gibi duruyor. Kontrastlar --alt-nav-zemin üstünde ölçüldü.
-       Tek sapma pasif etiket: referanstaki #a8aaa9 yalnız 1,83:1 veriyor ve
-       AA'yı geçmiyor; gerçek sitede okunmaz kalırdı, bu yüzden AA geçen en
-       açık tona çekildi. */
-    --alt-nav-zemin: #fafafa;              /* opak yedek (cam desteklenmezse) */
-    --alt-nav-cam:   rgba(250,250,250,.88); /* buzlu cam yüzey                */
-    --alt-nav-vurgu: #1b1b1b;              /* kapsül ve CTA dairesi           */
-    --alt-nav-aktif: #080808;              /* aktif etiket                    */
-    --alt-nav-pasif: #5c5c5c;              /* pasif ikon ve etiket            */
+    /* Alt navigasyon çubuğu BİLİNÇLİ olarak site paletinin dışında. Dört
+       değer de NERVA referans VİDEOSUNDAN ölçüldü: video karesi tuvale
+       çizilip baskın tonlar sayıldı (kapsülde tek karede 1181 piksel).
 
-    /* Referans videonun çubuğu #e4e6e5 ölçülmüştü ama orada BEYAZ bir
-       uygulama ekranının üstünde duruyor; aynı renk bizim siyah sayfamızın
-       üstünde krem bir leke gibi okunuyordu (eşzamanlı kontrast). Rengi
-       kopyalamak algıyı kopyalamaya yetmediği için çubuk beyaza çekildi.
-       Vurgu da nötr koyuya alındı: referansta koyu yeşildi, istenmedi.
+       Çubuk OPAK. Cam (backdrop-filter) ile "videodaki renk" aynı anda
+       mümkün değil: videoda çubuk BEYAZ bir ekranın üstünde duruyor, bizde
+       SİYAH sayfanın üstünde; %88 saydamlıkta arkadaki siyah emilip çubuk
+       #dcdcdc'ye düşüyordu. Kullanıcı birebir videodaki rengi istedi.
 
-       Kontrastlar EN KÖTÜ duruma göre: cam %88 saydam, arkada saf siyah
-       varken etkin zemin #dcdcdc. O zeminde kapsül 12,49:1, aktif etiket
-       14,60:1, pasif etiket 4,81:1, kapsül içindeki beyaz ikon 17,13:1.
-       Arkada fotoğraf varsa zemin açılır, oranlar daha da yükselir. */
+       Bu zeminde kontrastlar: kapsül 13,85:1, aktif etiket 17,1:1, kapsül
+       içindeki beyaz ikon 16,9:1. PASİF ETİKET 2,29:1 — WCAG AA (4,5:1)
+       altında. Referansta böyle ve birebir istendi; bilinçli sapma.
+       Erişilebilirlik gerekirse #5c5c5c (4,88:1) geri konur. */
+    --alt-nav-zemin: #e7e9e9;   /* çubuk                   */
+    --alt-nav-vurgu: #092117;   /* kapsül ve CTA dairesi   */
+    --alt-nav-aktif: #000906;   /* aktif etiket            */
+    --alt-nav-pasif: #999b9b;   /* pasif ikon ve etiket    */
 
     --amber-wash:   rgba(212,160,82,.14);   /* yalnız beraberlik rozeti zemini */
     --kirmizi-wash: rgba(224,85,85,.14);    /* yalnız mağlubiyet rozeti zemini */
