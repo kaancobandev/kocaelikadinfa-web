@@ -281,6 +281,14 @@ const jsonLd = {
   ::-webkit-scrollbar-track { background: var(--dark); }
   ::-webkit-scrollbar-thumb { background: var(--green); border-radius: 3px; }
 
+  /* Mobil tarayıcıların dokunma vurgusu: ölçülen varsayılan
+     rgba(51,181,229,.4). Köşe yarıçapını TAKMADIĞI için yuvarlatılmış
+     kart ve hap biçimli öğelerde mavi bir dikdörtgen olarak çıkıyordu.
+     Özellik kalıtsal, bu yüzden tek tanım tüm siteyi kapsıyor. Yerine
+     aşağıdaki :active durumları geri bildirim veriyor — vurgu kalkıp
+     yerine bir şey konmazsa "dokundum mu" belirsizliği oluşuyor. */
+  html { -webkit-tap-highlight-color: transparent; }
+
   .btn-primary {
     display: inline-block;
     background: var(--green);
@@ -292,8 +300,9 @@ const jsonLd = {
     text-decoration: none;
     border: none;
     cursor: pointer;
-    transition: background .25s;
+    transition: background .25s, transform .12s ease;
   }
+  .btn-primary:active { transform: scale(.97); }
   /* Hover yalnız zemin tonu: glow ve zıplama yok (dekoratif hareket değil, durum bildirimi) */
   .btn-primary:hover { background: var(--green-mid); }
 
@@ -358,9 +367,12 @@ const jsonLd = {
     font: inherit;
     text-align: left;
     text-decoration: none;
-    transition: border-color .15s ease;
+    transition: border-color .15s ease, transform .12s ease;
   }
   button.card { width: 100%; cursor: pointer; }
+  /* Dokunma geri bildirimi: kart hafifçe içeri basılıyor. Haber, takım,
+     galeri ve 404 kartlarının hepsi bu sınıfı kullanıyor. */
+  .card:active { transform: scale(.985); border-color: var(--border-strong); }
   .card:hover { border-color: var(--border-strong); }
   .card:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
   .card-media {
