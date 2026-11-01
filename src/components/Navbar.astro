@@ -316,9 +316,11 @@ const ikonlar: Record<string, string> = {
     background: var(--alt-nav-vurgu);
     opacity: 0;
     pointer-events: none;
-    /* Yumuşak yavaşlayan eğri: hedefe hızlı çıkıp uzun süre süzülerek
-       oturuyor, lineer bir ease'e göre gözle belirgin biçimde akıcı. */
-    transition: transform .42s cubic-bezier(.22, 1, .36, 1), opacity .25s ease;
+    /* Referans videodan ölçülen hareket: hedefi yolun ~%8,6'sı kadar aşıp
+       geri yaslanıyor, süre ~0,26 sn. Buradaki eğri aynı aşmayı veriyor.
+       Tıklamada asıl hareket WAAPI ile yapılıyor (gerilme için); bu geçiş
+       JS'in çalışmadığı ya da yeniden boyutlandırma gibi durumlar için. */
+    transition: transform .3s cubic-bezier(.32, 1.5, .6, 1), opacity .25s ease;
   }
 
   .alt-nav-kapsul {
@@ -411,6 +413,9 @@ const ikonlar: Record<string, string> = {
   const gosterge = document.querySelector<HTMLElement>('.alt-nav-gosterge');
   const altOgeler = Array.from(document.querySelectorAll<HTMLElement>('.alt-nav-oge'));
 
+  /** Göstergenin son yatay konumu; gerilmeli hareketin başlangıcı. */
+  let sonX = 0;
+
   /** Göstergeyi hedef sekmenin kapsülünün tam üstüne koyar. */
   function gostergeyiYerlestir(oge: HTMLElement | null, animasyonlu: boolean) {
     if (!liste || !gosterge) return;
@@ -421,21 +426,46 @@ const ikonlar: Record<string, string> = {
 
     const k = kapsul.getBoundingClientRect();
     const l = liste.getBoundingClientRect();
-
-    // İlk yerleştirmede ve yeniden boyutlandırmada kayma OLMAMALI;
-    // yoksa sayfa her açıldığında gösterge soldan süzülürdü.
-    if (!animasyonlu) gosterge.style.transition = 'none';
+    const hedefX = k.left - l.left;
+    const hedefY = k.top - l.top;
 
     gosterge.style.width  = k.width + 'px';
     gosterge.style.height = k.height + 'px';
-    gosterge.style.transform =
-      'translate(' + (k.left - l.left) + 'px, ' + (k.top - l.top) + 'px)';
     gosterge.style.opacity = '1';
 
+    // İlk yerleştirmede ve yeniden boyutlandırmada kayma OLMAMALI;
+    // yoksa sayfa her açıldığında gösterge soldan süzülürdü.
     if (!animasyonlu) {
+      gosterge.style.transition = 'none';
+      gosterge.style.transform = 'translate(' + hedefX + 'px, ' + hedefY + 'px)';
       void gosterge.offsetWidth;   // stil uygulansın, sonra geçiş geri gelsin
       gosterge.style.transition = '';
+      sonX = hedefX;
+      return;
     }
+
+    /* Referans videodan ölçülen iki davranış:
+       1) Kapsül hedefi yolun ~%8,6'sı kadar AŞIP geri yaslanıyor (bounce).
+       2) Uçarken yatay olarak GERİLİYOR: dururken ~88px, hareket hâlinde
+          ~105px ölçüldü (~%19). Yumuşak hissi asıl bu veriyor.
+       İkisi birlikte ancak ara kareyle olur, o yüzden hareket WAAPI ile;
+       CSS geçişi tek başına ortada gerilme yapamıyor. */
+    const mesafe = Math.abs(hedefX - sonX);
+    const gerilme = 1 + Math.min(0.22, mesafe / 600);
+    const azalt = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!azalt && mesafe > 2 && typeof gosterge.animate === 'function') {
+      gosterge.animate([
+        { transform: 'translate(' + sonX + 'px, ' + hedefY + 'px) scaleX(1)',
+          easing: 'cubic-bezier(.4, 0, .6, 1)' },
+        { transform: 'translate(' + ((sonX + hedefX) / 2) + 'px, ' + hedefY + 'px) scaleX(' + gerilme + ')',
+          offset: 0.5, easing: 'cubic-bezier(.32, 1.5, .6, 1)' },
+        { transform: 'translate(' + hedefX + 'px, ' + hedefY + 'px) scaleX(1)' },
+      ], { duration: 300, fill: 'none' });
+    }
+
+    gosterge.style.transform = 'translate(' + hedefX + 'px, ' + hedefY + 'px)';
+    sonX = hedefX;
   }
 
   const aktifOge = () => altOgeler.find(o => o.classList.contains('aktif')) ?? null;
