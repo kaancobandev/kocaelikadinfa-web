@@ -344,6 +344,19 @@ const ikonlar: Record<string, string> = {
   .alt-nav-oge.aktif .alt-nav-etiket { font-weight: var(--fw-bold); }
   .alt-nav-oge:focus-visible { outline: 2px solid var(--alt-nav-vurgu); outline-offset: 2px; }
 
+  /* Mobil tarayıcılar dokunma anında kendi vurgularını çiziyor: yarı
+     saydam mavi bir DİKDÖRTGEN. Köşe yarıçapını takmadığı için hap
+     biçimli çubukta kutu gibi görünüyordu. Kapatıldı — ama dokunma
+     geri bildirimi kaybolmasın diye aşağıda :active durumları var.
+     (Odak halkaları :focus-visible olduğu için dokunmada çıkmıyor,
+     klavyeyle gezinmede çıkmaya devam ediyor.) */
+  .alt-nav-oge,
+  .alt-nav-cta,
+  .ust-serit-link { -webkit-tap-highlight-color: transparent; }
+
+  /* Sekmelerin geri bildirimi zaten kayan gösterge; etiket de koyulaşıyor */
+  .alt-nav-oge:active .alt-nav-etiket { color: var(--alt-nav-aktif); }
+
   /* CTA bir sekme değil: daire, çubuktan yukarı taşıyor ve hiç hareket
      etmiyor. Aktif kapsülle aynı renkte olduğu için ayrımı şekil yapıyor. */
   .alt-nav-cta-yuva { display: flex; justify-content: center; }
@@ -361,6 +374,10 @@ const ikonlar: Record<string, string> = {
   }
   .alt-nav-cta svg { width: 22px; height: 22px; }
   .alt-nav-cta:focus-visible { outline: 2px solid var(--alt-nav-vurgu); outline-offset: 3px; }
+  /* CTA'nın kayan göstergesi yok; basılma hissi buradan geliyor */
+  .alt-nav-cta { transition: transform .12s ease; }
+  .alt-nav-cta:active { transform: scale(.93); }
+  .ust-serit-link:active { opacity: .65; }
 
   /* Masaüstünde alt çubuk yok; üstteki navbar devralıyor. Bu kural
      taban .alt-nav kuralından SONRA gelmek zorunda: ikisi de 0,2,0
