@@ -177,6 +177,24 @@ const jsonLd = {
     --kirmizi: #e05555;   /* hata ve kayıp.                5,60:1 / 5,18:1 */
     --link:    #4da6ff;   /* YALNIZ haber gövdesi içi bağlantı. 8,21:1 / 7,59:1 */
 
+    /* Alt navigasyon çubuğu BİLİNÇLİ olarak site paletinin dışında. Dört
+       değer de NERVA referans VİDEOSUNDAN ölçüldü: video karesi tuvale
+       çizilip baskın tonlar sayıldı (kapsülde tek karede 1181 piksel).
+
+       Çubuk OPAK. Cam (backdrop-filter) ile "videodaki renk" aynı anda
+       mümkün değil: videoda çubuk BEYAZ bir ekranın üstünde duruyor, bizde
+       SİYAH sayfanın üstünde; %88 saydamlıkta arkadaki siyah emilip çubuk
+       #dcdcdc'ye düşüyordu. Kullanıcı birebir videodaki rengi istedi.
+
+       Vurgu referansta koyu yeşildi; kullanıcı siyah istedi. Bu zeminde
+       kontrastlar: kapsül 17,2:1, aktif etiket 17,1:1, beyaz ikon 21:1. PASİF ETİKET 2,29:1 — WCAG AA (4,5:1)
+       altında. Referansta böyle ve birebir istendi; bilinçli sapma.
+       Erişilebilirlik gerekirse #5c5c5c (4,88:1) geri konur. */
+    --alt-nav-zemin: #e7e9e9;   /* çubuk                   */
+    --alt-nav-vurgu: #000000;   /* kapsül ve CTA dairesi   */
+    --alt-nav-aktif: #000906;   /* aktif etiket            */
+    --alt-nav-pasif: #999b9b;   /* pasif ikon ve etiket    */
+
     --amber-wash:   rgba(212,160,82,.14);   /* yalnız beraberlik rozeti zemini */
     --kirmizi-wash: rgba(224,85,85,.14);    /* yalnız mağlubiyet rozeti zemini */
 
@@ -263,6 +281,14 @@ const jsonLd = {
   ::-webkit-scrollbar-track { background: var(--dark); }
   ::-webkit-scrollbar-thumb { background: var(--green); border-radius: 3px; }
 
+  /* Mobil tarayıcıların dokunma vurgusu: ölçülen varsayılan
+     rgba(51,181,229,.4). Köşe yarıçapını TAKMADIĞI için yuvarlatılmış
+     kart ve hap biçimli öğelerde mavi bir dikdörtgen olarak çıkıyordu.
+     Özellik kalıtsal, bu yüzden tek tanım tüm siteyi kapsıyor. Yerine
+     aşağıdaki :active durumları geri bildirim veriyor — vurgu kalkıp
+     yerine bir şey konmazsa "dokundum mu" belirsizliği oluşuyor. */
+  html { -webkit-tap-highlight-color: transparent; }
+
   .btn-primary {
     display: inline-block;
     background: var(--green);
@@ -274,8 +300,9 @@ const jsonLd = {
     text-decoration: none;
     border: none;
     cursor: pointer;
-    transition: background .25s;
+    transition: background .25s, transform .12s ease;
   }
+  .btn-primary:active { transform: scale(.97); }
   /* Hover yalnız zemin tonu: glow ve zıplama yok (dekoratif hareket değil, durum bildirimi) */
   .btn-primary:hover { background: var(--green-mid); }
 
@@ -340,9 +367,12 @@ const jsonLd = {
     font: inherit;
     text-align: left;
     text-decoration: none;
-    transition: border-color .15s ease;
+    transition: border-color .15s ease, transform .12s ease;
   }
   button.card { width: 100%; cursor: pointer; }
+  /* Dokunma geri bildirimi: kart hafifçe içeri basılıyor. Haber, takım,
+     galeri ve 404 kartlarının hepsi bu sınıfı kullanıyor. */
+  .card:active { transform: scale(.985); border-color: var(--border-strong); }
   .card:hover { border-color: var(--border-strong); }
   .card:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
   .card-media {
