@@ -59,9 +59,16 @@ const jsonLd = {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" href="/logo.jpeg" />
+    {/* Favicon kulübün armasından üretildi. Önceki favicon.svg ve
+        favicon.ico Astro şablonundan kalma Astro logosuydu ve Google
+        dahil her yerde o görünüyordu. favicon.ico içinde 16/32/48
+        boyutları gömülü: tarayıcılar ve tarayıcı botları bağlantıya
+        bakmadan doğrudan /favicon.ico isteyebiliyor. */}
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    {/* iOS saydamlığı yok sayıp siyah zemine bastığı için bu dosya beyaz
+        zeminli. Eskiden 127 KB'lık logo.jpeg kullanılıyordu. */}
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <title>{title}</title>
     <meta name="description" content={description} />
