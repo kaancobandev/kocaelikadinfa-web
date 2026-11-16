@@ -117,12 +117,11 @@ const jsonLd = {
 
   :root {
     /* ══ TASARIM SİSTEMİ ══════════════════════════════════════════════
-       Ölçüm (2026-10-29, halka açık .astro kapsamı, IntroLoader ve admin
-       hariç): 29 ayrı hex 62 yerde, 20 degrade, --green-bright 82 çağrı,
-       296 ham padding/margin/gap değeri. Karşılaştırma için Venezia FC ana
-       sayfası 1274 öğeyi 9 boyut, 3 ağırlık ve TEK harf aralığıyla
-       yönetiyor. "Amatör" hissi tek tek efektlerden değil, her bölümün
-       kendi kararını vermiş olmasından geliyor.
+       Ölçüldü: site 42 font-size, 7 ağırlık, 14 harf aralığı, 57 hex renk,
+       ~100 padding ve 18 köşe yarıçapı kullanıyordu. Karşılaştırma için
+       Venezia FC ana sayfası 1274 öğeyi 9 boyut, 3 ağırlık ve TEK harf
+       aralığıyla yönetiyor. "Amatör" hissi tek tek efektlerden değil, her
+       bölümün kendi kararını vermiş olmasından geliyor.
 
        Bu blok hedef sistemi tanımlar. Bileşenler henüz çoğunlukla kendi
        ham değerlerini kullanıyor; göç dosya dosya yapılacak (bkz.
@@ -152,10 +151,10 @@ const jsonLd = {
 
     /* ── Renk ──
        Kontrast oranları siyah zemine göre ölçüldü; hepsi WCAG AA üstü. */
-    --text:       #ffffff;   /* başlık            21:1    */
-    --text-body:  #d6d6d6;   /* gövde paragrafı   14,45:1 */
-    --text-muted: #9a9a9a;   /* meta, footer menü  7,46:1 */
-    --text-dim:   #8a8a8a;   /* telif              6,08:1 — en soluk sınır */
+    --text:       #ffffff;   /* başlık            21:1  */
+    --text-body:  #d6d6d6;   /* gövde paragrafı   13,4:1 */
+    --text-muted: #9a9a9a;   /* meta, footer menü  6,4:1 */
+    --text-dim:   #8a8a8a;   /* telif, admin       5,2:1 — en soluk sınır */
 
     --black:     #000000;
     --surface:   #0b0e0b;
@@ -170,33 +169,6 @@ const jsonLd = {
     --surface-hover: rgba(255,255,255,.04);
     --green-wash:    rgba(44,184,74,.08);
     --scrim:         rgba(0,0,0,.80);
-
-    /* ── Rol renkleri — her biri TEK işli. Kontrast: siyah / --surface ── */
-    --kemik:   #f2efe9;   /* kırık beyaz: TÜM h1 ve h2.         18,30:1 */
-    --amber:   #d4a052;   /* nötr dikkat: ne iyi ne kötü.  8,95:1 / 8,27:1 */
-    --kirmizi: #e05555;   /* hata ve kayıp.                5,60:1 / 5,18:1 */
-    --link:    #4da6ff;   /* YALNIZ haber gövdesi içi bağlantı. 8,21:1 / 7,59:1 */
-
-    /* Alt navigasyon çubuğu BİLİNÇLİ olarak site paletinin dışında. Dört
-       değer de NERVA referans VİDEOSUNDAN ölçüldü: video karesi tuvale
-       çizilip baskın tonlar sayıldı (kapsülde tek karede 1181 piksel).
-
-       Çubuk OPAK. Cam (backdrop-filter) ile "videodaki renk" aynı anda
-       mümkün değil: videoda çubuk BEYAZ bir ekranın üstünde duruyor, bizde
-       SİYAH sayfanın üstünde; %88 saydamlıkta arkadaki siyah emilip çubuk
-       #dcdcdc'ye düşüyordu. Kullanıcı birebir videodaki rengi istedi.
-
-       Vurgu referansta koyu yeşildi; kullanıcı siyah istedi. Bu zeminde
-       kontrastlar: kapsül 17,2:1, aktif etiket 17,1:1, beyaz ikon 21:1. PASİF ETİKET 2,29:1 — WCAG AA (4,5:1)
-       altında. Referansta böyle ve birebir istendi; bilinçli sapma.
-       Erişilebilirlik gerekirse #5c5c5c (4,88:1) geri konur. */
-    --alt-nav-zemin: #e7e9e9;   /* çubuk                   */
-    --alt-nav-vurgu: #000000;   /* kapsül ve CTA dairesi   */
-    --alt-nav-aktif: #000906;   /* aktif etiket            */
-    --alt-nav-pasif: #999b9b;   /* pasif ikon ve etiket    */
-
-    --amber-wash:   rgba(212,160,82,.14);   /* yalnız beraberlik rozeti zemini */
-    --kirmizi-wash: rgba(224,85,85,.14);    /* yalnız mağlubiyet rozeti zemini */
 
     /* ── Boşluk (4px ızgara) ── */
     --sp-1: .5rem;     /*  8px */
@@ -225,6 +197,7 @@ const jsonLd = {
     --dark:       var(--surface);
     --card-bg:    var(--surface);
     --radius:     var(--r-md);
+    --green-glow: rgba(13,77,30,0.35);
 
     /* ── Görsel boyut sistemi ──────────────────────────────────────────
        Fotoğraflar kendi en-boy oranını korur; yalnızca bu sınırların
@@ -248,73 +221,50 @@ const jsonLd = {
     line-height: 1.6;
   }
 
-  /* ══ Tipografik roller (§6.1) ═══════════════════════════════════════
-     Tüm halka açık sayfalarda aynı. Bileşenler bu rolleri yeniden
-     tanımlamaz; yalnız ana sayfa h1'i (--fs-display) ve PageHero h1'i
-     (sayfa başına clamp) kendi boyutunu verir.
-     DİKKAT: scoped bir kural (0,2,0+) bu global element kurallarını
-     (0,0,1) ezer; bir başlık rolün dışına çıkıyorsa nedeni bileşendeki
-     yerel kuraldır, sıra değil (§8.0/A). */
-  h1, h2 { color: var(--kemik); text-wrap: balance; }
-  h2 {
-    font-size: var(--fs-xl);
-    font-weight: var(--fw-bold);
-    line-height: var(--lh-tight);
-    letter-spacing: var(--ls-tight);
-    max-width: 20ch;
-  }
-  h3 {
-    font-size: var(--fs-md);
-    font-weight: var(--fw-medium);
-    line-height: var(--lh-snug);
-    color: var(--text);
-  }
-  p {
-    font-size: var(--fs-base);
-    line-height: var(--lh-body);
-    color: var(--text-body);
-    max-width: var(--measure-text);
-    text-wrap: pretty;
-  }
-
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: var(--dark); }
   ::-webkit-scrollbar-thumb { background: var(--green); border-radius: 3px; }
 
-  /* Mobil tarayıcıların dokunma vurgusu: ölçülen varsayılan
-     rgba(51,181,229,.4). Köşe yarıçapını TAKMADIĞI için yuvarlatılmış
-     kart ve hap biçimli öğelerde mavi bir dikdörtgen olarak çıkıyordu.
-     Özellik kalıtsal, bu yüzden tek tanım tüm siteyi kapsıyor. Yerine
-     aşağıdaki :active durumları geri bildirim veriyor — vurgu kalkıp
-     yerine bir şey konmazsa "dokundum mu" belirsizliği oluşuyor. */
-  html { -webkit-tap-highlight-color: transparent; }
-
   .btn-primary {
     display: inline-block;
     background: var(--green);
-    color: var(--text);
-    padding: var(--sp-2) var(--sp-4);
+    color: #fff;
+    padding: .8rem 2rem;
     border-radius: var(--r-pill);
     font-weight: var(--fw-bold);
     font-size: var(--fs-base);
+    
     text-decoration: none;
     border: none;
     cursor: pointer;
-    transition: background .25s, transform .12s ease;
+    transition: background .25s, transform .2s, box-shadow .2s;
   }
-  .btn-primary:active { transform: scale(.97); }
-  /* Hover yalnız zemin tonu: glow ve zıplama yok (dekoratif hareket değil, durum bildirimi) */
-  .btn-primary:hover { background: var(--green-mid); }
+  .btn-primary:hover {
+    background: var(--green-mid);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px var(--green-glow);
+  }
 
-  /* ══ Bölüm kabı (§2.3) ═════════════════════════════════════════════
-     .band > .band-inner — sırası sabit: (eyebrow) · h2 · (tek giriş
-     paragrafı) · içerik · (tek ikincil bağlantı). Sayfalar bu kalıbın
-     dışında düzen CSS'i yazmaz; bölüm dolgusu yalnız burada tanımlıdır.
+  .section-tag {
+    display: inline-block;
+    font-size: var(--fs-eyebrow);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--green-bright);
+    margin-bottom: 1rem;
+  }
 
-     Sınıf adı bilerek `.section` DEĞİL: aramiza-katil.astro'da eskiden
-     scoped bir `.section` vardı ve Astro onu [data-astro-cid-…] ile 0,2,0
-     özgüllüğe çıkarıyor; global bir `.section` (0,1,0) sıra ne olursa
-     olsun kaybederdi.                                                   */
+
+  /* ══ Bölüm kabı ════════════════════════════════════════════════════
+     Bugün her bölüm kendi `padding: Xrem Y%` değerini yazıyor — ölçülen
+     28 farklı padding, 3 farklı oluk, 22 farklı max-width. Bunlar Faz D'de
+     tek tek buraya bağlanacak.
+
+     Sınıf adı bilerek `.section` DEĞİL: aramiza-katil.astro'da zaten scoped
+     bir `.section` var ve Astro onu [data-astro-cid-…] ile 0,2,0 özgüllüğe
+     çıkarıyor; global bir `.section` (0,1,0) sıra ne olursa olsun kaybeder
+     ve sitenin en uzun sayfası yeni oluğu sessizce almazdı.               */
   .band {
     padding-block: var(--sp-6);
     padding-inline: var(--gutter);
@@ -326,108 +276,18 @@ const jsonLd = {
   @media (max-width: 768px) {
     .band { padding-block: var(--sp-5); }
   }
-  /* Bölüm içi dikey ritim: başlık → içerik --sp-4, eyebrow → h2 --sp-2
-     (eyebrow'un kendi alt boşluğu), h1/h2 → giriş paragrafı --sp-3. */
-  .band-inner > * + * { margin-top: var(--sp-4); }
-  .band-inner > .eyebrow + h1,
-  .band-inner > .eyebrow + h2 { margin-top: 0; }
-  .band-inner > h1 + p,
-  .band-inner > h2 + p { margin-top: var(--sp-3); }
 
   /* ══ Üst etiket ════════════════════════════════════════════════════
-     Eski .section-tag ile aynı kural iki kez tanımlanıyordu; tek sınıf.
-     Tracking ve uppercase EKLENEN tek yer burası; gövdeye harf aralığı
-     yazılmaz, başka hiçbir ölçekte uppercase kullanılmaz.               */
+     22 ayrı yerde elle yazılmış küçük etiket tanımının yerine tek sınıf.
+     Tracking EKLENEN tek yer burası; gövdeye harf aralığı yazılmaz.     */
   .eyebrow {
     display: inline-block;
     font-size: var(--fs-eyebrow);
     font-weight: var(--fw-medium);
-    line-height: 1;
     letter-spacing: var(--ls-eyebrow);
     text-transform: uppercase;
     color: var(--green-bright);
     margin-bottom: var(--sp-2);
-  }
-
-  /* ══ Kart anatomisi (§2.3) — 10 sayfada aynı dört parça ═══════════
-     1 görsel .card-media (4/3, kırpma odağı üstte: yüzler kadrajın üst
-       yarısında) · 2 başlık .card-title (h3 rolü, ≤3 satır) · 3 meta
-       .card-meta (tarih/altyazı) · 4 dolgu, zemin, 1px kenarlık, köşe.
-     Kartın tamamı tek <a> ya da tek <button>; eyebrow, kategori etiketi
-     ve "Devamını oku" YOK. Hover yalnız kenarlık rengi.                 */
-  .card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
-    padding: var(--sp-3);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--r-md);
-    color: inherit;
-    font: inherit;
-    text-align: left;
-    text-decoration: none;
-    transition: border-color .15s ease, transform .12s ease;
-  }
-  button.card { width: 100%; cursor: pointer; }
-  /* Dokunma geri bildirimi: kart hafifçe içeri basılıyor. Haber, takım,
-     galeri ve 404 kartlarının hepsi bu sınıfı kullanıyor. */
-  .card:active { transform: scale(.985); border-color: var(--border-strong); }
-  .card:hover { border-color: var(--border-strong); }
-  .card:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
-  .card-media {
-    display: block;
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    overflow: hidden;
-    border-radius: var(--r-sm);
-    background: var(--black);
-  }
-  .card-media img,
-  .card-media iframe {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center 35%;
-    border: 0;
-  }
-  .card-title {
-    font-size: var(--fs-md);
-    font-weight: var(--fw-medium);
-    line-height: var(--lh-snug);
-    color: var(--text);
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .card-meta {
-    display: block;
-    /* Altyazı şeridi kart yüksekliğini belirlemez ve boşken kaybolmaz:
-       galeri kartlarının çoğunda caption boş (actions.ts yalnız ilk satıra
-       yazar); şerit yüksekliğini korur, içine hiçbir şey basılmaz (§7.3). */
-    min-height: 2.5rem;
-    font-size: var(--fs-sm);
-    line-height: var(--lh-snug);
-    color: var(--text-muted);
-  }
-  /* Fotoğrafı olmayan kayıt (§7.6): stok görsel değil, boş çerçeve ve
-     ortada 48px'lik tek yatay çizgi. İkon, metin, arma yok.            */
-  .foto-yok {
-    position: relative;
-    display: block;
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    background: var(--surface-2);
-  }
-  .foto-yok::after {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 48px; height: 1px;
-    transform: translate(-50%, -50%);
-    background: var(--text-dim);
   }
 
   /* ══ Hareket azaltma ═══════════════════════════════════════════════
@@ -455,13 +315,13 @@ const jsonLd = {
     z-index: 2000;
     transform: translateY(-120%);
     background: var(--green-bright);
-    color: var(--black);   /* bilinçli yüksek kontrast istisnası: yeşil dolgu üstünde siyah */
+    color: #000;
     font-size: var(--fs-sm);
     font-weight: var(--fw-bold);
     
     text-decoration: none;
-    padding: var(--sp-2) var(--sp-3);
-    border-radius: 0 0 var(--r-md) 0;
+    padding: .85rem 1.5rem;
+    border-radius: 0 0 10px 0;
     box-shadow: 0 6px 20px rgba(0,0,0,.5);
     transition: transform .18s ease;
   }

@@ -68,9 +68,7 @@ const getirilecekler = [
   'Havlu ve yedek tişört',
 ];
 
-/* SSS. "Ne getirmeli" listesi ayrı bir bölüm değil, buradaki bir soru
-   (bölüm sayısı ≤4, §4.5.14); içerik aynen duruyor. */
-const sss: { s: string; c: string; liste?: string[] }[] = [
+const sss = [
   {
     s: 'Hiç futbol oynamamış biri katılabilir mi?',
     c: 'Evet. Akademimiz futbola yeni başlayan sporcuları temel seviyeden alıyor; önceden deneyim şartı yok. Antrenörlerimiz her sporcunun seviyesine göre program uyguluyor.',
@@ -96,11 +94,6 @@ const sss: { s: string; c: string; liste?: string[] }[] = [
     s: 'Velim antrenmanları izleyebilir mi?',
     c: 'Antrenman ziyaretleri ve veli bilgilendirmesi için bizimle iletişime geçebilirsin; sahaya göre uygulama değişebiliyor.',
   },
-  {
-    s: 'İlk antrenmana ne getirmeli?',
-    c: 'Deneme antrenmanına gelirken yanında bulunması gerekenler. Eksiğin varsa sorun değil, bize haber ver.',
-    liste: getirilecekler,
-  },
 ];
 
 const gunBilgisiVar = gruplar.some(g => g.gunler);
@@ -119,6 +112,7 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
       title="Aramıza"
       accent="Katıl"
       description="Futbola yeni başlıyor ya da kendini geliştirmek istiyorsan doğru yerdesin. 4–16 yaş akademi kayıtlarımız açık."
+      minHeight="44vh"
       maxTitle="5rem"
     >
         <div class="hero-actions">
@@ -133,11 +127,11 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     </PageHero>
 
     <!-- ── Kimler katılabilir ── -->
-    <section class="band groups-section">
-      <div class="band-inner">
-        <span class="eyebrow">Kimler Katılabilir?</span>
+    <section class="section groups-section">
+      <div class="section-inner">
+        <span class="section-eyebrow">Kimler Katılabilir?</span>
         <h2>Yaş Grupları ve Takımlar</h2>
-        <p>Her seviyeye uygun bir grubumuz var. Hangisine uygun olduğundan emin değilsen bize sor, birlikte belirleyelim.</p>
+        <p class="section-lead">Her seviyeye uygun bir grubumuz var. Hangisine uygun olduğundan emin değilsen bize sor, birlikte belirleyelim.</p>
 
         <div class="groups-grid">
           {gruplar.map(g => (
@@ -145,8 +139,10 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
               <span class="group-yas">{g.yas}</span>
               <h3>{g.ad}</h3>
               <p>{g.aciklama}</p>
-              {/* Gün-saat bilgisi boşsa satır hiç basılmaz; tek not bölümün altında (§4.5.13) */}
-              {g.gunler && <p class="group-gun"><strong>Antrenman:</strong> {g.gunler}</p>}
+              {g.gunler
+                ? <p class="group-gun"><strong>Antrenman:</strong> {g.gunler}</p>
+                : <p class="group-gun muted">Gün ve saat bilgisi için bize ulaşın</p>
+              }
             </div>
           ))}
         </div>
@@ -161,9 +157,9 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     </section>
 
     <!-- ── Sahalar ── -->
-    <section class="band fields-section">
-      <div class="band-inner">
-        <span class="eyebrow">Nerede Antrenman Yapıyoruz?</span>
+    <section class="section fields-section">
+      <div class="section-inner">
+        <span class="section-eyebrow">Nerede Antrenman Yapıyoruz?</span>
         <h2>Antrenman Sahalarımız</h2>
 
         <div class="fields-grid">
@@ -193,9 +189,9 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     </section>
 
     <!-- ── Adımlar ── -->
-    <section class="band steps-section">
-      <div class="band-inner">
-        <span class="eyebrow">Nasıl Başlarım?</span>
+    <section class="section steps-section">
+      <div class="section-inner">
+        <span class="section-eyebrow">Nasıl Başlarım?</span>
         <h2>3 Adımda Aramıza Katıl</h2>
 
         <ol class="steps">
@@ -210,7 +206,59 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
           ))}
         </ol>
 
-        <!-- Başvuru kanalları aynı bölümde: ikinci dolgulu buton yok (§4.5.12) -->
+        <a href={ON_KAYIT_URL} target="_blank" rel="noopener noreferrer" class="btn-primary steps-cta">Ön Kayıt Formunu Doldur</a>
+      </div>
+    </section>
+
+    <!-- ── Ne getirmeli ── -->
+    <section class="section bring-section">
+      <div class="section-inner bring-inner">
+        <div class="bring-text">
+          <span class="section-eyebrow">Hazırlık</span>
+          <h2>İlk Antrenmana Ne Getirmeli?</h2>
+          <p class="section-lead">Deneme antrenmanına gelirken yanında bulunması gerekenler. Eksiğin varsa sorun değil, bize haber ver.</p>
+        </div>
+        <ul class="bring-list">
+          {getirilecekler.map(item => (
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              {item}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ── SSS ── -->
+    <section class="section faq-section">
+      <div class="section-inner">
+        <span class="section-eyebrow">Merak Edilenler</span>
+        <h2>Sık Sorulan Sorular</h2>
+
+        <div class="faq-list">
+          {sss.map(item => (
+            <details class="faq-item">
+              <summary>
+                {item.s}
+                <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </summary>
+              <p>{item.c}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ── İletişim ── -->
+    <section class="section contact-section">
+      <div class="section-inner">
+        <span class="section-eyebrow">İletişim</span>
+        <h2>Sorularını Bize Sor</h2>
+
         <div class="options-grid">
           <a href={ON_KAYIT_URL} target="_blank" rel="noopener noreferrer" class="option-card">
             <div class="option-icon">
@@ -262,194 +310,224 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
       </div>
     </section>
 
-    <!-- ── SSS ── -->
-    <section class="band faq-section">
-      <div class="band-inner">
-        <span class="eyebrow">Merak Edilenler</span>
-        <h2>Sık Sorulan Sorular</h2>
-
-        <div class="faq-list">
-          {sss.map(item => (
-            <details class="faq-item">
-              <summary>
-                {item.s}
-                <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </summary>
-              <p>{item.c}</p>
-              {item.liste && (
-                <ul class="faq-liste">
-                  {item.liste.map(x => <li>{x}</li>)}
-                </ul>
-              )}
-            </details>
-          ))}
-        </div>
-      </div>
-    </section>
-
   </main>
 
   <Footer />
 </Layout>
 
 <style>
-  /* Üst boşluk global .band-inner ritminden (--sp-4) gelir */
-  .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
-  /* İkincil biçim: zeminsiz, çerçevesiz metin bağlantı */
+  .hero-actions { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 2rem; }
   .btn-ghost {
     display: inline-flex;
     align-items: center;
-    gap: var(--sp-1);
+    gap: .55rem;
+    padding: .8rem 1.6rem;
+    border-radius: var(--r-pill);
+    border: 1px solid rgba(44,184,74,0.3);
+    background: rgba(44,184,74,0.06);
     color: var(--green-bright);
     font-size: var(--fs-sm);
-    font-weight: var(--fw-medium);
+    font-weight: var(--fw-bold);
+    letter-spacing: .5px;
     text-decoration: none;
-    font-variant-numeric: tabular-nums;
-    transition: color .2s;
+    transition: background .25s, border-color .25s, transform .2s;
   }
-  .btn-ghost:hover { color: var(--text); }
-  .btn-ghost:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
+  .btn-ghost:hover {
+    background: rgba(44,184,74,0.14);
+    border-color: var(--green-bright);
+    transform: translateY(-2px);
+  }
 
-  /* ── Ortak bölüm: kap ve ritim global .band/.band-inner'dan gelir;
-     burada yalnız bölümleri ayıran ince çizgi ── */
-  .groups-section, .fields-section, .steps-section, .faq-section {
-    background: var(--black);
-    border-top: 1px solid var(--border);
+  /* ── Ortak bölüm ── */
+  .section { padding: 5rem 8%; border-top: 1px solid var(--border); }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+
+  .section-eyebrow {
+    display: inline-block;
+    font-size: var(--fs-eyebrow); font-weight: var(--fw-bold); letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase; color: var(--green-bright); margin-bottom: .8rem;
   }
+  .section h2 {
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
+    margin-bottom: 1rem;
+  }
+  .section-lead { color: var(--text-body); max-width: 560px; margin-bottom: 2.5rem; line-height: var(--lh-body); }
 
   .note {
-    margin-top: var(--sp-3);
+    margin-top: 1.5rem;
     font-size: var(--fs-sm);
     color: var(--text-body);
-    border: 1px solid var(--border);
+    background: rgba(44,184,74,0.05);
+    border: 1px solid rgba(44,184,74,0.15);
     border-radius: var(--r-md);
-    padding: var(--sp-2) var(--sp-3);
+    padding: .9rem 1.1rem;
   }
   .note a { color: var(--green-bright); font-weight: var(--fw-bold); text-decoration: none; }
   .note a:hover { text-decoration: underline; }
 
   /* ── Gruplar ── */
+  .groups-section { background: var(--dark); }
   .groups-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
-    gap: var(--sp-3);
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
   }
+  @media (max-width: 960px) { .groups-grid { grid-template-columns: 1fr; } }
 
   .group-card {
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: var(--sp-3);
+    padding: 1.6rem 1.5rem 1.8rem;
     display: flex;
     flex-direction: column;
-    gap: var(--sp-2);
-    transition: border-color .15s ease;
+    gap: .6rem;
+    transition: border-color .25s, transform .2s;
   }
-  .group-card:hover { border-color: var(--border-strong); }
+  .group-card:hover { border-color: var(--green); transform: translateY(-3px); }
 
   .group-yas {
     align-self: flex-start;
-    font-size: var(--fs-eyebrow); font-weight: var(--fw-medium); letter-spacing: var(--ls-eyebrow);
+    font-size: var(--fs-eyebrow); font-weight: var(--fw-bold); letter-spacing: var(--ls-eyebrow);
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--green-bright);
+    background: rgba(44,184,74,0.1);
+    border: 1px solid rgba(44,184,74,0.22);
+    border-radius: var(--r-pill);
+    padding: .25rem .75rem;
   }
   .group-card h3 { font-size: var(--fs-md); font-weight: var(--fw-bold); }
   .group-card p  { font-size: var(--fs-sm); color: var(--text-body); line-height: var(--lh-body); }
-  .group-card .group-gun {
+  .group-gun {
     margin-top: auto;
-    padding-top: var(--sp-2);
+    padding-top: .8rem;
     border-top: 1px solid var(--border);
-    font-size: var(--fs-sm);
+    font-size: var(--fs-sm) !important;
   }
   .group-gun strong { color: var(--text); }
+  .group-gun.muted { font-style: italic; opacity: .8; }
 
   /* ── Sahalar ── */
+  .fields-section { background: var(--black); }
   .fields-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
-    gap: var(--sp-3);
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
   }
+  @media (max-width: 960px) { .fields-grid { grid-template-columns: 1fr; } }
 
   .field-card {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-2);
-    padding: var(--sp-3);
+    gap: .7rem;
+    padding: 1.5rem;
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     text-decoration: none;
     color: var(--text);
-    transition: border-color .15s ease;
+    transition: border-color .25s, background .25s, transform .2s;
   }
-  .field-card:hover { border-color: var(--border-strong); }
+  .field-card:hover { border-color: var(--green-bright); background: #111; transform: translateY(-3px); }
   .field-card:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 
   .field-icon {
     width: 42px; height: 42px;
     border-radius: var(--r-md);
-    border: 1px solid var(--border);
+    background: rgba(44,184,74,0.1);
+    border: 1px solid rgba(44,184,74,0.2);
     display: flex; align-items: center; justify-content: center;
-    color: var(--text-muted);
+    color: var(--green-bright);
   }
-  .field-body { display: flex; flex-direction: column; gap: var(--sp-1); }
+  .field-body { display: flex; flex-direction: column; gap: .25rem; }
   .field-body h3 { font-size: var(--fs-base); font-weight: var(--fw-bold); }
-  .field-ilce { font-size: var(--fs-eyebrow); color: var(--text-muted); font-weight: var(--fw-medium); letter-spacing: .5px; }
-  .field-adres { font-size: var(--fs-sm); color: var(--text-muted); line-height: var(--lh-snug); }
+  .field-ilce { font-size: var(--fs-eyebrow); color: var(--green-bright); font-weight: var(--fw-bold); letter-spacing: .5px; }
+  .field-adres { font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.5; }
   .field-map {
     margin-top: auto;
-    font-size: var(--fs-eyebrow); font-weight: var(--fw-medium);
+    font-size: var(--fs-eyebrow); font-weight: var(--fw-bold);
     color: var(--text-muted);
+    transition: color .25s;
   }
+  .field-card:hover .field-map { color: var(--green-bright); }
 
   /* ── Adımlar ── */
+  .steps-section { background: var(--dark); }
   .steps {
     list-style: none;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
-    gap: var(--sp-3);
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
   }
+  @media (max-width: 960px) { .steps { grid-template-columns: 1fr; } }
 
-  .step { display: flex; gap: var(--sp-2); align-items: flex-start; }
-  /* Adım numarası: yeşil daire değil, büyük soluk rakam (sayfada tek dolgu butondur) */
+  .step { display: flex; gap: 1rem; align-items: flex-start; }
   .step-no {
     flex-shrink: 0;
-    width: 2.5rem;
-    font-size: var(--fs-lg); font-weight: var(--fw-bold);
-    color: var(--text-muted);
-    line-height: var(--lh-tight);
-    font-variant-numeric: tabular-nums;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--green);
+    color: #fff;
+    font-size: var(--fs-base); font-weight: var(--fw-bold);
+    display: flex; align-items: center; justify-content: center;
   }
-  .step h3 { margin-bottom: var(--sp-1); }
+  .step h3 { font-size: var(--fs-base); font-weight: var(--fw-bold); margin-bottom: .35rem; }
   .step p  { font-size: var(--fs-sm); color: var(--text-body); line-height: var(--lh-body); }
+  .steps-cta { display: inline-block; }
+
+  /* ── Ne getirmeli ── */
+  .bring-section { background: var(--black); }
+  .bring-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+  @media (max-width: 960px) { .bring-inner { grid-template-columns: 1fr; gap: 2rem; } }
+  .bring-text .section-lead { margin-bottom: 0; }
+
+  .bring-list { list-style: none; display: flex; flex-direction: column; gap: .8rem; }
+  .bring-list li {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    padding: .9rem 1.1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    font-size: var(--fs-base);
+    font-weight: var(--fw-medium);
+  }
+  .bring-list svg { color: var(--green-bright); flex-shrink: 0; }
 
   /* ── SSS ── */
+  .faq-section { background: var(--dark); }
   /* SSS iki kolon — tek kolonda sağ yarı boş kalıyordu */
   .faq-list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr 1fr;
     align-content: start;
-    gap: var(--sp-2);
+    gap: .7rem;
   }
-  @media (max-width: 767px) { .faq-list { grid-template-columns: 1fr; } }
+  @media (max-width: 960px) { .faq-list { grid-template-columns: 1fr; } }
 
   .faq-item {
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     overflow: hidden;
-    transition: border-color .15s ease;
+    transition: border-color .25s;
   }
-  .faq-item[open] { border-color: var(--border-strong); }
+  .faq-item[open] { border-color: rgba(44,184,74,0.35); }
 
   .faq-item summary {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--sp-2);
-    padding: var(--sp-3);
+    gap: 1rem;
+    padding: 1.1rem 1.3rem;
     cursor: pointer;
     font-size: var(--fs-base);
     font-weight: var(--fw-bold);
@@ -457,77 +535,85 @@ const gunBilgisiVar = gruplar.some(g => g.gunler);
     transition: color .2s;
   }
   .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary:hover { color: var(--green-bright); }
   .faq-item summary:focus-visible { outline: 2px solid var(--green-bright); outline-offset: -2px; }
 
-  .faq-chevron { flex-shrink: 0; color: var(--text-muted); transition: transform .25s; }
+  .faq-chevron { flex-shrink: 0; color: var(--green-bright); transition: transform .25s; }
   .faq-item[open] .faq-chevron { transform: rotate(180deg); }
 
   .faq-item p {
-    padding: 0 var(--sp-3) var(--sp-3);
-    font-size: var(--fs-base);
-    color: var(--text-body);
-    line-height: var(--lh-body);
-  }
-  .faq-liste {
-    margin: calc(-1 * var(--sp-2)) var(--sp-3) var(--sp-3);
-    padding-left: var(--sp-3);
+    padding: 0 1.3rem 1.3rem;
     font-size: var(--fs-base);
     color: var(--text-body);
     line-height: var(--lh-body);
   }
 
-  /* ── Başvuru kanalları ── */
+  /* ── İletişim ── */
+  .contact-section { background: var(--black); }
   /* İki kart yan yana — 1280px'te sağ taraf boş kalmıyor */
-  .options-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
-  @media (max-width: 767px) { .options-grid { grid-template-columns: 1fr; } }
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+  @media (max-width: 960px) { .options-grid { grid-template-columns: 1fr; } }
 
   .option-card {
     display: flex;
     align-items: center;
-    gap: var(--sp-3);
+    gap: 1.6rem;
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: var(--sp-3);
+    padding: 2rem;
     text-decoration: none;
     color: var(--text);
-    transition: border-color .15s ease;
+    transition: border-color .25s, background .25s, transform .2s;
   }
-  .option-card:hover { border-color: var(--border-strong); }
+  .option-card:hover { border-color: var(--green-bright); background: #111; transform: translateY(-3px); }
   .option-card:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 
-  /* İki kart aynı desen; WhatsApp ikonuyla tanınır, kurumsal yeşiliyle değil */
   .option-icon {
     width: 64px; height: 64px; flex-shrink: 0;
     border-radius: var(--r-md);
-    border: 1px solid var(--border);
+    background: rgba(44,184,74,0.1);
+    border: 1px solid rgba(44,184,74,0.2);
     display: flex; align-items: center; justify-content: center;
-    color: var(--text-muted);
+    color: var(--green-bright);
+    transition: background .25s;
   }
+  .option-card:hover .option-icon { background: rgba(44,184,74,0.18); }
+
+  .option-whatsapp .option-icon {
+    background: rgba(37,211,102,0.1);
+    border-color: rgba(37,211,102,0.25);
+    color: #25d366;
+  }
+  .option-card.option-whatsapp:hover { border-color: #25d366; }
+  .option-card.option-whatsapp:hover .option-icon { background: rgba(37,211,102,0.18); }
 
   .option-body { flex: 1; min-width: 0; }
-  .option-body h3 { font-size: var(--fs-md); font-weight: var(--fw-bold); margin-bottom: var(--sp-1); }
+  .option-body h3 { font-size: var(--fs-md); font-weight: var(--fw-bold); margin-bottom: .5rem; }
   .option-body p  { font-size: var(--fs-sm); color: var(--text-body); line-height: var(--lh-body); }
   .phone-num {
     display: inline-block;
-    margin-top: var(--sp-1);
-    font-size: var(--fs-base); font-weight: var(--fw-medium);
-    color: var(--green-bright);
-    font-variant-numeric: tabular-nums;
+    margin-top: .5rem;
+    font-size: var(--fs-base); font-weight: var(--fw-bold);
+    color: #25d366; letter-spacing: .5px;
   }
 
-  .option-arrow { flex-shrink: 0; color: var(--text-muted); }
+  .option-arrow { flex-shrink: 0; color: var(--text-muted); transition: color .25s, transform .25s; }
+  .option-card:hover .option-arrow { color: var(--green-bright); transform: translateX(4px); }
+  .option-card.option-whatsapp:hover .option-arrow { color: #25d366; }
 
-  /* Üst boşluk global .band-inner ritminden (--sp-4) gelir */
   .contact-alt {
+    margin-top: 1.8rem;
     font-size: var(--fs-sm);
     color: var(--text-muted);
   }
-  .contact-alt a { color: var(--green-bright); font-weight: var(--fw-medium); text-decoration: none; }
-  .contact-alt a:hover { text-decoration: underline; text-underline-offset: 2px; }
-  .contact-alt .dot { margin: 0 var(--sp-1); opacity: .5; }
+  .contact-alt a { color: var(--green-bright); font-weight: var(--fw-bold); text-decoration: none; }
+  .contact-alt a:hover { text-decoration: underline; }
+  .contact-alt .dot { margin: 0 .6rem; opacity: .5; }
 
-  @media (max-width: 767px) {
+  @media (max-width: 640px) {
+    .section { padding: 3.5rem 6%; }
+    .option-card { padding: 1.4rem 1.2rem; gap: 1rem; }
     .option-icon { width: 52px; height: 52px; border-radius: var(--r-md); }
     .option-icon svg { width: 24px; height: 24px; }
     .option-body h3 { font-size: var(--fs-base); }

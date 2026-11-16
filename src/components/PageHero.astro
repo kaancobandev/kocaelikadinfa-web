@@ -1,39 +1,28 @@
 ---
 /**
- * Sayfa başlığı bloğu — iç sayfaların tek h1'i.
+ * Sayfa başlığı bloğu.
  *
- * Eskiden 7 sayfada birebir kopyalanan ızgara deseni + degrade + yeşil
- * ikinci satır burada toplanmıştı; degrade, doku ve yeşil vurgu gitti.
- * Fotoğraflı varyantta görsel artık metnin ARKASINDA değil ALTINDA durur:
- * tam iç genişlik, üstüne hiçbir metin binmez, karartma gerekmez (§2.2.1,
- * §2.2.5). Blok sayfanın birincil öğesidir: üst/alt boşluğu komşu
- * bölümlerin iki katıdır (§4.3).
+ * Bu blok (ızgara deseni + degrade + vurgulu başlık) daha önce 7 sayfada
+ * birebir kopyalanmıştı. Tek yerde toplandı; sayfalar yalnızca farklılıkları
+ * prop olarak veriyor.
  */
 interface Props {
-  /** Üstteki küçük etiket — birim ya da zaman, h1'i tekrar etmez */
+  /** Üstteki küçük etiket — ör. "Son Dakika" */
   tag?: string;
-  /** Başlık */
+  /** Başlığın ilk satırı */
   title: string;
-  /** Başlığın devamı (aynı renk, aynı satırda sarılır) */
+  /** Başlığın yeşil degradeli ikinci satırı */
   accent?: string;
-  /** Başlık altındaki tek giriş paragrafı */
+  /** Başlık altındaki açıklama */
   description?: string;
-  /** Başlığın altında tam genişlik basılan fotoğraf (img() çıktısı) */
+  /** Bölüm yüksekliği — ör. "38vh" */
+  minHeight?: string;
+  /** Arka plan fotoğrafı (CSS url değeri hazır gelmeli) */
   image?: string;
-  /** Fotoğrafın srcset'i (imgSet() çıktısı) */
-  imageSet?: string;
-  /** Fotoğrafın ALTINDAKİ tek satır künye (§2.2.5). Yalnız fotoğraf varsa
-      basılır; boşsa hiç basılmaz, boş satır bırakmaz. */
-  caption?: string;
+  /** Metin hizası */
+  align?: 'left' | 'right';
   /** Başlık boyutu için clamp üst sınırı */
   maxTitle?: string;
-  /**
-   * Kısa hero: birincil öğe başlık değil hemen altındaki içerik olan sayfada
-   * (yalnız /antrenmanlardan-kareler, lead hücre ilk ekranda görünmeli).
-   * Diğer sayfalarda hero geniş ekranda ilk ekranı tek başına kaplar:
-   * h1 ekrandaki tek --fs-display/--fs-xl metin olur (§2.1.1, §4.3).
-   */
-  compact?: boolean;
 }
 
 const {
@@ -41,74 +30,74 @@ const {
   title,
   accent,
   description,
+  minHeight = '40vh',
   image,
-  imageSet,
-  caption,
+  align = 'left',
   maxTitle = '5.5rem',
-  compact = false,
 } = Astro.props;
 ---
 
-<section class:list={['page-hero', 'band', { compact }]} style={`--ph-max-title:${maxTitle};`}>
-  <div class="band-inner">
-    {tag && <span class="eyebrow">{tag}</span>}
-    <h1>{accent ? `${title} ${accent}` : title}</h1>
-    {description && <p>{description}</p>}
+<section
+  class:list={['page-hero', { 'has-image': !!image, right: align === 'right' }]}
+  style={`--ph-min:${minHeight};--ph-max-title:${maxTitle};${image ? `--ph-image:url('${image}');` : ''}`}
+>
+  <div class="page-hero-inner">
+    {tag && <span class="ph-tag">{tag}</span>}
+    <h1>
+      {title}{accent && <><br /><span>{accent}</span></>}
+    </h1>
+    {description && <p class="ph-desc">{description}</p>}
     <slot />
-    {image && (
-      <img
-        class="ph-image"
-        src={image}
-        srcset={imageSet}
-        sizes="(max-width: 1120px) 100vw, 1120px"
-        alt=""
-        fetchpriority="high"
-        decoding="async"
-      />
-    )}
-    {image && caption && <p class="ph-altyazi">{caption}</p>}
   </div>
 </section>
 
 <style>
-  /* Fotoğraf künyesi: görselin hemen altında, overlay değil (§2.2.5).
-
-     İki düzeltme: (1) pre-line, çünkü panelde Enter ile atılan satır
-     sonları metin düğümünde duruyor ama HTML varsayılanında tek boşluğa
-     iniyordu — kullanıcı alt satıra geçemiyordu. (2) Genişlik sınırı
-     kaldırıldı: --measure-text (620px) okunabilirlik için doğru ölçü ama
-     alan tek satırlık künye değil, uzun tanıtım metni olarak kullanılıyor
-     ve 1120px'lik fotoğrafın altında yarıya kadar yazıp kesiliyordu.
-     Artık fotoğrafla aynı genişlikte.
-
-     max-width: none AÇIKÇA yazılmak zorunda: Layout.astro'daki global
-     "p { max-width: var(--measure-text) }" kuralı bu öğeye de uyuyor,
-     yani bildirimi buradan silmek sınırı kaldırmıyor, sadece global
-     değeri devralıyor. */
-  .ph-altyazi {
-    margin-top: var(--sp-3);
-    max-width: none;
-    font-size: var(--fs-base);
-    line-height: var(--lh-body);
-    color: var(--text-body);
-    white-space: pre-line;
+  .page-hero {
+    min-height: var(--ph-min);
+    display: flex;
+    align-items: center;
+    padding: 5rem 8%;
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 60% 80% at 50% 50%, rgba(26,122,46,0.20) 0%, transparent 65%),
+      linear-gradient(160deg, #0d1a0f 0%, var(--black) 60%);
   }
 
-  /* Birincil öğe: üst/alt boşluk komşu bölümlerin (--sp-6) iki katı */
-  .page-hero { padding-block: calc(var(--sp-6) * 2); }
-  @media (max-width: 767px) {
-    .page-hero { padding-block: calc(var(--sp-5) * 2); }
+  /* Fotoğraflı varyant: görsel en altta, üstüne koyulaştırma */
+  .page-hero.has-image {
+    background:
+      radial-gradient(ellipse 70% 80% at 50% 50%, rgba(26,122,46,0.22) 0%, transparent 65%),
+      linear-gradient(160deg, rgba(10,10,10,0.88) 0%, rgba(13,26,15,0.80) 55%),
+      var(--ph-image) center / cover no-repeat;
   }
-  /* Geniş ekranda hero ilk ekranı tek başına kaplar: bir sonraki bölümün
-     h2'si ilk ekrana girmez, h1 yalnız kalır. Dikkat çerçeveyle değil
-     yalnızlıkla çekilir (§2.1.2); boş görünüyorsa doğrudur. */
-  @media (min-width: 768px) {
-    .page-hero:not(.compact) {
-      min-height: calc(100vh - var(--nav-h));
-      display: flex;
-      align-items: center;
-    }
-    .page-hero:not(.compact) > .band-inner { width: 100%; }
+
+  /* İnce ızgara dokusu */
+  .page-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      repeating-linear-gradient(0deg,  transparent, transparent 80px, rgba(26,122,46,0.05) 80px, rgba(26,122,46,0.05) 81px),
+      repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(26,122,46,0.05) 80px, rgba(26,122,46,0.05) 81px);
+  }
+
+  .page-hero-inner {
+    position: relative;
+    max-width: 680px;
+  }
+  .page-hero.right .page-hero-inner { margin-left: auto; text-align: right; }
+  .page-hero.right .ph-desc { margin-left: auto; }
+
+  .ph-tag {
+    display: inline-block;
+    font-size: var(--fs-eyebrow);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--green-bright);
+    margin-bottom: 1rem;
   }
 
   .page-hero h1 {
@@ -118,21 +107,20 @@ const {
     font-weight: var(--fw-bold);
     line-height: var(--lh-tight);
     letter-spacing: var(--ls-display);
-    max-width: 20ch;
+    margin-bottom: 1.2rem;
+  }
+  .page-hero h1 span {
+    color: var(--green-bright);
   }
 
-  /* Fotoğraf: geniş kadraj, kırpma odağı üstte (yüzler üst yarıda) */
-  .ph-image {
-    display: block;
-    width: 100%;
-    aspect-ratio: 21 / 9;
-    max-height: var(--media-max-h);
-    object-fit: cover;
-    object-position: center 35%;
-    border-radius: var(--r-md);
-    margin-top: var(--sp-5);
+  .ph-desc {
+    font-size: var(--fs-base);
+    color: var(--text-body);
+    max-width: 460px;
+    line-height: var(--lh-body);
   }
-  @media (max-width: 768px) {
-    .ph-image { aspect-ratio: 4 / 3; max-height: var(--media-max-h-sm); }
+
+  @media (max-width: 640px) {
+    .page-hero { padding: 4rem 6%; }
   }
 </style>

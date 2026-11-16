@@ -5,41 +5,16 @@ import Footer from '../components/Footer.astro';
 import PageHero from '../components/PageHero.astro';
 import { supabase, type NewsItem } from '../lib/supabase';
 import { img, imgSet } from '../lib/img';
-import { newsPath, formatDate, isoDate } from '../lib/news';
+import { newsPath, excerpt, formatDate, isoDate } from '../lib/news';
 
-/* ── Sayfalama (§7.2): 12 haber/sayfa, sunucu taraflı ?sayfa=N ──────────
-   .range() iki ucu da kapsayıcıdır; toplam sayı aynı sorgudan gelir.
-   Aralık dışı her değer 1. sayfaya kırpılır.                               */
-const SAYFA_BOYU = 12;
-const ham = Number(Astro.url.searchParams.get('sayfa'));
-const istenen = Number.isFinite(ham) && ham >= 1 ? Math.floor(ham) : 1;
+const { data } = await supabase
+  .from('news')
+  .select('*')
+  .order('id', { ascending: false });
 
-function sayfaGetir(sayfa: number) {
-  const bas = (sayfa - 1) * SAYFA_BOYU;
-  return supabase
-    .from('news')
-    .select('*', { count: 'exact' })
-    .order('id', { ascending: false })
-    .range(bas, bas + SAYFA_BOYU - 1);
-}
+const news: NewsItem[] = data ?? [];
 
-const sayfaSayisi = (count: number | null) => Math.max(1, Math.ceil((count ?? 0) / SAYFA_BOYU));
-
-let sayfa = istenen;
-let sonuc = await sayfaGetir(sayfa);
-let toplamSayfa = sayfaSayisi(sonuc.count);
-// Aralık dışı: PostgREST ya boş döner ya 416 (error) — iki durumda da 1. sayfa
-if (sonuc.error || sayfa > toplamSayfa) {
-  sayfa = 1;
-  sonuc = await sayfaGetir(1);
-  toplamSayfa = sayfaSayisi(sonuc.count);
-}
-const news: NewsItem[] = sonuc.data ?? [];
-const sayfalar = Array.from({ length: toplamSayfa }, (_, i) => i + 1);
-
-// Yalnız 1. sayfada en yeni haber tek başına, tam genişlikte (§4.5.8)
-const oneCikan = sayfa === 1 ? news[0] : undefined;
-const kalanlar = sayfa === 1 ? news.slice(1) : news;
+const fallbackImg = 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=800&q=80';
 ---
 
 <Layout
@@ -48,86 +23,56 @@ const kalanlar = sayfa === 1 ? news.slice(1) : news;
 >
   <Navbar />
 
-  <main id="icerik" tabindex="-1">
+  <main id="icerik" tabindex="-1" class="haberler-page">
 
     <PageHero
       tag="Son Dakika"
       title="Haber"
       accent="Merkezi"
       description="Kulübümüzden son gelişmeler, maç haberleri ve duyurular."
-    >
-      {oneCikan && (
-        <a href={newsPath(oneCikan)} class="card one-cikan">
-          {oneCikan.image_url
-            ? (
-              <span class="card-media">
-                <img
-                  src={img(oneCikan.image_url, 800)}
-                  srcset={imgSet(oneCikan.image_url, [400, 800, 1200])}
-                  sizes="(max-width: 767px) 100vw, 50vw"
-                  alt=""
-                  fetchpriority="high"
-                  decoding="async"
-                />
-              </span>
-            )
-            : <span class="card-media foto-yok"></span>
-          }
-          <span class="one-cikan-body">
-            <span class="one-cikan-title">{oneCikan.title}</span>
-            <span class="card-meta">
-              {formatDate(oneCikan.published_at) && (
-                <time datetime={isoDate(oneCikan.published_at)}>{formatDate(oneCikan.published_at)}</time>
-              )}
-            </span>
-          </span>
-        </a>
-      )}
-    </PageHero>
+      minHeight="38vh"
+    />
 
-    <!-- Kalan haberler: veri yoksa bölüm hiç basılmaz -->
-    {kalanlar.length > 0 && (
-      <section class="band news-section" aria-label="Haberler">
-        <div class="band-inner">
-          <div class="news-grid">
-            {kalanlar.map(n => (
-              <a href={newsPath(n)} class="card">
-                {n.image_url
-                  ? (
-                    <span class="card-media">
-                      <img
-                        src={img(n.image_url, 400)}
-                        srcset={imgSet(n.image_url, [400, 800])}
-                        sizes="(max-width: 767px) 100vw, (max-width: 1119px) 50vw, 33vw"
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </span>
-                  )
-                  : <span class="card-media foto-yok"></span>
-                }
-                <h3 class="card-title">{n.title}</h3>
-                <span class="card-meta">
-                  {formatDate(n.published_at) && (
-                    <time datetime={isoDate(n.published_at)}>{formatDate(n.published_at)}</time>
-                  )}
-                </span>
+    <!-- Haberler grid -->
+    {news.length > 0 ? (
+      <section class="news-section">
+        <div class="news-grid">
+          {news.map(n => (
+            <article class="news-card">
+              <a href={newsPath(n)} class="news-link-wrap">
+                <div class="news-img">
+                  <div class="news-img-bg"></div>
+                  <img
+                    class="news-img-fg"
+                    src={img(n.image_url, 800) || fallbackImg}
+                    srcset={imgSet(n.image_url)}
+                    sizes="(max-width: 640px) 100vw, (max-width: 960px) 50vw, 33vw"
+                    alt={n.title}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <div class="news-body">
+                  <div class="news-meta">
+                    <span class="news-tag">Haber</span>
+                    {formatDate(n.published_at) && (
+                      <time class="news-date" datetime={isoDate(n.published_at)}>{formatDate(n.published_at)}</time>
+                    )}
+                  </div>
+                  <h2>{n.title}</h2>
+                  <p>{excerpt(n.description, 170)}</p>
+                  <span class="news-more">Devamını Oku →</span>
+                </div>
               </a>
-            ))}
-          </div>
-
-          {toplamSayfa > 1 && (
-            <nav class="sayfalama" aria-label="Sayfalar">
-              {sayfalar.map(n => (
-                n === sayfa
-                  ? <span class="sayfa aktif" aria-current="page">{n}</span>
-                  : <a class="sayfa" href={`?sayfa=${n}`}>{n}</a>
-              ))}
-            </nav>
-          )}
+            </article>
+          ))}
         </div>
       </section>
+    ) : (
+      <div class="empty-state">
+        <p>Henüz haber eklenmemiş.</p>
+        <a href="/admin/dashboard" class="btn-primary">Admin Paneline Git</a>
+      </div>
     )}
 
   </main>
@@ -136,57 +81,171 @@ const kalanlar = sayfa === 1 ? news.slice(1) : news;
 </Layout>
 
 <style>
-  /* Öne çıkan kart: görsel solda, başlık sağda, ölçek --fs-lg (§6.1 rolü) */
-  .one-cikan {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--sp-3);
-    margin-top: var(--sp-5);
+  /* ── Haber Grid ── */
+  .news-section {
+    padding: 4rem 5%;
+    background: var(--black);
+    border-top: 1px solid var(--border);
   }
-  .one-cikan-body {
+
+  .news-grid {
+    max-width: 1160px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 960px) {
+    .news-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .news-grid { grid-template-columns: 1fr; }
+  }
+
+  .news-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    gap: var(--sp-2);
+    transition: border-color .25s, transform .2s, box-shadow .25s;
   }
-  .one-cikan-title {
-    font-size: var(--fs-lg);
+  .news-card:hover {
+    border-color: var(--green);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(13,77,30,0.18);
+  }
+  .news-card:focus-within {
+    border-color: var(--green-bright);
+    outline: 2px solid var(--green-bright);
+    outline-offset: 3px;
+  }
+
+  /* Kartın tamamı tıklanabilir */
+  .news-link-wrap {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    text-decoration: none;
+    color: inherit;
+  }
+  .news-link-wrap:focus-visible { outline: none; }
+
+  /* Sabit oran, ama tavanla sınırlı: dar kolonlarda kart aşırı uzamıyor */
+  .news-img {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    max-height: var(--card-media-max-h);
+    overflow: hidden;
+    background: #0a0a0a;
+    flex-shrink: 0;
+  }
+  /* Tek kolona düşünce kart tam genişlik oluyor — oranı koruyup
+     yüksekliği sınırlıyoruz (4/3'e çevirmek dikey görsellerde
+     kenarlarda büyük boşluk bırakıyordu). */
+  @media (max-width: 640px) {
+    .news-img { max-height: 440px; }
+  }
+  /* Görsellerin %73'ü zaten 3:4 dikey, kutuyu tam dolduruyor.
+     Yatay olanlarda bulanık leke yerine düz koyu panel kalıyor. */
+  .news-img-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, #141814 0%, #0a0d0a 100%);
+  }
+  /* Asıl fotoğraf: kırpılmadan, ortalanmış şekilde tamamı görünür */
+  .news-img-fg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+  }
+
+  .news-body {
+    padding: 1.5rem 1.6rem 1.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: .7rem;
+    flex: 1;
+  }
+
+  .news-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .8rem;
+  }
+  .news-tag {
+    font-size: var(--fs-eyebrow);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--green-bright);
+  }
+  .news-date {
+    font-size: var(--fs-eyebrow);
+    font-weight: var(--fw-medium);
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .news-body h2 {
+    font-size: var(--fs-md);
     font-weight: var(--fw-bold);
     line-height: var(--lh-snug);
-    letter-spacing: var(--ls-tight);
     color: var(--text);
-    max-width: 24ch;
-    text-wrap: balance;
-  }
-  @media (max-width: 767px) {
-    .one-cikan { grid-template-columns: 1fr; }
-  }
-
-  .news-section { border-top: 1px solid var(--border); }
-
-  /* Izgara formülü (§2.3) */
-  .news-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
-    gap: var(--sp-3);
+    /* Kart yükseklikleri satır içinde tutarlı kalsın */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
-  /* ── Sayfalama: yalnız aktif numara yeşil ── */
-  .sayfalama { display: flex; gap: var(--sp-2); font-variant-numeric: tabular-nums; }
-  .sayfa {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 2.5rem;
-    min-height: 2.5rem;
-    border: 1px solid var(--border);
-    border-radius: var(--r-sm);
+  /* Özet: en fazla 4 satır — kartlar artık uzayıp boşluk bırakmıyor */
+  .news-body p {
     font-size: var(--fs-sm);
-    color: var(--text-muted);
-    text-decoration: none;
-    transition: border-color .15s ease;
+    color: var(--text-body);
+    line-height: var(--lh-body);
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
-  a.sayfa:hover { border-color: var(--border-strong); color: var(--text); }
-  a.sayfa:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 2px; }
-  .sayfa.aktif { color: var(--green-bright); border-color: var(--border-strong); }
+
+  .news-more {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
+    color: var(--green-bright);
+    transition: color .2s;
+  }
+  .news-card:hover .news-more { color: #fff; }
+
+  /* ── Boş durum ── */
+  .empty-state {
+    padding: 6rem 8%;
+    text-align: center;
+    color: var(--text-body);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .btn-primary {
+    background: var(--green);
+    color: #fff;
+    padding: .7rem 1.6rem;
+    border-radius: var(--r-pill);
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-sm);
+    text-decoration: none;
+    transition: background .2s;
+  }
+  .btn-primary:hover { background: var(--green-mid); }
 </style>

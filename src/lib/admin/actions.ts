@@ -375,13 +375,7 @@ export const adminActions: Record<string, ActionDef> = {
     run: async (ctx) => {
       const image_url = await resolveImage(ctx, 'image_file', 'image_url', 'pilot-hero');
       if (!image_url) return { error: 'Lütfen bir görsel seçin veya geçerli bir URL girin.' };
-      // description = fotoğrafın altındaki künye; boşsa sitede satır basılmaz
-      return upsertHero(
-        ctx,
-        2,
-        { image_url, description: str(ctx.form, 'description') },
-        'Pilot Takım hero görseli ve yazısı güncellendi!'
-      );
+      return upsertHero(ctx, 2, { image_url }, 'Pilot Takım hero görseli güncellendi!');
     },
   },
 
@@ -412,13 +406,7 @@ export const adminActions: Record<string, ActionDef> = {
     run: async (ctx) => {
       const image_url = await resolveImage(ctx, 'image_file', 'image_url', 'a-takim-hero');
       if (!image_url) return { error: 'Lütfen bir görsel seçin veya geçerli bir URL girin.' };
-      // description = fotoğrafın altındaki künye; boşsa sitede satır basılmaz
-      return upsertHero(
-        ctx,
-        3,
-        { image_url, description: str(ctx.form, 'description') },
-        'A Takım hero görseli ve yazısı güncellendi!'
-      );
+      return upsertHero(ctx, 3, { image_url }, 'A Takım hero görseli güncellendi!');
     },
   },
 };

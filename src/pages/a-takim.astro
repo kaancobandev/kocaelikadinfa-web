@@ -3,20 +3,17 @@ import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 import PageHero from '../components/PageHero.astro';
-import Lightbox from '../components/Lightbox.astro';
 import { supabase, type GalleryItem } from '../lib/supabase';
 import { img, imgSet } from '../lib/img';
 
 // hero_settings satırları: 1 = ana sayfa, 2 = pilot takım, 3 = A takım
 const [{ data: settingsData }, { data: galleryData }] = await Promise.all([
-  supabase.from('hero_settings').select('image_url,description').eq('id', 3).maybeSingle(),
+  supabase.from('hero_settings').select('image_url').eq('id', 3).maybeSingle(),
   supabase.from('a_takim_gallery').select('*').order('sort_order', { ascending: true }),
 ]);
 
 // Panelden görsel yüklenmediyse depodaki varsayılan kullanılır
 const heroImage: string = settingsData?.image_url ?? '/a-takim-hero.jpeg';
-// Fotoğrafın altındaki künye panelden geliyor; boşsa satır hiç basılmaz
-const heroAltyazi: string = (settingsData?.description ?? '').trim();
 const photos: GalleryItem[] = galleryData ?? [];
 ---
 
@@ -26,77 +23,65 @@ const photos: GalleryItem[] = galleryData ?? [];
 >
   <Navbar />
 
-  <main id="icerik" tabindex="-1">
-
-    {/* İki takım da menüde tek "Takımlar" sekmesinin arkasında; geçiş burada
-        görünür olmalı, gövdenin içinde üçüncül bir bağlantı olarak değil. */}
-    <nav class="band takim-gecis-band" aria-label="Takımlar">
-      <div class="band-inner">
-        <ul class="takim-gecis">
-          <li><span class="takim aktif" aria-current="page">A Takım — Kadınlar 1. Ligi</span></li>
-          <li><a class="takim" href="/pilot-takim">Pilot Takım — Kadınlar 3. Ligi</a></li>
-        </ul>
-      </div>
-    </nav>
+  <main id="icerik" tabindex="-1" class="at-page">
 
     <PageHero
-      tag="Takımlar"
-      title="A Takım — Kadınlar 1. Ligi"
+      tag="A Takım"
+      title="Kocaeli'nin"
+      accent="Gururu"
       description="Altyapıya verdiğimiz önem ve genç oyuncularımıza duyduğumuz güvenle, kadın futbolunda sürdürülebilir başarı hedefliyoruz."
+      minHeight="52vh"
       image={img(heroImage, 1600, 70)}
-      imageSet={imgSet(heroImage, [800, 1200, 1600], 70)}
-      caption={heroAltyazi}
+      align="right"
     />
 
-    <!-- Yazı: tek paragraf -->
-    <section class="band story-section">
-      <div class="band-inner">
+    <!-- Yazı -->
+    <section class="story-section">
+      <div class="story-inner">
         <h2>Takımımız Hakkında</h2>
-        <p>
-          Kadınlar 1. Lig'inin en genç, tamamen yerli ve yabancı oyuncu bulundurmayan tek takımı olarak; başarımızı kendi altyapımızdan yetişen genç yeteneklere verdiğimiz değerle inşa ediyoruz. Kocaeli Kadın Futbol Akademisi olarak geleceği kendi sporcularımızla yazıyoruz.
-        </p>
+        <div class="story-text">
+          <p>
+            Kadınlar 1. Lig'inin en genç, tamamen yerli ve yabancı oyuncu bulundurmayan tek takımı olarak; başarımızı kendi altyapımızdan yetişen genç yeteneklere verdiğimiz değerle inşa ediyoruz.
+          </p>
+          <p>
+            Kocaeli Kadın Futbol Akademisi olarak geleceği kendi sporcularımızla yazıyoruz.
+          </p>
+        </div>
+
       </div>
     </section>
 
-    <!-- Fotoğraflar: veri yoksa bölüm hiç basılmaz -->
+    <!-- Fotoğraflar -->
     {photos.length > 0 && (
-      <section class="band photos-section" id="kareler" aria-label="A Takım'dan kareler">
-        <div class="band-inner">
-          <span class="eyebrow">Kadınlar 1. Ligi</span>
-          <h2>Sahadan Kareler</h2>
-          <div class="photos-grid">
-            {photos.map((p, i) => (
-              <button type="button" class="card" data-lb-src={img(p.image_url, 1600)} data-lb-altyazi={p.caption ?? ''}>
-                <span class="card-media">
-                  <img
-                    src={img(p.image_url, 400)}
-                    srcset={imgSet(p.image_url, [400, 800])}
-                    sizes="(max-width: 767px) 100vw, (max-width: 1119px) 50vw, 33vw"
-                    alt={p.caption ?? 'Sahadan kareler'}
-                    {/* İlk satır zaten ekranda; ertelemek yerine hemen insin */}
-                    loading={i < 3 ? 'eager' : 'lazy'}
-                    fetchpriority={i < 3 ? 'high' : undefined}
-                    decoding="async"
-                  />
-                </span>
-                {/* Altyazı şeridi her zaman basılır; boşsa yüksekliğini korur */}
-                <span class="card-meta">{p.caption ?? ''}</span>
-              </button>
-            ))}
-          </div>
-          <Lightbox />
+      <section class="photos-section">
+        <h2 class="photos-title">Sahadan Kareler</h2>
+        <div class="photos-grid">
+          {photos.map((p, i) => (
+            <figure class="photo-card">
+              <div class="photo-media">
+                <img
+                  src={img(p.image_url, 800)}
+                  srcset={imgSet(p.image_url)}
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  alt={p.caption ?? ''}
+                  {/* İlk satır zaten ekranda; ertelemek yerine hemen insin */}
+                  loading={i < 3 ? 'eager' : 'lazy'}
+                  fetchpriority={i < 3 ? 'high' : undefined}
+                  decoding="async"
+                />
+              </div>
+              {p.caption && <figcaption>{p.caption}</figcaption>}
+            </figure>
+          ))}
         </div>
       </section>
     )}
 
-    <!-- Çağrı -->
-    <section class="band cta-section">
-      <div class="band-inner">
-        <h2>A Takımımıza Katıl</h2>
-        <p>Kadromuzda yer almak istiyorsan seçmelerimizi takip et ve başvurunu yap.</p>
-        <!-- Dolgulu buton yok: bu sayfa bilgilendirir, /aramiza-katil'e üçüncül bağlantıyla yollar (§4.4) -->
-        <a href="/aramiza-katil" class="link-tertiary">Seçmeler için bize ulaşın →</a>
-      </div>
+    <!-- CTA -->
+    <section class="cta-section">
+      <h2>A Takımımıza Katıl</h2>
+      <p>Kadromuzda yer almak istiyorsan seçmelerimizi takip et ve başvurunu yap.</p>
+      <a href="/aramiza-katil" class="btn-primary">Başvuru Yap</a>
     </section>
 
   </main>
@@ -105,50 +90,93 @@ const photos: GalleryItem[] = galleryData ?? [];
 </Layout>
 
 <style>
-  .story-section,
-  .photos-section,
-  .cta-section { border-top: 1px solid var(--border); }
-  /* Gövde ölçüsü ~66 karakter/satır (global p kuralıyla aynı, burada açık) */
-  .story-section p { max-width: var(--measure-text); }
-
-  /* Üçüncül bağlantı: soluk düz metin, vurgu rengi yok */
-  .link-tertiary {
-    display: inline-block;
-    font-size: var(--fs-sm);
-    color: var(--text-muted);
-    text-decoration: none;
-    transition: color .2s;
+  /* ── Yazı ── */
+  .story-section {
+    padding: 6rem 8%;
+    background: var(--dark);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
   }
-  .link-tertiary:hover { color: var(--text); }
-  .link-tertiary:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
+  .story-inner { max-width: 820px; margin-left: auto; }
 
-  /* Izgara formülü (§2.3) */
+  .story-section h2 {
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
+    margin-bottom: 2rem;
+    display: inline-block;
+  }
+  .story-section h2::after {
+    content: '';
+    display: block;
+    width: 50px; height: 3px;
+    background: var(--green-bright);
+    margin-top: .4rem;
+    border-radius: var(--r-sm);
+  }
+
+  .story-text { display: flex; flex-direction: column; gap: 1.2rem; }
+  .story-text p { font-size: var(--fs-base); color: var(--text-body); line-height: var(--lh-body); }
+
+  /* ── Fotoğraflar ── */
+  .photos-section { padding: 5rem 8%; background: var(--black); }
+
+  .photos-title {
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
+    margin-bottom: 2.5rem;
+    display: inline-block;
+  }
+  .photos-title::after {
+    content: '';
+    display: block;
+    width: 50px; height: 3px;
+    background: var(--green-bright);
+    margin-top: .4rem;
+    border-radius: var(--r-sm);
+  }
+
+  /* Izgara — satır satır soldan sağa. Kolon bazlı masonry'de (column-count)
+     belge sırası ekrandaki sırayla örtüşmediği için üstteki fotoğraflar en
+     son, alttakiler ilk iniyordu. */
   .photos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
-    gap: var(--sp-3);
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+    align-items: start;
   }
+  @media (max-width: 960px) { .photos-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .photos-grid { grid-template-columns: 1fr; } }
 
-  /* Takım geçişi: menüde "Takımlar" tek sekme olduğu için iki takıma da
-     buradan ulaşılıyor. Gövdenin içindeki üçüncül bağlantının yerini aldı —
-     diğer takım sayfanın dibinde değil, başında görünür. */
-  .takim-gecis-band { padding-block: 0; }
-  .takim-gecis {
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-2) var(--sp-4);
-    border-bottom: 1px solid var(--border);
-    padding-bottom: var(--sp-2);
+  .photo-card {
+    border-radius: var(--r-md);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    transition: transform .3s, box-shadow .3s;
   }
-  .takim {
-    font-size: var(--fs-sm);
-    font-weight: var(--fw-medium);
-    color: var(--text-muted);
-    text-decoration: none;
-    transition: color .2s;
+  .photo-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.5); }
+  .photo-media { overflow: hidden; }
+  /* Izgarada satırlar hizalı dursun diye ortak oran; yükseklik baştan belli
+     olduğu için görsel inerken sayfa kaymıyor. */
+  .photo-card img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    height: auto;
+    object-fit: cover;
+    object-position: center 40%;
+    transition: transform .4s;
   }
-  a.takim:hover { color: var(--text); }
-  a.takim:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
-  .takim.aktif { color: var(--green-bright); }
+  .photo-card:hover img { transform: scale(1.03); }
+  figcaption { background: var(--card-bg); padding: .8rem 1rem; font-size: var(--fs-sm); color: var(--text-muted); font-weight: var(--fw-medium); }
+
+  /* ── CTA ── */
+  .cta-section {
+    padding: 5rem 8%;
+    background: var(--dark);
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+  .cta-section h2 { font-size: var(--fs-xl); font-weight: var(--fw-bold); margin-bottom: .8rem; }
+  .cta-section p  { color: var(--text-body); margin-bottom: 2rem; }
 </style>

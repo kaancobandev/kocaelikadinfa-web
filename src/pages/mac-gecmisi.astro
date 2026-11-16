@@ -4,7 +4,6 @@ import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 import PageHero from '../components/PageHero.astro';
 import { supabase, type Match } from '../lib/supabase';
-import { img } from '../lib/img';
 import { sonuc, ozet } from '../lib/match';
 
 const { data } = await supabase
@@ -29,6 +28,7 @@ const matchGroups: [string, Match[]][] = [...groupMap.entries()];
 const result = sonuc;
 
 const resultLabel = { win: 'G', draw: 'B', loss: 'M', null: '–' } as const;
+const resultClass = { win: 'win', draw: 'draw', loss: 'loss', null: '' } as const;
 
 function initials(name: string) {
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
@@ -41,10 +41,8 @@ function formatDate(d: string) {
   return `${parseInt(m[3])} ${TR_MONTHS[parseInt(m[2]) - 1]} ${m[1]}`;
 }
 
-// Özet istatistik — hesap src/lib/match.ts'te (aynı kulüp tespitini kullanır).
-// Eskiden `ozet` fonksiyonun kendisine atanıyor, hiç çağrılmıyordu.
-// ozet() yalnız { w, d, l, gf, ga } döndürür; oynanan sayısı matches.length.
-const stats = ozet(matches);
+// Özet istatistik — hesap src/lib/match.ts'te (aynı kulüp tespitini kullanır)
+const stats = ozet;
 ---
 
 <Layout
@@ -53,98 +51,87 @@ const stats = ozet(matches);
 >
   <Navbar />
 
-  <main id="icerik" tabindex="-1">
+  <main id="icerik" tabindex="-1" class="mg-page">
 
     <PageHero
       tag="Sezon 2025–26"
       title="Maç"
       accent="Geçmişi"
       description="Tüm maçlarımızın sonuçları, skorlar ve karşılaştığımız takımlar."
-    >
-      {/* Sezon künyesi: sayfanın birincil öğesi (§4.3); veri yoksa basılmaz */}
-      {matches.length > 0 && (
-        <div class="summary-bar" aria-label="Sezon künyesi">
-          <div class="summary-item">
-            <span class="s-num">{matches.length}</span>
-            <span class="s-lbl">Maç</span>
-          </div>
-          <div class="summary-item">
-            <span class="s-num win-color">{stats.w}</span>
-            <span class="s-lbl">Galibiyet</span>
-          </div>
-          <div class="summary-item">
-            <span class="s-num draw-color">{stats.d}</span>
-            <span class="s-lbl">Beraberlik</span>
-          </div>
-          <div class="summary-item">
-            <span class="s-num loss-color">{stats.l}</span>
-            <span class="s-lbl">Mağlubiyet</span>
+      minHeight="40vh"
+    />
+
+    <!-- Kategori başlığına göre dinamik bölümler -->
+    {matchGroups.map(([title, list], gi) => (
+      <section class={`group-section${gi % 2 === 1 ? ' alt' : ''}`}>
+        <div class="group-header">
+          <div class="group-title-wrap">
+            <span class="group-badge">{title}</span>
+            <h2>{title} Maçları</h2>
           </div>
         </div>
-      )}
-    </PageHero>
 
-    <!-- Kategori başlığına göre dinamik bölümler; kategori adı yalnız h2'de -->
-    {matchGroups.map(([title, list]) => (
-      <section class="band group-section">
-        <div class="band-inner">
-          <h2>{title} Maçları</h2>
+        <div class="matches-list">
+          {list.map(m => {
+            const r = result(m);
+            return (
+              <div class="match-card">
+                <div class="match-meta-left">
+                  <span class="match-date">{formatDate(m.match_date)}</span>
+                </div>
 
-          <div class="matches-list">
-            {list.map(m => {
-              const r = result(m);
-              return (
-                <div class="match-card">
-                  <div class="match-meta-left">
-                    <span class="match-date">{formatDate(m.match_date)}</span>
+                <div class="match-teams">
+                  <div class="team-side home">
+                    <div class="team-logo-wrap">
+                      {m.home_logo
+                        ? <img src={m.home_logo} alt={m.home_name} class="team-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                        : null
+                      }
+                      <span class="team-logo-fallback" style={m.home_logo ? 'display:none' : 'display:flex'}>
+                        {initials(m.home_name)}
+                      </span>
+                    </div>
+                    <span class="team-name">{m.home_name}</span>
                   </div>
 
-                  <div class="match-teams">
-                    <div class="team-side home">
-                      <div class="team-logo-wrap">
-                        {m.home_logo
-                          ? <img src={img(m.home_logo, 120)} alt={m.home_name} class="team-logo" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-                          : null
-                        }
-                        <span class="team-logo-fallback" style={m.home_logo ? 'display:none' : 'display:flex'}>
-                          {initials(m.home_name)}
-                        </span>
-                      </div>
-                      <span class="team-name">{m.home_name}</span>
-                    </div>
-
-                    <div class="score-center">
-                      <span class="score-big">{m.score_home}</span>
-                      <span class="score-sep">–</span>
-                      <span class="score-big">{m.score_away}</span>
-                    </div>
-
-                    <div class="team-side away">
-                      <div class="team-logo-wrap">
-                        {m.away_logo
-                          ? <img src={img(m.away_logo, 120)} alt={m.away_name} class="team-logo" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-                          : null
-                        }
-                        <span class="team-logo-fallback" style={m.away_logo ? 'display:none' : 'display:flex'}>
-                          {initials(m.away_name)}
-                        </span>
-                      </div>
-                      <span class="team-name">{m.away_name}</span>
-                    </div>
+                  <div class="score-center">
+                    <span class="score-big">{m.score_home}</span>
+                    <span class="score-sep">–</span>
+                    <span class="score-big">{m.score_away}</span>
                   </div>
 
-                  <div class="match-result">
-                    <span class={`result-badge ${r ?? ''}`}>
-                      {resultLabel[r ?? 'null']}
-                    </span>
+                  <div class="team-side away">
+                    <div class="team-logo-wrap">
+                      {m.away_logo
+                        ? <img src={m.away_logo} alt={m.away_name} class="team-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                        : null
+                      }
+                      <span class="team-logo-fallback" style={m.away_logo ? 'display:none' : 'display:flex'}>
+                        {initials(m.away_name)}
+                      </span>
+                    </div>
+                    <span class="team-name">{m.away_name}</span>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+
+                <div class="match-result">
+                  <span class={`result-badge ${r ?? ''}`}>
+                    {resultLabel[r ?? 'null']}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
     ))}
+
+    {matches.length === 0 && (
+      <div class="empty-state">
+        <p>Henüz maç sonucu eklenmemiş.</p>
+        <a href="/admin/dashboard" class="btn-primary">Admin Paneline Git</a>
+      </div>
+    )}
 
   </main>
 
@@ -152,54 +139,73 @@ const stats = ozet(matches);
 </Layout>
 
 <style>
-  /* ── Grup bölümü: dönüşümlü zemin yok, yalnız ince çizgi ── */
+  /* ── Grup bölümü ── */
   .group-section {
+    padding: 4rem 8%;
     background: var(--black);
     border-top: 1px solid var(--border);
   }
+  .group-section.alt { background: var(--dark); }
 
-  /* ── Sezon künyesi: büyük rakamlar, tabular-nums ── */
-  .summary-bar { display: flex; gap: var(--sp-4); flex-wrap: wrap; }
-  .summary-item { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-1); }
-  .s-num { font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--text); line-height: var(--lh-tight); font-variant-numeric: tabular-nums; }
-  .s-lbl { font-size: var(--fs-eyebrow); font-weight: var(--fw-medium); line-height: 1; letter-spacing: var(--ls-eyebrow); text-transform: uppercase; color: var(--text-muted); }
-  /* .s-num'dan sonra tanımlı, aynı özgüllükte: !important gerekmez.
-     Galibiyet sayısı yeşil değil — --green-bright --fs-lg ölçeğinde kullanılmaz. */
-  .win-color  { color: var(--text); }
-  .draw-color { color: var(--amber); }
-  .loss-color { color: var(--kirmizi); }
+  .group-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .group-title-wrap { display: flex; flex-direction: column; gap: .5rem; }
+  .group-badge {
+    display: inline-block;
+    background: var(--green);
+    color: #fff;
+    font-size: var(--fs-eyebrow); font-weight: var(--fw-bold); letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase; padding: .25rem .8rem; border-radius: var(--r-pill);
+    width: fit-content;
+  }
+  .group-title-wrap h2 { font-size: var(--fs-xl); font-weight: var(--fw-bold); }
+
+  /* Özet bar */
+  .summary-bar { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+  .summary-item { display: flex; flex-direction: column; align-items: center; gap: .2rem; }
+  .s-num { font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--text); line-height: var(--lh-tight); }
+  .s-lbl { font-size: var(--fs-eyebrow); font-weight: var(--fw-medium); letter-spacing: var(--ls-eyebrow); text-transform: uppercase; color: var(--text-muted); }
+  .win-color  { color: var(--green-bright) !important; }
+  .draw-color { color: #d4d452 !important; }
+  .loss-color { color: #e05555 !important; }
 
   /* ── Maç kartları ── */
-  .matches-list { display: flex; flex-direction: column; gap: var(--sp-2); }
+  .matches-list { display: flex; flex-direction: column; gap: .8rem; }
 
   .match-card {
-    background: var(--surface);
+    background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: var(--r-md);
-    padding: var(--sp-2) var(--sp-3);
+    border-radius: var(--radius);
+    padding: 1rem 1.4rem;
     display: grid;
     grid-template-columns: 140px 1fr 56px;
     align-items: center;
-    gap: var(--sp-2);
-    transition: border-color .15s ease;
+    gap: 1rem;
+    transition: border-color .2s, background .2s;
   }
-  .match-card:hover { border-color: var(--border-strong); }
+  .match-card:hover { border-color: var(--green); background: #1a1a1a; }
 
-  .match-meta-left { display: flex; flex-direction: column; }
-  .match-date { font-size: var(--fs-sm); line-height: var(--lh-snug); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .match-meta-left { display: flex; flex-direction: column; gap: .3rem; }
+  .match-date   { font-size: var(--fs-sm); font-weight: var(--fw-bold); color: var(--text); }
 
   /* Takımlar + skor */
   .match-teams {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--sp-3);
+    gap: 1.2rem;
   }
 
   .team-side {
     display: flex;
     align-items: center;
-    gap: var(--sp-1);
+    gap: .6rem;
     flex: 1;
   }
   .team-side.home { justify-content: flex-end; }
@@ -209,75 +215,85 @@ const stats = ozet(matches);
     width: 40px; height: 40px; flex-shrink: 0;
     border-radius: 50%;
     border: 1px solid var(--border);
-    background: var(--black);
+    background: rgba(255,255,255,0.03);
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
   }
-  .team-logo { width: 100%; height: 100%; object-fit: contain; padding: calc(var(--sp-1) / 2); }
+  .team-logo { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
   .team-logo-fallback {
-    font-size: var(--fs-eyebrow); font-weight: var(--fw-medium);
-    color: var(--text-muted); letter-spacing: var(--ls-eyebrow);
+    font-size: var(--fs-eyebrow); font-weight: var(--fw-bold);
+    color: var(--green-bright); letter-spacing: .5px;
     align-items: center; justify-content: center;
   }
   .team-name {
     font-size: var(--fs-sm);
-    font-weight: var(--fw-medium);
-    color: var(--text);
+    font-weight: var(--fw-bold);
     white-space: normal;
     word-break: break-word;
     line-height: var(--lh-snug);
   }
 
   .score-center {
-    display: flex; align-items: center; gap: var(--sp-1); flex-shrink: 0;
+    display: flex; align-items: center; gap: .4rem; flex-shrink: 0;
   }
   /* NOT: .score-big font-size'ı (1.6rem) bilinçli istisna — skorlar ölçek
      tokenlarının dışında tutuluyor; font-variant-numeric de öyle. */
   .score-big { font-variant-numeric: tabular-nums; font-size: 1.6rem; font-weight: 900; color: var(--green-bright); line-height: var(--lh-tight); }
   .score-sep { font-size: var(--fs-md); color: var(--text-muted); }
 
-  /* Sonuç rozeti: mobilde de görünür (§4.5.7) */
+  /* Sonuç */
   .match-result { display: flex; justify-content: center; }
   .result-badge {
     width: 36px; height: 36px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-size: var(--fs-eyebrow); font-weight: var(--fw-bold);
-    color: var(--text-muted);
-    border: 1px solid var(--border);
   }
-  /* Sonuç ayrımı görsel YAPI ile: galibiyet dolgu, beraberlik/mağlubiyet
-     wash zemin + 1px çerçeve. Harf (G/B/M) her zaman kalır; renk tek
-     ayrım aracı olmaz. Kırmızı 36px rozetin içinde kalır, karta taşmaz. */
-  .result-badge.win  { background: var(--green);        color: var(--text);    border-color: var(--green); }
-  .result-badge.draw { background: var(--amber-wash);   color: var(--amber);   border-color: var(--amber); }
-  .result-badge.loss { background: var(--kirmizi-wash); color: var(--kirmizi); border-color: var(--kirmizi); }
+  .result-badge.win  { background: rgba(34,150,58,.2);  color: var(--green-bright); }
+  .result-badge.draw { background: rgba(200,200,0,.15); color: #d4d452; }
+  .result-badge.loss { background: rgba(200,40,40,.15); color: #e05555; }
+
+  /* Boş durum */
+  .empty-state {
+    padding: 6rem 8%;
+    text-align: center;
+    color: var(--text-body);
+    display: flex; flex-direction: column; align-items: center; gap: 1.5rem;
+  }
 
   /* ───────────────────────────────────────────────
      Responsive — mobil
      NOT: medya sorguları taban stillerden SONRA gelmeli,
      yoksa eşit özgüllükteki taban kurallar bunları eziyor.
   ─────────────────────────────────────────────── */
-  @media (max-width: 767px) {
+  @media (max-width: 640px) {
     .match-card {
-      grid-template-columns: 1fr auto;
-      gap: var(--sp-2);
-      padding: var(--sp-2);
+      grid-template-columns: 1fr;
+      gap: .5rem;
+      padding: .8rem 1rem;
     }
-    .match-meta-left { grid-column: 1 / -1; }
-    .match-teams { gap: var(--sp-1); }
+    .match-meta-left {
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: .6rem;
+      flex-wrap: wrap;
+    }
+    .match-teams { gap: .5rem; }
     .team-side {
       flex-direction: column;
-      align-items: flex-start;
-      gap: var(--sp-1);
+      align-items: center;
+      gap: .25rem;
       min-width: 0;
     }
     .team-side.home,
-    .team-side.away { justify-content: flex-start; }
+    .team-side.away { justify-content: center; }
     .team-name {
       font-size: var(--fs-eyebrow);
       white-space: normal;
       max-width: 90px;
+      text-align: center;
       line-height: var(--lh-snug);
     }
+    .match-result { display: none; }
   }
 </style>
