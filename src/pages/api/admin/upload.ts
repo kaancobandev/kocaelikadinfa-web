@@ -6,7 +6,8 @@ import { adminActions } from '../../../lib/admin/actions';
  * Tek görsellik ekleme ucu — çoklu yükleme için.
  *
  * Neden ayrı bir uç var: 30 telefon fotoğrafı tek POST'ta ~75 MB eder,
- * Netlify'ın istek gövdesi sınırı ise bunun çok altında. Tarayıcı görselleri
+ * sunucusuz fonksiyonun istek gövdesi sınırı ise bunun çok altında
+ * (Vercel'de 4,5 MB). Tarayıcı görselleri
  * küçültüp buraya tek tek gönderiyor; her istek küçük ve bağımsız olduğu için
  * ne boyut sınırına ne de fonksiyon zaman aşımına takılıyor, ayrıca ilerleme
  * gösterilebiliyor.

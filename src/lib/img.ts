@@ -1,5 +1,5 @@
 /**
- * Supabase Storage görsellerini Netlify Image CDN üzerinden yeniden
+ * Supabase Storage görsellerini Vercel Image Optimization üzerinden yeniden
  * boyutlandırıp WebP'ye çevirir.
  *
  * Yüklenen fotoğraflar telefon kamerasından geldiği için 3000–5000 px
@@ -25,7 +25,10 @@ export function img(
 ): string {
   if (!src) return '';
   if (!isTransformable(src)) return src;
-  return `/.netlify/images?url=${encodeURIComponent(src)}&w=${width}&fm=webp&q=${quality}`;
+  // fm parametresi YOK: Netlify'da format elle veriliyordu, Vercel ise
+  // çıktı formatını tarayıcının Accept başlığından seçiyor. İzin verilen
+  // genişlikler astro.config.mjs içindeki imagesConfig.sizes listesinde.
+  return `/_vercel/image?url=${encodeURIComponent(src)}&w=${width}&q=${quality}`;
 }
 
 /**
