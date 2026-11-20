@@ -22,7 +22,11 @@ export default defineConfig({
       // çağrıları taranarak çıkarıldı — yeni bir genişlik kullanılırsa
       // buraya da eklenmeli.
       sizes: [120, 240, 400, 480, 600, 640, 800, 1024, 1200, 1600, 2000],
-      // Yalnızca kulübün Supabase Storage'ı dönüştürülebilir.
+      // Yalnızca kulübün Supabase Storage'ındaki /storage/** yolu
+      // dönüştürülebilir. domains BİLEREK boş: dolu olsaydı tüm host
+      // açılır ve aşağıdaki pathname kısıtı anlamsızlaşırdı. Astro'nun
+      // image.domains ayarı da bu yüzden kaldırıldı — adaptör onu buraya
+      // ekliyor ve kısıtı sessizce deliyordu (ölçüldü).
       domains: [],
       remotePatterns: [
         {
@@ -37,10 +41,4 @@ export default defineConfig({
       formats: ['image/webp'],
     },
   }),
-
-  // Astro'nun kendi görsel işleme izni. src/lib/img.ts uç noktayı doğrudan
-  // çağırsa da bu ayar Astro tarafındaki kontrolü açık tutuyor.
-  image: {
-    domains: ['ysozqdfbmferemehaylv.supabase.co'],
-  },
 });
