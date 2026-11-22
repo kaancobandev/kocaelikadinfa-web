@@ -26,3 +26,9 @@ pnpm-debug.log*
 # Barındırıcıların yerel derleme klasörleri
 .netlify
 .vercel
+
+# Ic calisma belgeleri (depo herkese acik, yayinlanmasinlar)
+FABLE-PROMPT.md
+SADELESTIRME-RAPORU.md
+BILGI-MIMARISI-PLANI.md
+PROJE-DOKUMU.md
